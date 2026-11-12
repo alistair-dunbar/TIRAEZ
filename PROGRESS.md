@@ -4,8 +4,10 @@
 
 1. **Run the live tests in the cloud session.** The founder's laptop gets `403 Request not allowed`
    from Anthropic because of a VPN he can't turn off, so live testing happens in a Claude Code cloud
-   session with `ANTHROPIC_API_KEY` set as an environment variable. Run `npm install` and `npm test`.
-   If the live tests are skipped, the key is not set in the environment. Fix the prompt in
+   session. The key is in the environment variable `TIRAEZ_ANTHROPIC_KEY` (the name
+   `ANTHROPIC_API_KEY` is reserved by Claude Code in cloud environments). Run `npm install`, then
+   `ANTHROPIC_API_KEY="$TIRAEZ_ANTHROPIC_KEY" npm test`. Never print the key or commit it.
+   If `TIRAEZ_ANTHROPIC_KEY` is empty, the key was not saved in the environment settings. Fix the prompt in
    `src/prompt.ts` until every live test passes, and re-run 2 to 3 times because output varies.
 2. **Finish plan phase A0** (see PLAN.md). Committed as work in progress: `src/api/` (router, in-memory
    store, validator), `src/mock.ts`, `contract/schemas/`. Still to build:
