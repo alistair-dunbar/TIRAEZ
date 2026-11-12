@@ -3,14 +3,27 @@
 // and falls back to regexes for free-form pasted text.
 import type { ParsedEnquiry } from "./types.ts";
 
-const NAME_LABELS = ["name", "naam", "namn", "nom", "full name"];
-const EMAIL_LABELS = ["email", "e-mail", "e-post", "epost", "mail", "courriel"];
-const PHONE_LABELS = ["phone", "telephone", "tel", "telefon", "telefoon", "téléphone", "mobile", "handy"];
-const MESSAGE_LABELS = ["message", "nachricht", "meddelande", "bericht", "comments", "kommentar"];
+const NAME_LABELS = ["name", "naam", "namn", "nom", "full name", "nombre"];
+const EMAIL_LABELS = ["email", "e-mail", "e-post", "epost", "mail", "courriel", "correo", "correo electrónico"];
+const PHONE_LABELS = ["phone", "telephone", "tel", "telefon", "telefoon", "téléphone", "mobile", "handy", "teléfono", "móvil"];
+const MESSAGE_LABELS = ["message", "nachricht", "meddelande", "bericht", "comments", "kommentar", "mensaje", "comentarios"];
 // Lines that end the message body in portal emails ("Sent at 23:47", etc.)
-const MESSAGE_END = /^(sent at|gesendet|skickat|verzonden|envoyé|--\s*$)/i;
+const MESSAGE_END = /^(sent at|gesendet|skickat|verzonden|envoyé|enviado|--\s*$)/i;
 
-const REF_PATTERN = /\b([A-Z]{2,5})[-\s]?(\d{3,6})\b/i;
+// Listing refs look like "CTH-1234". Two patterns, so ordinary text ("June 2027", "EUR450000")
+// is not read as a ref:
+// - Anywhere in the text: capital letters, an optional hyphen, digits ("CTH-1234", "CTH1234").
+// - Straight after a reference word, also lower case or with a space ("ref cth 1234").
+const REF_STRICT = /\b([A-Z]{2,5})-?(\d{3,6})\b/g;
+const REF_AFTER_KEYWORD =
+  /(?:ref|reference|referenz|referentie|referens|referencia|référence)\b\.?(?:\s*(?:no|nr|nº)\.?)?\s*[:#]?\s*([a-z]{2,5})[-\s]?(\d{3,6})\b/giu;
+// Letter groups that are never a listing prefix: currencies, months, units, time words.
+const NOT_A_PREFIX = new Set([
+  "EUR", "GBP", "USD", "SEK", "NOK", "DKK", "CHF", "AED", "SAR", "PLN",
+  "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUNE", "JUL", "JULY", "AUG", "SEP", "SEPT", "OCT", "NOV", "DEC",
+  "MARCH", "APRIL", "JUNI", "JULI", "MAJ", "MEI", "MAI", "MAYO", "JUNIO", "JULIO", "JUIN",
+  "UTC", "GMT", "CET", "CEST", "TEL", "FAX", "SQM", "SQFT",
+]);
 const EMAIL_PATTERN = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
 const PHONE_PATTERN = /(?:\+|\b00)\d[\d\s().-]{7,}\d/; // needs + or 00 so prices are not mistaken for phones
 
@@ -38,11 +51,17 @@ function extractMessage(lines: string[]): string | null {
   return text || null;
 }
 
-function extractRef(text: string, lines: string[]): string | null {
-  // Prefer an explicit "reference" line, then the subject, then anywhere.
-  const refLine = lines.find((l) => /(ref|référence|referentie|referens|objekt)/i.test(l) && REF_PATTERN.test(l));
-  const m = (refLine ?? text).match(REF_PATTERN);
-  return m ? `${m[1].toUpperCase()}-${m[2]}` : null;
+function firstRef(text: string, pattern: RegExp): string | null {
+  for (const m of text.matchAll(pattern)) {
+    const prefix = m[1].toUpperCase();
+    if (!NOT_A_PREFIX.has(prefix)) return `${prefix}-${m[2]}`;
+  }
+  return null;
+}
+
+function extractRef(text: string): string | null {
+  // Prefer a ref named as one ("Reference: CTH-1234", "ref cth 1234"), then any ref-shaped code.
+  return firstRef(text, REF_AFTER_KEYWORD) ?? firstRef(text, REF_STRICT);
 }
 
 export function parseEnquiry(raw: string): ParsedEnquiry {
@@ -63,7 +82,7 @@ export function parseEnquiry(raw: string): ParsedEnquiry {
     name: labelValue(lines, NAME_LABELS),
     email: email ?? bodyEmail,
     phone,
-    listing_ref: extractRef(text, lines),
+    listing_ref: extractRef(text),
     message: extractMessage(lines) ?? text,
   };
 }

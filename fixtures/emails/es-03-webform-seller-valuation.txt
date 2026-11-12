@@ -1,0 +1,9 @@
+From: Costa Test Homes website <web@costa-test-homes.example>
+Subject: Website enquiry
+
+Name: Carmen López
+Email: carmen.lopez@example.es
+Phone: +34 699 876 543
+Property: -
+Message: Hola, quiero vender mi piso de dos dormitorios en el centro de Estepona. ¿Cuánto creen que vale y cuánto cobran de comisión?
+--

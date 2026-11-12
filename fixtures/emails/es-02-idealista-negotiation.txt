@@ -1,0 +1,14 @@
+From: idealista <noreply@idealista.example>
+Subject: Nuevo mensaje sobre tu anuncio CTH-1213
+
+Has recibido un mensaje de un usuario interesado en tu anuncio.
+
+Referencia: CTH-1213
+Nombre: Javier Ruiz
+Correo electrónico: javier.ruiz@example.es
+Teléfono: +34 655 123 456
+
+Mensaje:
+Buenas tardes. ¿El precio del adosado en Nueva Andalucía es negociable? ¿Aceptaría el propietario 650.000 euros? Pagaríamos al contado.
+
+Enviado desde idealista a las 23:12

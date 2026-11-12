@@ -1,0 +1,8 @@
+From: Costa Test Homes website <web@costa-test-homes.example>
+Subject: Website enquiry
+
+Name: Julien Moreau
+Email: julien.moreau@example.fr
+Property: -
+Message: Bonjour, nous cherchons un appartement de deux chambres avec vue mer à Marbella ou Estepona, budget 800 000 €. Nous voulons acheter en mai 2027.
+--

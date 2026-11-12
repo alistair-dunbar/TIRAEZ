@@ -1,0 +1,14 @@
+From: Kyero <enquiries@kyero.example>
+Subject: New enquiry: CTH-1204 - Townhouse in Estepona
+
+You have a new enquiry from Kyero.
+
+Property reference: CTH-1204
+Name: Sanne de Vries
+Email: sanne.devries@example.nl
+Telephone: +31 6 12345678
+
+Message:
+Goedenavond, wij zijn geïnteresseerd in het geschakelde huis in El Paraíso. Is het nog beschikbaar? Wij zijn in de krokusvakantie in Spanje en willen dit jaar nog kopen.
+
+Sent at 22:41 (Europe/Madrid)

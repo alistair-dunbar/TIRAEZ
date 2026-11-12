@@ -1,0 +1,14 @@
+From: Rightmove Overseas <overseas-leads@rightmove.example>
+Subject: Overseas enquiry for property CTH-1210
+
+A buyer has sent you an enquiry.
+
+Agent reference: CTH-1210
+Full name: Anna Berg
+Email: anna.berg@example.se
+Phone: +46 73 987 65 43
+
+Comments:
+Hej, vi gillar takvåningen i hamnen. Behöver vi en spansk advokat, och hur skaffar man ett NIE-nummer?
+--
+Rightmove Overseas lead service (test fixture)

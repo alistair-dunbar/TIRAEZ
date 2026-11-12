@@ -50,6 +50,23 @@ describe("parseEnquiry: edge cases", () => {
     assert.equal(parseEnquiry("Do you have any villas with a pool near Marbella?").listing_ref, null);
   });
 
+  test("dates, years and prices are not read as listing refs", () => {
+    for (const text of [
+      "We would like to buy in June 2027.",
+      "Wir möchten im Juni 2027 kaufen, Budget EUR 450000.",
+      "Budget max EUR450000, viewing in MARCH 2027.",
+      "Nous visiterons en mai 2027.",
+    ]) {
+      assert.equal(parseEnquiry(text).listing_ref, null, text);
+    }
+  });
+
+  test("a ref is still found next to a date", () => {
+    assert.equal(parseEnquiry("Is CTH-1234 still available? We plan to buy in June 2027.").listing_ref, "CTH-1234");
+    assert.equal(parseEnquiry("Is CTH1234 still available?").listing_ref, "CTH-1234");
+    assert.equal(parseEnquiry("In June 2027 we fly over. Referencia: cth 1207").listing_ref, "CTH-1207");
+  });
+
   test("a price in the text is not mistaken for a phone number", () => {
     assert.equal(parseEnquiry("Our budget is 1 850 000 EUR for DCP-1003.").phone, null);
   });

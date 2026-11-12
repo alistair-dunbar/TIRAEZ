@@ -22,10 +22,12 @@ agreeing between the two founders.
 
 - [ ] Add Claude API credit with a spending cap, fix the 403, and run the live tests until they pass
 - [ ] Merge the demo PR into `main`
-- [ ] Write the contract for four endpoints only: `GET /agency/{id}`, `POST /listings/search`,
-      `POST /leads/upsert`, `POST /leads/{id}/events`, with one example each
-- [ ] Give B a mock server built from those examples, so B never waits on A
-- [ ] Build the fixtures: `agency.json`, a 20-listing Kyero `feed.xml` and 30 sample emails
+- [x] Agree the contract. Replaced by contract v2.0.0 (Dakhil, agreed by both on Nov 12): 11 endpoints
+      under `/v2`, `X-Api-Key` auth, 25 examples, contract tests in `contract/tests/validate.py`.
+      Merged into the demo branch; the app moved to `core/`
+- [x] Mock server for B: B builds its own mock from `fixtures/agencies/` (contract README), so A's v1 mock was dropped
+- [x] Fixtures: `fixtures/agencies/costa-test-homes/` (agency, 20 listings, Kyero `feed.xml`, from Dakhil)
+      and `fixtures/emails/` (30 sample emails with an answer key, from A)
 - [ ] Start Meta Business verification (build nothing for WhatsApp yet)
 - [ ] Book the lawyer for three questions: the data processing agreement, whether the audit enquiries
       are acceptable, and the AI disclosure wording
@@ -41,7 +43,8 @@ listings sync hourly.
 - [ ] Tables: `agencies`, `listings`, `leads`, `events`, `messages`
 - [ ] Settings loader: `agency.json` is validated and stored
 - [ ] Listing sync: Kyero XML every 60 minutes, with missing listings marked `sold`
-- [ ] `GET /agency/{id}` and `POST /listings/search` with an API key check
+- [ ] `GET /agency/{agency_id}`, `GET /agency/{agency_id}/duty` and `POST /listings/search` from contract v2,
+      with the `X-Api-Key` check. Run `python3 contract/tests/validate.py --base-url <staging>/v2 --api-key ...`
 - [ ] A `/health` check with uptime alerts to both phones
 - [ ] Record the 60-second demo video in English, German and Swedish, in live mode, not offline mode
 

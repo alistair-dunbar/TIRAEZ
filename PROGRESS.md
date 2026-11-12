@@ -1,26 +1,45 @@
 # Progress
 
-## Handover note (2026-11-12): start here
+## Handover note (2026-11-12, second session): start here
 
-1. **Run the live tests in the cloud session.** The founder's laptop gets `403 Request not allowed`
-   from Anthropic because of a VPN he can't turn off, so live testing happens in a Claude Code cloud
-   session. The key is in the environment variable `TIRAEZ_ANTHROPIC_KEY` (the name
-   `ANTHROPIC_API_KEY` is reserved by Claude Code in cloud environments). Run `npm install`, then
-   `ANTHROPIC_API_KEY="$TIRAEZ_ANTHROPIC_KEY" npm test`. Never print the key or commit it.
-   If `TIRAEZ_ANTHROPIC_KEY` is empty, the key was not saved in the environment settings. Fix the prompt in
-   `src/prompt.ts` until every live test passes, and re-run 2 to 3 times because output varies.
-2. **Finish plan phase A0** (see PLAN.md). Committed as work in progress: `src/api/` (router, in-memory
-   store, validator), `src/mock.ts`, `contract/schemas/`. Still to build:
-   - `fixtures/agency.json` (test agency id `costa-test-homes`), `fixtures/listings.json` and a Kyero
-     `fixtures/feed.xml` with the same 20 listings, and 30 sample enquiry emails with an answer key.
-     The mock server cannot start until these exist.
-   - `contract/examples/` (one request and response per endpoint), `contract/README.md` for Dakhil,
-     and `contract/CHANGELOG.md`
-   - Tests for the API against the schemas, and an `npm run mock` script
-   - Tighten the listing-ref regex in `src/parse.ts`: free text such as "June 2027" can be misread as a ref
-3. Work on branch `claude/adoring-mayer-kvv7pd` (PR #1).
+1. **Live tests still have not run.** In the session of Nov 12 the key was saved in the environment
+   settings as `ANTHROPIC_API_KEY`, which Claude Code reserves in cloud sessions, so the shell never saw
+   it. The key was also shown in a screenshot in chat, so it must be **revoked and replaced**. Save the
+   new key as `TIRAEZ_ANTHROPIC_KEY`, start a **new** session (variables are read at session start), then:
+   `cd core && npm install && ANTHROPIC_API_KEY="$TIRAEZ_ANTHROPIC_KEY" npm test`. Never print the key.
+   Fix the prompt in `core/src/prompt.ts` until every live test passes; re-run 2 to 3 times.
+2. **Contract v2.0.0 is agreed** (Dakhil's, Nov 12) and merged into this branch from
+   `claude/cool-keller-1wzj7d`. It replaced the v1 work (router, store, validator, mock, v1 schemas and
+   v1 fixtures), which was deleted. The Node app moved to `core/`. Part B builds its own mock.
+3. **Open decisions: contract v2 against the 7 reply rules in CLAUDE.md.** The v2 agency settings have no
+   `booking_link` (rule 7: every reply ends with the booking link) and no `legal_footer`, and viewings
+   are now requests that an agent confirms by phone. The Costa Test Homes `handoff_topics` leave out
+   residency (rule 4). Decide with Dakhil: add optional `booking_link` and `legal_footer` to the
+   agency schema (a minor 2.1.0 change, needs both approvals), or change rule 7. Until then the demo
+   keeps its own `core/config/agency.demo.json`.
+4. Work on branch `claude/adoring-mayer-kvv7pd` (PR #1).
 
 Last updated: 2026-11-12
+
+## A0 status
+
+- [ ] Live tests pass (blocked on the key, see 1)
+- [ ] Merge PR #1 into `main`. It now contains Dakhil's contract branch too, so merge his branch first or
+      close it in favour of this one
+- [x] Contract agreed: v2.0.0
+- [x] Mock for B: B builds it from `fixtures/agencies/`
+- [x] Fixtures: Dakhil's `fixtures/agencies/costa-test-homes/` (agency, 20 listings, Kyero feed) and
+      `fixtures/emails/`: 30 sample emails (5 each in en, es, de, sv, nl, fr; Idealista, Kyero,
+      Rightmove Overseas and the web form) with `answer-key.json`. `core/tests/emails.test.ts` checks
+      the parser against the key: all 30 pass
+- [x] Listing-ref parser tightened: "June 2027", "EUR450000" and month names are no longer read as refs;
+      a lower-case ref with a space is only accepted right after a reference word ("ref cth 1214").
+      Spanish labels added (Nombre, Correo electrónico, Teléfono, Mensaje)
+- [ ] Tick `fixtures/emails/` in the "Still to add in phase 0" list of `contract/README.md`. That file is
+      in `contract/`, so it goes in a PR both founders approve (and `python3 contract/bundle.py` must be re-run)
+- [ ] Not code: Meta Business verification, booking the lawyer, deciding with Dakhil about Part B's pace
+
+Tests: 89 offline tests pass (`cd core && npm test`); `python3 contract/tests/validate.py` passes.
 
 ## Finished (demo v0)
 
@@ -62,7 +81,7 @@ Last updated: 2026-11-12
       cover EN, DE, SV, NL and FR. Others fall back to the English footer.
 - [ ] No real channels (WhatsApp, Gmail, portal webhooks), calendar, database, auth or deployment. Out of scope for v0.
 
-## Next steps
+## Next steps (paths inside `core/`)
 
 The full plan after the demo is in PLAN.md (Part A, revised Nov 12). The steps below cover A0.
 

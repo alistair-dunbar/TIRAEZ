@@ -1,0 +1,9 @@
+From: Costa Test Homes website <web@costa-test-homes.example>
+Subject: Website enquiry
+
+Name: Maria Svensson
+Email: maria.svensson@example.se
+Phone: +46 70 555 12 34
+Property: -
+Message: Hej! Vi är en familj på fem som söker en villa med fyra sovrum och pool i Benahavís eller Estepona, max 2 miljoner euro. Vi vill flytta till hösten 2027.
+--
