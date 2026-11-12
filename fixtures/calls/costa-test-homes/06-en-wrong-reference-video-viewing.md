@@ -1,5 +1,6 @@
 ---
 id: call-06
+agency_id: costa-test-homes
 title: British buyer gives a reference that doesn't exist, then describes the property
 language: en
 caller_number: "+447700900123"
@@ -16,7 +17,7 @@ expected_functions:
   - identify_caller: {}
   - find_listing: {ref: CTH-1290}
   - find_listing: {area: "Puerto Banús", type: penthouse}
-  - save_answers: {name: "Claire Henderson", intent: buyer, budget_eur_min: 1300000, budget_eur_max: 1500000, financing: mortgage, timing: 6_months, travel_dates: "late February", add_listing_refs: [CTH-1203]}
+  - save_answers: {name: "Claire Henderson", intent: buyer, budget_min: 1300000, budget_max: 1500000, financing: mortgage, timing: 6_months, travel_dates: "late February", add_listing_refs: [CTH-1203]}
   - get_duty_agent: {}
   - request_viewing: {listing_ref: CTH-1203, preferred_days: ["2026-12-16", "2026-12-17"], time_of_day: afternoon}
   - send_confirmation: {channel: whatsapp, template: viewing_request_received}

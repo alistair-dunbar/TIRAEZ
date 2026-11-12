@@ -1,5 +1,6 @@
 ---
 id: call-03
+agency_id: costa-test-homes
 title: Dutch family asks about a reserved townhouse and about mortgages
 language: nl
 caller_number: "+31612345678"
@@ -14,7 +15,7 @@ expected_functions:
   - identify_caller: {}
   - find_listing: {ref: CTH-1218, include_unavailable: true}
   - find_listing: {town: Estepona, beds: 3, price_max: 500000}
-  - save_answers: {name: "Daan de Vries", intent: buyer, budget_eur_max: 450000, financing: mortgage, timing: 6_months, travel_dates: "Feb 14 to 22", add_listing_refs: [CTH-1218, CTH-1204]}
+  - save_answers: {name: "Daan de Vries", intent: buyer, budget_max: 450000, financing: mortgage, timing: 6_months, travel_dates: "Feb 14 to 22", add_listing_refs: [CTH-1218, CTH-1204]}
   - get_duty_agent: {}
   - request_viewing: {listing_ref: CTH-1204, preferred_days: ["2027-02-16", "2027-02-17", "2027-02-18"], time_of_day: any}
   - send_confirmation: {channel: whatsapp, template: viewing_request_received}
@@ -43,7 +44,7 @@ Daan de Vries, 38, from Utrecht. He's calling after the kids are in bed, with hi
 
 **AI** (B01): Hola, you've reached Costa Test Homes. I'm the agency's AI assistant, and this call is recorded. How can I help you today?
 
-**Caller:** Goedenavond. We zagen het rijtjeshuis in Bel Air, CTH-1218. Is dat nog beschikbaar?
+**Caller:** Goedenavond. We hebben het rijtjeshuis in Bel Air gezien, CTH-1218. Is dat nog beschikbaar?
 > *Good evening. We saw the townhouse in Bel Air, CTH-1218. Is it still available?*
 
 **AI** (B02, B05): *(now in Dutch)* Good evening! Let me check… That one is reserved at the moment, which means another buyer has had an offer accepted. Sometimes these do fall through. Would you like the agent to let you know if it becomes free?

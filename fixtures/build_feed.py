@@ -1,4 +1,4 @@
-"""Build fixtures/feed.xml (Kyero v3 style) from fixtures/listings.json.
+"""Build fixtures/agencies/costa-test-homes/feed.xml (Kyero v3 style) from its listings.json.
 
 listings.json is the source of truth: it is what Part A's listing sync should
 produce, and what Part B's mock serves. feed.xml is the raw input Part A parses.
@@ -8,6 +8,10 @@ Two rules are built in on purpose, so Part A's sync is tested against them:
 - Reserved listings carry <status>reserved</status>. Real Kyero feeds have no
   standard status field, so check how each pilot agency marks reservations.
 
+Only Costa Test Homes has a raw feed fixture, because Kyero is its feed type.
+The Gulf test agencies get theirs once Part A knows the Property Finder and
+Bayut formats from a real agency.
+
 Run:  python3 fixtures/build_feed.py
 """
 
@@ -15,7 +19,7 @@ import json
 import pathlib
 import xml.etree.ElementTree as ET
 
-HERE = pathlib.Path(__file__).parent
+HERE = pathlib.Path(__file__).parent / "agencies" / "costa-test-homes"
 TYPE_MAP = {
     "villa": "Villa",
     "apartment": "Apartment",
@@ -45,8 +49,8 @@ def build():
         text(prop, "id", 9000 + i)
         text(prop, "date", item["updated_at"].replace("T", " ").rstrip("Z"))
         text(prop, "ref", item["ref"])
-        text(prop, "price", item["price_eur"])
-        text(prop, "currency", "EUR")
+        text(prop, "price", item["price"])
+        text(prop, "currency", item["currency"])
         text(prop, "price_freq", "sale")
         text(prop, "type", TYPE_MAP[item["type"]])
         text(prop, "town", item["town"])

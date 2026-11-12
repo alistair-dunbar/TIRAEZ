@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contract.tiraez.invalid/v1/api.schema.json",
+  "$id": "https://contract.tiraez.invalid/v2/api.schema.json",
   "title": "Core API request and response bodies",
   "description": "One $def per body. openapi.yaml points at these, and tests/validate.py checks every example against them.",
   "$defs": {
@@ -10,7 +10,7 @@
       "additionalProperties": false,
       "properties": {
         "status": { "type": "string", "enum": ["ok", "degraded"] },
-        "version": { "type": "string", "pattern": "^1\\.\\d+\\.\\d+$" }
+        "version": { "type": "string", "pattern": "^2\\.\\d+\\.\\d+$" }
       }
     },
 
@@ -50,8 +50,8 @@
         "town": { "type": "string" },
         "area": { "type": "string" },
         "type": { "type": "string", "enum": ["villa", "apartment", "penthouse", "townhouse", "plot", "other"] },
-        "price_min": { "$ref": "common.schema.json#/$defs/euros" },
-        "price_max": { "$ref": "common.schema.json#/$defs/euros" },
+        "price_min": { "$ref": "common.schema.json#/$defs/money", "description": "In the agency's currency." },
+        "price_max": { "$ref": "common.schema.json#/$defs/money" },
         "beds": { "type": "integer", "minimum": 0, "description": "Minimum bedrooms." },
         "include_unavailable": { "type": "boolean", "default": false, "description": "When true, reserved and sold listings are returned too, so the AI can say so." },
         "limit": { "type": "integer", "minimum": 1, "maximum": 3, "default": 3 }
@@ -149,7 +149,7 @@
           "minItems": 1,
           "items": { "$ref": "common.schema.json#/$defs/date" }
         },
-        "time_of_day": { "type": "string", "enum": ["morning", "afternoon", "any"], "default": "any" },
+        "time_of_day": { "type": "string", "enum": ["morning", "afternoon", "evening", "any"], "default": "any", "description": "evening matters in the Gulf, where many viewings happen after sunset." },
         "preferred_agent_id": { "$ref": "common.schema.json#/$defs/agent_id", "description": "Ask for a specific agent, for example the one who showed the property. Part A uses it when that agent exists, otherwise falls back to the on-duty agent." },
         "preferred_language": { "$ref": "common.schema.json#/$defs/language", "description": "The language the caller wants the agent to speak. Part A prefers an agent who speaks it (agency languages and agent summary_language are the guide)." },
         "channel": { "$ref": "common.schema.json#/$defs/channel" },

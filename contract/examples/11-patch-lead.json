@@ -9,8 +9,8 @@
     "add_listing_refs": [
       "CTH-1234"
     ],
-    "budget_eur_min": 1000000,
-    "budget_eur_max": 1400000,
+    "budget_min": 1000000,
+    "budget_max": 1400000,
     "timing": "3_months",
     "financing": "cash",
     "travel_dates": "Jan 14 to 18",
@@ -28,8 +28,8 @@
     "listing_refs": [
       "CTH-1234"
     ],
-    "budget_eur_min": 1000000,
-    "budget_eur_max": 1400000,
+    "budget_min": 1000000,
+    "budget_max": 1400000,
     "timing": "3_months",
     "financing": "cash",
     "travel_dates": "Jan 14 to 18",

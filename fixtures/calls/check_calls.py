@@ -1,21 +1,27 @@
-"""Check the call scripts against the contract, the test agency and each other.
+"""Check the call scripts against the contract, the test agencies and each other.
 
 Run:  python3 fixtures/calls/check_calls.py
 
-For every NN-*.md script it checks:
-- the front matter has every required field, and the id matches the file number
-- languages, phone numbers and times are in contract format
-- office_open matches the agency's real office hours at call_time_local
+Scripts live in one folder per test agency: fixtures/calls/<agency_id>/NN-*.md.
+The agency's settings and listings come from fixtures/agencies/<agency_id>/.
+
+For every script it checks:
+- the front matter has every required field, the id matches the file number,
+  and agency_id matches the folder
+- the call language is one the agency's phone receptionist speaks
+- phone numbers and times are in contract format
+- office_open matches that agency's real office hours (and weekend) at call_time_local
 - every block used exists in blocks.md
-- every listing exists in fixtures/listings.json (except the ones in unknown_refs,
-  which must NOT exist, because the script tests a wrong reference)
-- every function is one the voice agent has, and its arguments use contract values
-  (templates, channels, callback reasons and priorities, time of day, agents)
-- transfers only happen while the office is open
-- callback times fall inside office hours
-- the outcome matches what the call did, and every call ends with something done
-  (only a wrong number may end with nothing)
-- across all scripts, every line of the phone test matrix is covered
+- every listing exists in that agency's listings (except unknown_refs, which
+  must NOT exist, because the script tests a wrong reference)
+- every function is one the voice agent has, and its arguments use contract
+  values (templates, channels, callback reasons and priorities, time of day,
+  agents, languages)
+- transfers only happen while the office is open, and callbacks are booked
+  inside office hours
+- the outcome matches what the call did, and every call ends with something
+  done (only a wrong number may end with nothing)
+- across each market's scripts, every line of that market's test matrix is covered
 
 Allowed values are read from the contract schemas, so this stays in step with them.
 """
@@ -30,10 +36,11 @@ import yaml
 
 HERE = pathlib.Path(__file__).resolve().parent
 FIXTURES = HERE.parent
+AGENCIES = FIXTURES / "agencies"
 SCHEMAS = FIXTURES.parent / "contract" / "schemas"
 
 REQUIRED_FIELDS = [
-    "id", "title", "language", "caller_number", "call_time_local", "office_open",
+    "id", "agency_id", "title", "language", "caller_number", "call_time_local", "office_open",
     "matrix", "listings", "blocks", "expected_functions", "expected_outcome",
     "end_action", "pass_criteria", "must_not",
 ]
@@ -44,28 +51,50 @@ FUNCTIONS = {
     "notify_agent",
 }
 
-# The phone test matrix from the business plan. Every line must be covered by at least one script.
-REQUIRED_MATRIX = [
-    "launch language: en",
-    "launch language: es",
-    "launch language: de",
-    "launch language: sv",
-    "launch language: nl",
-    "launch language: fr",
-    "reference that does not exist",
-    "sold listing",
-    "strong accent, background noise, speaker phone",
-    "seller asking for a valuation",
-    "boundary topic: legal",
-    "angry caller, must transfer",
-    "transfer to an agent who does not answer",
-    "silence",
-    "hang-up mid-call",
-    "wrong number",
-    "language switch mid-call",
-]
+MARKETS = {"ES": "europe", "PT": "europe", "AE": "gulf", "SA": "gulf"}
 
-# Outcomes that count as "something was done" at the end of the call.
+# The phone test matrix per market. Every line must be covered by at least one script in that market.
+REQUIRED_MATRIX = {
+    "europe": [
+        "launch language: en",
+        "launch language: es",
+        "launch language: de",
+        "launch language: sv",
+        "launch language: nl",
+        "launch language: fr",
+        "reference that does not exist",
+        "sold listing",
+        "strong accent, background noise, speaker phone",
+        "seller asking for a valuation",
+        "boundary topic: legal",
+        "angry caller, must transfer",
+        "transfer to an agent who does not answer",
+        "silence",
+        "hang-up mid-call",
+        "wrong number",
+        "language switch mid-call",
+    ],
+    "gulf": [
+        "launch language: ar",
+        "launch language: en",
+        "launch language: ru",
+        "launch language: hi",
+        "launch language: zh",
+        "launch language: ur",
+        "off-plan listing",
+        "boundary topic: visa_residency",
+        "boundary topic: investment_returns",
+        "weekend call",
+        "seller asking for a valuation",
+        "budget in another currency",
+        "sizes in square feet",
+        "code-switching mid-call",
+        "channel the agency does not offer",
+        "warm transfer, answered",
+    ],
+}
+
+# Calls that count as "something was done" at the end.
 ACTIONS = {"request_viewing", "book_callback", "transfer_call", "take_message"}
 
 failures = []
@@ -116,19 +145,24 @@ def parse_front_matter(path):
 
 
 def check_script(path, meta, body, v, agency, listings, block_ids):
-    name = path.name
+    name = f"{path.parent.name}/{path.name}"
     for field in REQUIRED_FIELDS:
         if field not in meta:
             fail(name, f"missing field {field}")
     if any(f not in meta for f in REQUIRED_FIELDS):
         return
 
-    number = name.split("-")[0]
+    number = path.name.split("-")[0]
     if meta["id"] != f"call-{number}":
         fail(name, f"id {meta['id']} should be call-{number}")
+    if meta["agency_id"] != agency["agency_id"]:
+        fail(name, f"agency_id {meta['agency_id']} does not match the folder {agency['agency_id']}")
 
+    agency_voice = set(agency.get("phone", {}).get("voice_languages", []))
     if meta["language"] not in v["voice_languages"]:
-        fail(name, f"language {meta['language']} is not a voice language")
+        fail(name, f"language {meta['language']} is not a contract voice language")
+    elif meta["language"] not in agency_voice:
+        fail(name, f"language {meta['language']} is not one of {agency['agency_id']}'s voice languages {sorted(agency_voice)}")
     if "start_language" in meta and meta["start_language"] not in v["languages"]:
         fail(name, f"start_language {meta['start_language']} is not a contract language")
     if not v["phone"].match(meta["caller_number"]):
@@ -153,14 +187,14 @@ def check_script(path, meta, body, v, agency, listings, block_ids):
     unknown = set(meta.get("unknown_refs", []))
     for ref in unknown:
         if ref in listings:
-            fail(name, f"unknown_refs lists {ref}, but it exists in listings.json")
+            fail(name, f"unknown_refs lists {ref}, but it exists in the agency's listings")
     for ref in meta["listings"]:
         if ref not in listings:
-            fail(name, f"listing {ref} is not in fixtures/listings.json")
+            fail(name, f"listing {ref} is not in {agency['agency_id']}'s listings")
 
     def check_ref(ref, where):
         if ref not in listings and ref not in unknown:
-            fail(name, f"{where} uses {ref}, which is not in listings.json or unknown_refs")
+            fail(name, f"{where} uses {ref}, which is not in the agency's listings or unknown_refs")
 
     agent_ids = {a["agent_id"] for a in agency["agents"]}
     called = []
@@ -179,10 +213,9 @@ def check_script(path, meta, body, v, agency, listings, block_ids):
                 check_ref(args[key], fn)
         for ref in args.get("add_listing_refs", []):
             check_ref(ref, fn)
-        if "agent_id" in args and args["agent_id"] not in agent_ids:
-            fail(name, f"{fn} names agent {args['agent_id']}, who is not in agency.json")
-        if "preferred_agent_id" in args and args["preferred_agent_id"] not in agent_ids:
-            fail(name, f"{fn} prefers agent {args['preferred_agent_id']}, who is not in agency.json")
+        for key in ("agent_id", "preferred_agent_id"):
+            if key in args and args[key] not in agent_ids:
+                fail(name, f"{fn} {key} {args[key]} is not an agent in {agency['agency_id']}")
         for key in ("language", "preferred_language"):
             if key in args and args[key] not in v["languages"]:
                 fail(name, f"{fn} {key} {args[key]} is not a contract language")
@@ -193,6 +226,8 @@ def check_script(path, meta, body, v, agency, listings, block_ids):
                 fail(name, f"channel {args.get('channel')} is not in the contract")
             if args.get("template") == "listing_link" and "listing_ref" not in args:
                 fail(name, "listing_link needs a listing_ref")
+            if "language" in args and args["language"] not in agency["languages"]:
+                fail(name, f"confirmation language {args['language']} is not offered by {agency['agency_id']}")
         if fn == "book_callback":
             if args.get("reason") not in v["callback_reasons"]:
                 fail(name, f"callback reason {args.get('reason')} is not in the contract")
@@ -227,13 +262,14 @@ def check_script(path, meta, body, v, agency, listings, block_ids):
         fail(name, f"outcome {outcome} but no {needs[outcome]} call")
     if "log_call" not in called:
         fail(name, "every call must end with log_call")
+    sent_listings = any(
+        isinstance(i, dict) and "send_confirmation" in i and (i["send_confirmation"] or {}).get("template") == "listing_link"
+        for i in meta["expected_functions"]
+    )
     if outcome == "wrong_number":
         if "notify_agent" in called:
             fail(name, "wrong numbers must not notify agents")
-    elif not (ACTIONS & set(called) or any(
-        isinstance(i, dict) and "send_confirmation" in i and (i["send_confirmation"] or {}).get("template") == "listing_link"
-        for i in meta["expected_functions"]
-    )):
+    elif not (ACTIONS & set(called) or sent_listings):
         fail(name, "the call ends without anything done (viewing, callback, transfer, message or listings sent)")
     if not str(meta["end_action"]).strip():
         fail(name, "end_action is empty")
@@ -245,35 +281,48 @@ def check_script(path, meta, body, v, agency, listings, block_ids):
 
 def main():
     v = contract_values()
-    agency = load_json(FIXTURES / "agency.json")
-    listings = {item["ref"]: item for item in load_json(FIXTURES / "listings.json")}
     block_ids = set(re.findall(r"^## (B\d{2}) ", (HERE / "blocks.md").read_text(encoding="utf-8"), re.M))
     if not block_ids:
         fail("blocks.md", "no blocks found (headings must look like '## B01 Open')")
 
-    scripts = sorted(p for p in HERE.glob("*.md") if re.match(r"^\d{2}-", p.name))
-    covered = []
-    ids = set()
-    for path in scripts:
-        meta, body = parse_front_matter(path)
-        if meta is None:
+    covered = {market: [] for market in REQUIRED_MATRIX}
+    total = 0
+    folders = sorted(p for p in HERE.iterdir() if p.is_dir() and not p.name.startswith(("_", ".")))
+    for folder in folders:
+        agency_dir = AGENCIES / folder.name
+        if not (agency_dir / "agency.json").exists():
+            fail(folder.name, f"no test agency at fixtures/agencies/{folder.name}")
             continue
-        if meta.get("id") in ids:
-            fail(path.name, f"duplicate id {meta.get('id')}")
-        ids.add(meta.get("id"))
-        check_script(path, meta, body, v, agency, listings, block_ids)
-        covered.extend(meta.get("matrix", []))
+        agency = load_json(agency_dir / "agency.json")
+        listings = {item["ref"]: item for item in load_json(agency_dir / "listings.json")}
+        market = MARKETS.get(agency["country"])
+        if market is None:
+            fail(folder.name, f"country {agency['country']} has no market in MARKETS")
+            continue
+        ids = set()
+        for path in sorted(p for p in folder.glob("*.md") if re.match(r"^\d{2}-", p.name)):
+            total += 1
+            meta, body = parse_front_matter(path)
+            if meta is None:
+                continue
+            if meta.get("id") in ids:
+                fail(f"{folder.name}/{path.name}", f"duplicate id {meta.get('id')}")
+            ids.add(meta.get("id"))
+            check_script(path, meta, body, v, agency, listings, block_ids)
+            covered[market].extend(meta.get("matrix", []))
 
-    for line in REQUIRED_MATRIX:
-        if not any(c.startswith(line) for c in covered):
-            fail("matrix", f"no script covers '{line}'")
+    for market, lines in REQUIRED_MATRIX.items():
+        for line in lines:
+            if not any(c.startswith(line) for c in covered[market]):
+                fail(f"matrix ({market})", f"no script covers '{line}'")
 
     if failures:
         print(f"FAILED: {len(failures)} problem(s)")
         for f in failures:
             print("  -", f)
         sys.exit(1)
-    print(f"OK: {len(scripts)} call scripts, {len(block_ids)} blocks, all {len(REQUIRED_MATRIX)} matrix lines covered")
+    counts = ", ".join(f"{m}: {len(REQUIRED_MATRIX[m])} matrix lines" for m in REQUIRED_MATRIX)
+    print(f"OK: {total} call scripts in {len(folders)} agencies, {len(block_ids)} blocks ({counts}, all covered)")
 
 
 if __name__ == "__main__":

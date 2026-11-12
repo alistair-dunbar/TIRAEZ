@@ -1,5 +1,6 @@
 ---
 id: call-07
+agency_id: costa-test-homes
 title: Buyer asks about a sold villa from an old advert and gets alternatives
 language: en
 caller_number: "+447700900456"
@@ -14,7 +15,7 @@ expected_functions:
   - identify_caller: {}
   - find_listing: {ref: CTH-1215, include_unavailable: true}
   - find_listing: {type: villa, price_min: 2800000, price_max: 4500000}
-  - save_answers: {name: "Robert Hughes", intent: buyer, budget_eur_min: 3000000, budget_eur_max: 4500000, timing: 6_months, add_listing_refs: [CTH-1202, CTH-1209]}
+  - save_answers: {name: "Robert Hughes", intent: buyer, budget_min: 3000000, budget_max: 4500000, timing: 6_months, add_listing_refs: [CTH-1202, CTH-1209]}
   - get_duty_agent: {}
   - book_callback: {reason: buyer_question, priority: normal, preferred_time: "2026-12-14T10:00"}
   - send_confirmation: {channel: whatsapp, template: listing_link, listing_ref: CTH-1202}

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contract.tiraez.invalid/v1/event.schema.json",
+  "$id": "https://contract.tiraez.invalid/v2/event.schema.json",
   "title": "Lead event",
   "description": "Body of POST /leads/{lead_id}/events. Every message, call and decision is one event, so the lead log tells the whole story.",
   "type": "object",
@@ -112,7 +112,7 @@
             "type": "object",
             "required": ["topic"],
             "properties": {
-              "topic": { "type": "string", "enum": ["legal", "tax", "mortgage", "negotiation", "complaint", "valuation_price", "asked_for_person", "other"] },
+              "topic": { "anyOf": [{ "$ref": "common.schema.json#/$defs/handoff_topic" }, { "type": "string", "enum": ["asked_for_person", "other"] }] },
               "note": { "type": "string" }
             }
           }

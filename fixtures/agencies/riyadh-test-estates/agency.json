@@ -1,0 +1,172 @@
+{
+  "agency_id": "riyadh-test-estates",
+  "name": "Riyadh Test Estates",
+  "country": "SA",
+  "timezone": "Asia/Riyadh",
+  "currency": "SAR",
+  "area_unit": "m2",
+  "data_region": "ksa",
+  "languages": [
+    "ar",
+    "en",
+    "ur",
+    "hi"
+  ],
+  "office_hours": {
+    "sun": [
+      [
+        "09:00",
+        "13:00"
+      ],
+      [
+        "16:30",
+        "21:00"
+      ]
+    ],
+    "mon": [
+      [
+        "09:00",
+        "13:00"
+      ],
+      [
+        "16:30",
+        "21:00"
+      ]
+    ],
+    "tue": [
+      [
+        "09:00",
+        "13:00"
+      ],
+      [
+        "16:30",
+        "21:00"
+      ]
+    ],
+    "wed": [
+      [
+        "09:00",
+        "13:00"
+      ],
+      [
+        "16:30",
+        "21:00"
+      ]
+    ],
+    "thu": [
+      [
+        "09:00",
+        "13:00"
+      ],
+      [
+        "16:30",
+        "21:00"
+      ]
+    ],
+    "fri": [],
+    "sat": [
+      [
+        "16:30",
+        "21:00"
+      ]
+    ]
+  },
+  "agents": [
+    {
+      "agent_id": "faisal",
+      "name": "Faisal Al Qahtani",
+      "mobile": "+966501000001",
+      "email": "faisal@riyadh-test-estates.example",
+      "summary_language": "ar",
+      "speaks": [
+        "ar",
+        "en"
+      ],
+      "on_duty": true
+    },
+    {
+      "agent_id": "sara",
+      "name": "Sara Al Harbi",
+      "mobile": "+966501000002",
+      "email": "sara@riyadh-test-estates.example",
+      "summary_language": "ar",
+      "speaks": [
+        "ar",
+        "en"
+      ],
+      "on_duty": false
+    },
+    {
+      "agent_id": "imran",
+      "name": "Imran Sheikh",
+      "mobile": "+966501000003",
+      "email": "imran@riyadh-test-estates.example",
+      "summary_language": "en",
+      "speaks": [
+        "en",
+        "ur",
+        "hi"
+      ],
+      "on_duty": false
+    }
+  ],
+  "feed": {
+    "type": "generic_xml",
+    "url": "https://riyadh-test-estates.example/feed.xml",
+    "refresh_minutes": 60
+  },
+  "channels": {
+    "email": true,
+    "whatsapp": true,
+    "phone": true
+  },
+  "phone": {
+    "ai_number": "+966112000000",
+    "voice_languages": [
+      "ar",
+      "en",
+      "ur"
+    ],
+    "opening_languages": [
+      "ar",
+      "en"
+    ],
+    "transfer_timeout_s": 25,
+    "recording_retention_days": 90,
+    "included_minutes": 300
+  },
+  "faq": [
+    {
+      "q": "Do buyers pay a fee?",
+      "a": "The agent explains the brokerage terms in writing before any viewing."
+    },
+    {
+      "q": "Can you arrange viewings by video call?",
+      "a": "Yes. An agent can show any ready property by video call."
+    },
+    {
+      "q": "Do you sell off-plan?",
+      "a": "Yes, registered off-plan projects. Payment stages and handover dates are set by the developer."
+    },
+    {
+      "q": "Where is the office?",
+      "a": "Olaya, Riyadh, with visitor parking."
+    }
+  ],
+  "handoff_topics": [
+    "legal",
+    "tax",
+    "mortgage",
+    "negotiation",
+    "complaint",
+    "valuation_price",
+    "investment_returns"
+  ],
+  "tone": "warm, respectful, professional",
+  "disclosure": {
+    "ar": "أنا مساعد ذكاء اصطناعي لدى Riyadh Test Estates.",
+    "en": "I'm the AI assistant for Riyadh Test Estates.",
+    "ur": "میں Riyadh Test Estates کا AI اسسٹنٹ ہوں۔",
+    "hi": "मैं Riyadh Test Estates का AI सहायक हूँ।"
+  }
+}

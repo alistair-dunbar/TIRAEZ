@@ -1,5 +1,6 @@
 ---
 id: call-02
+agency_id: costa-test-homes
 title: Swedish buyer who emailed yesterday calls back and wants sea views
 language: sv
 caller_number: "+46701234567"
@@ -14,7 +15,7 @@ expected_functions:
   - identify_caller: {}
   - find_listing: {ref: CTH-1234}
   - find_listing: {price_min: 1000000, price_max: 1300000}
-  - save_answers: {name: "Karin Ekström", intent: buyer, budget_eur_max: 1300000, add_listing_refs: [CTH-1214, CTH-1217]}
+  - save_answers: {name: "Karin Ekström", intent: buyer, budget_max: 1300000, add_listing_refs: [CTH-1214, CTH-1217]}
   - get_duty_agent: {}
   - book_callback: {reason: buyer_question, priority: normal, preferred_time: "2026-12-10T17:00", preferred_agent_id: lena, preferred_language: sv}
   - send_confirmation: {channel: whatsapp, template: listing_link, listing_ref: CTH-1214}

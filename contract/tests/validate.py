@@ -4,14 +4,16 @@ Static mode (no server, runs in CI on every push):
     python3 contract/tests/validate.py
 
     - every schema is valid JSON Schema 2020-12
-    - fixtures/agency.json and fixtures/listings.json match their schemas
+    - every test agency in fixtures/agencies/ matches the schemas, and its own
+      rules: one on-duty agent, a disclosure line for every language, voice
+      languages offered in text too, listings in the agency's own currency
     - every endpoint in openapi.yaml has at least one success example
     - every example's request and response match the schemas for its status
-    - listings inside example responses are identical to fixtures/listings.json
+    - listings inside example responses are identical to the fixture listings
 
 Live mode (against Part A's API, or Part B's mock):
-    python3 contract/tests/validate.py --base-url http://localhost:8787/v1 --api-key test
-    python3 contract/tests/validate.py --base-url https://staging.core.tiraez.com/v1 --api-key $KEY --include-stateful
+    python3 contract/tests/validate.py --base-url http://localhost:8787/v2 --api-key test
+    python3 contract/tests/validate.py --base-url https://staging.core.tiraez.com/v2 --api-key $KEY --include-stateful
 
     Sends each example request and checks the status code and that the response
     matches the schema. Values are not compared, because a real server returns
@@ -21,6 +23,7 @@ Live mode (against Part A's API, or Part B's mock):
 """
 
 import argparse
+import http.client
 import json
 import pathlib
 import re
@@ -37,7 +40,8 @@ CONTRACT = ROOT / "contract"
 SCHEMAS = CONTRACT / "schemas"
 EXAMPLES = CONTRACT / "examples"
 FIXTURES = ROOT / "fixtures"
-BASE_ID = "https://contract.tiraez.invalid/v1/"
+AGENCIES = FIXTURES / "agencies"
+BASE_ID = "https://contract.tiraez.invalid/v2/"
 
 failures = []
 
@@ -99,23 +103,51 @@ def load_operations():
 
 
 def check_fixtures(registry):
-    agency = json.loads((FIXTURES / "agency.json").read_text(encoding="utf-8"))
-    for err in errors_of(validator_for("schemas/agency.schema.json", registry), agency):
-        fail("fixtures/agency.json", err)
-    on_duty = [a["agent_id"] for a in agency["agents"] if a["on_duty"]]
-    if len(on_duty) != 1:
-        fail("fixtures/agency.json", f"exactly one agent must be on_duty, found {on_duty}")
+    """Validate every test agency. Returns {ref: listing} across all agencies."""
+    agency_v = validator_for("schemas/agency.schema.json", registry)
+    listing_v = validator_for("schemas/listing.schema.json", registry)
+    all_listings = {}
+    folders = sorted(p for p in AGENCIES.iterdir() if p.is_dir())
+    if not folders:
+        fail("fixtures/agencies", "no test agencies found")
+    for folder in folders:
+        where = f"fixtures/agencies/{folder.name}"
+        agency = json.loads((folder / "agency.json").read_text(encoding="utf-8"))
+        errs = errors_of(agency_v, agency)
+        for err in errs:
+            fail(f"{where}/agency.json", err)
+        if errs:
+            continue
+        if agency["agency_id"] != folder.name:
+            fail(where, f"agency_id {agency['agency_id']} must match the folder name")
+        on_duty = [a["agent_id"] for a in agency["agents"] if a["on_duty"]]
+        if len(on_duty) != 1:
+            fail(where, f"exactly one agent must be on_duty, found {on_duty}")
+        missing = set(agency["languages"]) - set(agency["disclosure"])
+        if missing:
+            fail(where, f"no disclosure line for {sorted(missing)}")
+        if "phone" in agency:
+            ph = agency["phone"]
+            if not set(ph["voice_languages"]) <= set(agency["languages"]):
+                fail(where, "every voice language must also be in languages")
+            if not set(ph["opening_languages"]) <= set(ph["voice_languages"]):
+                fail(where, "opening languages must be voice languages")
+        for a in agency["agents"]:
+            if a["summary_language"] not in a["speaks"]:
+                fail(where, f"agent {a['agent_id']} gets summaries in a language they don't speak")
 
-    listings = json.loads((FIXTURES / "listings.json").read_text(encoding="utf-8"))
-    v = validator_for("schemas/listing.schema.json", registry)
-    refs = set()
-    for item in listings:
-        for err in errors_of(v, item):
-            fail(f"fixtures/listings.json {item.get('ref')}", err)
-        if item["ref"] in refs:
-            fail("fixtures/listings.json", f"duplicate ref {item['ref']}")
-        refs.add(item["ref"])
-    return agency, {item["ref"]: item for item in listings}
+        for item in json.loads((folder / "listings.json").read_text(encoding="utf-8")):
+            ref = item.get("ref")
+            for err in errors_of(listing_v, item):
+                fail(f"{where}/listings.json {ref}", err)
+            if item.get("agency_id") != agency["agency_id"]:
+                fail(f"{where}/listings.json {ref}", "agency_id does not match the agency")
+            if item.get("currency") != agency["currency"]:
+                fail(f"{where}/listings.json {ref}", f"currency {item.get('currency')} is not the agency's {agency['currency']}")
+            if ref in all_listings:
+                fail(where, f"ref {ref} is used by more than one listing")
+            all_listings[ref] = item
+    return all_listings
 
 
 def load_examples():
@@ -162,7 +194,7 @@ def check_examples_static(examples, ops, registry, listings):
         response = expected_response(ex)
         for item in response.get("results", []) if isinstance(response, dict) else []:
             if listings.get(item.get("ref")) != item:
-                fail(name, f"listing {item.get('ref')} differs from fixtures/listings.json")
+                fail(name, f"listing {item.get('ref')} differs from the fixture listings")
 
         if 200 <= status < 300:
             covered.add(ex["operation"])
@@ -196,8 +228,8 @@ def check_live(examples, ops, registry, base_url, api_key, include_stateful):
                 status, body = resp.status, resp.read()
         except urllib.error.HTTPError as e:
             status, body = e.code, e.read()
-        except (urllib.error.URLError, TimeoutError) as e:
-            fail(name, f"no response: {e}")
+        except (OSError, http.client.HTTPException) as e:
+            fail(name, f"no response: {e!r}")
             continue
         ran += 1
         if status != ex["status"]:
@@ -225,7 +257,7 @@ def main():
 
     registry = load_registry()
     ops = load_operations()
-    _, listings = check_fixtures(registry)
+    listings = check_fixtures(registry)
     examples = load_examples()
     check_examples_static(examples, ops, registry, listings)
     if args.base_url:

@@ -5,5 +5,5 @@
   "description": "Both halves read agency settings on startup and cache them for 5 minutes.",
   "request": null,
   "status": 200,
-  "response_fixture": "agency.json"
+  "response_fixture": "agencies/costa-test-homes/agency.json"
 }

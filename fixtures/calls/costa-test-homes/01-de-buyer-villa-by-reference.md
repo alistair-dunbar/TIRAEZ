@@ -1,5 +1,6 @@
 ---
 id: call-01
+agency_id: costa-test-homes
 title: German buyer asks about a villa by reference, after hours
 language: de
 caller_number: "+4915112345678"
@@ -12,7 +13,7 @@ blocks: [B01, B02, B05, B07, B12, B08, B15, B18]
 expected_functions:
   - identify_caller: {}
   - find_listing: {ref: CTH-1234}
-  - save_answers: {intent: buyer, budget_eur_min: 1000000, budget_eur_max: 1400000, financing: cash, timing: 3_months, travel_dates: "Jan 14 to 18"}
+  - save_answers: {intent: buyer, budget_min: 1000000, budget_max: 1400000, financing: cash, timing: 3_months, travel_dates: "Jan 14 to 18"}
   - get_duty_agent: {}
   - request_viewing: {listing_ref: CTH-1234, preferred_days: ["2027-01-15", "2027-01-16"], time_of_day: morning}
   - send_confirmation: {channel: sms, template: viewing_request_received}

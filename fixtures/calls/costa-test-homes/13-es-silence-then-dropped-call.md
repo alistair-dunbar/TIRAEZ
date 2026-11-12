@@ -1,5 +1,6 @@
 ---
 id: call-13
+agency_id: costa-test-homes
 title: Silent start, faint caller, and the line drops mid-call
 language: es
 caller_number: "+34655112233"
@@ -48,10 +49,10 @@ Unknown, on a Spanish mobile. A man on a bad connection, possibly outside. He is
 
 *(9 seconds of silence)*
 
-**AI** (B16): ¿Hola? ¿Sigue ahí? Estoy aquí cuando quiera.
+**AI** (B16): ¿Hola? ¿Sigue ahí? Le escucho cuando quiera.
 > *Hello, are you still there? I'm here whenever you're ready.*
 
-**Caller:** *(faint)* ¿Hola? Perdone, se oye fatal… Llamaba por los apartamentos en Estepona… algo de unos trescientos mil…
+**Caller:** *(faint)* ¿Hola? Perdone, se oye fatal… Llamaba por los apartamentos en Estepona… algo por unos trescientos mil…
 > *Hello? Sorry, it's a terrible line… I was calling about the apartments in Estepona… something around three hundred thousand…*
 
 **AI** (B15, B05): *(in Spanish)* No problem. I caught apartments in Estepona, around three hundred thousand. Let me look… There's a two-bedroom apartment near the old town and the promenade at three hundred and fifty thousand, with sea views fr—

@@ -1,5 +1,6 @@
 ---
 id: call-10
+agency_id: costa-test-homes
 title: German couple asks about NIE, taxes and buying through a company
 language: de
 caller_number: "+491701234567"
@@ -13,7 +14,7 @@ blocks: [B01, B02, B05, B12, B07, B08, B09, B15, B18]
 expected_functions:
   - identify_caller: {}
   - find_listing: {ref: CTH-1207}
-  - save_answers: {name: "Petra Schmidt", intent: buyer, budget_eur_max: 2000000, financing: cash, timing: 6_months, add_listing_refs: [CTH-1207]}
+  - save_answers: {name: "Petra Schmidt", intent: buyer, budget_max: 2000000, financing: cash, timing: 6_months, add_listing_refs: [CTH-1207]}
   - get_duty_agent: {}
   - book_callback: {reason: handoff, priority: high, preferred_time: "2026-12-16T10:00"}
   - send_confirmation: {channel: sms, template: callback_booked}
@@ -44,7 +45,7 @@ Petra Schmidt, 49, from Hamburg, with her husband Jürgen on speaker beside her.
 
 **AI** (B01): Hola, you've reached Costa Test Homes. I'm the agency's AI assistant, and this call is recorded. How can I help you today?
 
-**Caller:** Guten Morgen. Wir interessieren uns für die Villa am New Golden Mile, CTH-1207. Wir haben aber vor allem Fragen zum Kauf selbst.
+**Caller:** Guten Morgen. Wir interessieren uns für die Villa an der New Golden Mile, CTH-1207. Wir haben aber vor allem Fragen zum Kauf selbst.
 > *Good morning. We're interested in the villa on the New Golden Mile, CTH-1207. But mostly we have questions about the purchase itself.*
 
 **AI** (B02, B05): *(now in German)* Good morning! Let me bring it up… Yes, it's available: the four-bedroom beachside villa at one point eight nine million euros, with a private garden, a pool and a direct path to the beach. What would you like to know?

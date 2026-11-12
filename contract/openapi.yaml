@@ -1,25 +1,25 @@
 openapi: 3.1.0
 info:
   title: Core API (shared contract between Part A and Part B)
-  version: 1.1.0
+  version: 2.0.0
   description: |
     The only link between Part A (core and text replies) and Part B (phone receptionist).
     Part A implements it. Part B calls it, and builds a mock of it until join 1 (Dec 7).
 
     Rules that apply to every endpoint:
     - Auth: send the `X-Api-Key` header. Keys are per caller (`text`, `voice`) and rotate monthly.
-    - Times are UTC ISO 8601 ending in Z, except fields named `*_local`, which are agency local time without a zone.
+    - Times are UTC ISO 8601 ending in Z, except fields named `*_local`, which are agency local time (in the agency's own time zone) without a zone.
     - Every response arrives within 800 ms at the 95th percentile.
     - Errors use status 4xx/5xx with the `Error` body. 429 carries `retry_after_s`.
-    - Within v1, fields may be added but never renamed or removed. See CHANGELOG.md.
-    v1.1.0 adds optional preferred_agent_id and preferred_language to callbacks and viewing requests.
+    - Money is in whole units of the agency's currency (EUR, AED, SAR); the AI never converts currencies.
+    - Within v2, fields may be added but never renamed or removed. See CHANGELOG.md.
 servers:
-  - url: https://core.tiraez.com/v1
-    description: Production (EU server). EU server.
-  - url: https://staging.core.tiraez.com/v1
+  - url: https://core.tiraez.com/v2
+    description: Production. One deployment per data region (eu, uae, ksa) once the Gulf launches; see agency.data_region. EU server.
+  - url: https://staging.core.tiraez.com/v2
     description: Staging, used for join 1 and join 2.
-  - url: http://localhost:8787/v1
-    description: Part B's mock, serving /fixtures.
+  - url: http://localhost:8787/v2
+    description: Part B's mock, serving /fixtures/agencies.
 security:
   - apiKey: []
 

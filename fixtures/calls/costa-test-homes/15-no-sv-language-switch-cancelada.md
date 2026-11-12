@@ -1,5 +1,6 @@
 ---
 id: call-15
+agency_id: costa-test-homes
 title: Norwegian caller starts in an unsupported language and switches to English, then Swedish
 language: sv
 start_language: "no"
@@ -14,7 +15,7 @@ blocks: [B01, B02, B05, B07, B08, B15, B18]
 expected_functions:
   - identify_caller: {}
   - find_listing: {area: Cancelada, type: villa}
-  - save_answers: {name: "Ingrid Solberg", language: "no", intent: buyer, budget_eur_max: 1300000, financing: cash, timing: 6_months, travel_dates: "Feb 1 to 7", add_listing_refs: [CTH-1214]}
+  - save_answers: {name: "Ingrid Solberg", language: "no", intent: buyer, budget_max: 1300000, financing: cash, timing: 6_months, travel_dates: "Feb 1 to 7", add_listing_refs: [CTH-1214]}
   - get_duty_agent: {}
   - request_viewing: {listing_ref: CTH-1214, preferred_days: ["2027-02-02", "2027-02-03"], time_of_day: afternoon, preferred_agent_id: lena, preferred_language: sv}
   - send_confirmation: {channel: sms, template: viewing_request_received, language: "no"}
@@ -63,7 +64,7 @@ Ingrid Solberg, 66, a retired teacher from Bergen. She wants to spend the winter
 
 **AI** (B07): That sounds wonderful. When are you hoping to buy?
 
-**Caller:** Inom ett halvår. Jag kommer till Spanien första till sjunde februari.
+**Caller:** Inom ett halvår. Jag kommer till Spanien den första till den sjunde februari.
 > *Within six months. I'm coming to Spain from the first to the seventh of February.*
 
 **AI** (B08): Would you like to see the villa during that trip? Which days, and mornings or afternoons?
