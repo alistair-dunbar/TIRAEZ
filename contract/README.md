@@ -22,6 +22,7 @@ If the code and the contract disagree, the contract wins until a pull request ch
 | `schemas/api.schema.json` | Every other request and response body. |
 | `examples/` | 25 request and response pairs, at least one per endpoint, including error cases. They are the test cases. |
 | `tests/validate.py` | The contract tests. Both halves run them. |
+| `CONTRACT_BUNDLE.md` | The whole contract in one file, for pasting into a chat. Rebuild it with `python3 contract/bundle.py` after any change. |
 | `CHANGELOG.md` | Every change since v1.0.0, including the move to v2. |
 
 Three test agencies live in `/fixtures/agencies/`, each with `agency.json` and `listings.json`:
