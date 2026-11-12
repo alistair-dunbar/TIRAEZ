@@ -1,0 +1,179 @@
+{
+  "agency_id": "dubai-test-realty",
+  "name": "Dubai Test Realty",
+  "country": "AE",
+  "timezone": "Asia/Dubai",
+  "currency": "AED",
+  "area_unit": "sqft",
+  "data_region": "uae",
+  "languages": [
+    "en",
+    "ar",
+    "ru",
+    "hi",
+    "ur",
+    "zh"
+  ],
+  "office_hours": {
+    "mon": [
+      [
+        "09:00",
+        "19:00"
+      ]
+    ],
+    "tue": [
+      [
+        "09:00",
+        "19:00"
+      ]
+    ],
+    "wed": [
+      [
+        "09:00",
+        "19:00"
+      ]
+    ],
+    "thu": [
+      [
+        "09:00",
+        "19:00"
+      ]
+    ],
+    "fri": [
+      [
+        "09:00",
+        "12:00"
+      ],
+      [
+        "14:00",
+        "19:00"
+      ]
+    ],
+    "sat": [
+      [
+        "10:00",
+        "16:00"
+      ]
+    ],
+    "sun": []
+  },
+  "agents": [
+    {
+      "agent_id": "omar",
+      "name": "Omar Al Mansoori",
+      "mobile": "+971501000001",
+      "email": "omar@dubai-test-realty.example",
+      "summary_language": "ar",
+      "speaks": [
+        "ar",
+        "en"
+      ],
+      "on_duty": true
+    },
+    {
+      "agent_id": "priya",
+      "name": "Priya Nair",
+      "mobile": "+971501000002",
+      "email": "priya@dubai-test-realty.example",
+      "summary_language": "en",
+      "speaks": [
+        "en",
+        "hi",
+        "ur"
+      ],
+      "on_duty": false
+    },
+    {
+      "agent_id": "anna",
+      "name": "Anna Volkova",
+      "mobile": "+971501000003",
+      "email": "anna@dubai-test-realty.example",
+      "summary_language": "ru",
+      "speaks": [
+        "ru",
+        "en"
+      ],
+      "on_duty": false
+    },
+    {
+      "agent_id": "wei",
+      "name": "Li Wei",
+      "mobile": "+971501000004",
+      "email": "wei@dubai-test-realty.example",
+      "summary_language": "zh",
+      "speaks": [
+        "zh",
+        "en"
+      ],
+      "on_duty": false
+    }
+  ],
+  "feed": {
+    "type": "property_finder_xml",
+    "url": "https://dubai-test-realty.example/feed.xml",
+    "refresh_minutes": 60
+  },
+  "channels": {
+    "email": true,
+    "whatsapp": true,
+    "phone": true
+  },
+  "phone": {
+    "ai_number": "+97144000000",
+    "voice_languages": [
+      "en",
+      "ar",
+      "ru",
+      "hi",
+      "zh"
+    ],
+    "opening_languages": [
+      "en",
+      "ar"
+    ],
+    "transfer_timeout_s": 25,
+    "recording_retention_days": 90,
+    "included_minutes": 300
+  },
+  "faq": [
+    {
+      "q": "Do buyers pay an agency fee?",
+      "a": "In this test agency, buyers pay a 2% agency fee plus VAT. The agent confirms all purchase costs in writing."
+    },
+    {
+      "q": "Do you sell off-plan?",
+      "a": "Yes, from several developers. Payment plans and handover dates are set by the developer."
+    },
+    {
+      "q": "Can you arrange viewings by video call?",
+      "a": "Yes. An agent can show any ready property by video call, and walk you through off-plan show units."
+    },
+    {
+      "q": "Do you help with the Golden Visa?",
+      "a": "An agent can introduce you to licensed advisers. The assistant does not give visa advice."
+    },
+    {
+      "q": "Where is the office?",
+      "a": "Business Bay, Dubai, with visitor parking."
+    }
+  ],
+  "handoff_topics": [
+    "legal",
+    "tax",
+    "mortgage",
+    "negotiation",
+    "complaint",
+    "valuation_price",
+    "visa_residency",
+    "investment_returns"
+  ],
+  "tone": "warm, courteous, professional",
+  "disclosure": {
+    "en": "I'm the AI assistant for Dubai Test Realty.",
+    "ar": "أنا مساعد ذكاء اصطناعي لدى Dubai Test Realty.",
+    "ru": "Я — ИИ-ассистент агентства Dubai Test Realty.",
+    "hi": "मैं Dubai Test Realty का AI सहायक हूँ।",
+    "ur": "میں Dubai Test Realty کا AI اسسٹنٹ ہوں۔",
+    "zh": "我是Dubai Test Realty的人工智能助理。"
+  }
+}

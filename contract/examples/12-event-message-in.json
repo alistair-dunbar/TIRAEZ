@@ -1,0 +1,20 @@
+{
+  "operation": "createEvent",
+  "method": "POST",
+  "path": "/leads/lead_01JD8Z7B2N5YR8S3T6V9W1X4ZB/events",
+  "description": "Part A logs an inbound portal enquiry.",
+  "request": {
+    "type": "message_in",
+    "channel": "portal",
+    "at": "2026-12-08T22:10:41Z",
+    "payload": {
+      "text": "Hej! Är villan CTH-1234 fortfarande till salu? När kan vi se den?",
+      "language": "sv",
+      "source": "idealista"
+    }
+  },
+  "status": 201,
+  "response": {
+    "event_id": "evt_01JD8ZA1C4E7G0J3K6M9P2R5T8"
+  }
+}

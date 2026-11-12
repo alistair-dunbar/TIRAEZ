@@ -1,0 +1,31 @@
+{
+  "operation": "upsertLead",
+  "method": "POST",
+  "path": "/leads/upsert",
+  "description": "A buyer who emailed last night now calls. Matched on phone, so the voice agent can say 'I see you asked about the Nueva Andalucía villa'.",
+  "request": {
+    "agency_id": "costa-test-homes",
+    "channel": "phone",
+    "phone": "+46701234567",
+    "language": "sv",
+    "contact_at": "2026-12-09T19:40:00Z"
+  },
+  "status": 200,
+  "response": {
+    "lead_id": "lead_01JD8Z7B2N5YR8S3T6V9W1X4ZB",
+    "is_new": false,
+    "opted_out": false,
+    "history": [
+      {
+        "at": "2026-12-08T22:11:20Z",
+        "channel": "email",
+        "line": "AI replied in Swedish about CTH-1234 and asked about timing."
+      },
+      {
+        "at": "2026-12-08T22:10:41Z",
+        "channel": "portal",
+        "line": "Enquiry from Idealista about CTH-1234, in Swedish."
+      }
+    ]
+  }
+}

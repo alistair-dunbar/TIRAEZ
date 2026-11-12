@@ -9,7 +9,21 @@ every buyer enquiry within 60 seconds, in the buyer's language. It qualifies the
 gives the agent an English summary. Buyers are mostly foreign (British, Dutch, German,
 Swedish, French, Belgian) and enquire at night through property portals, web forms and WhatsApp.
 
-## Current stage: demo v0
+## Repo layout
+
+| Folder | Owner | What it holds |
+| --- | --- | --- |
+| `contract/` | Both. Changes need both founders' approval | API contract v2 between Part A and Part B: OpenAPI, JSON Schemas, 25 examples, `tests/validate.py` |
+| `fixtures/agencies/` | Both | Test agencies (`costa-test-homes`, `dubai-test-realty`, `riyadh-test-estates`) |
+| `fixtures/emails/` | Part A | 30 sample enquiry emails for `costa-test-homes` with an answer key |
+| `fixtures/calls/` | Part B | Phone test scripts |
+| `core/` | Part A | The Node app: demo v0 today, the core API from A1 |
+| `voice/` | Part B (Dakhil) | AI phone receptionist |
+
+Never change `contract/` alone: open a PR that both founders approve (see `contract/README.md`).
+Part A implements the contract; Part B calls it and builds its own mock from `fixtures/agencies/`.
+
+## Current stage: demo v0 (paths below are inside `core/`)
 
 A local web app for a 60-second sales video: enquiry in -> reply in the buyer's language +
 English agent summary + seconds taken. No WhatsApp, Gmail, calendar or database yet. These
@@ -26,16 +40,20 @@ See PROGRESS.md for status and next steps, and PLAN.md for the agreed Part A pla
 - Dev-only: `tsx`, `typescript`, `@types/express`, `@types/node`.
 - **Ask the user before adding any other dependency.**
 
-## Commands
+## Commands (run from `core/`)
 
 - `npm start`: server on http://localhost:3000
-- `npm test`: all tests. Live API tests skip with a message if `ANTHROPIC_API_KEY` is unset.
+- `npm test`: all tests (`tests/live.test.ts` calls the real API). Live API tests skip with a message if `ANTHROPIC_API_KEY` is unset.
 - `npm run typecheck`: `tsc --noEmit`
 - `DEMO_MODE=offline` in `.env`: no API key needed. The 5 samples get pre-written replies from
   `data/offline-replies.json`, served through `respond()` with a stand-in client, so the safety nets
   still run. Not AI output: never use it in the sales video or present it as live.
   `tests/offline.test.ts` checks that these replies follow all 7 rules; keep them passing if you edit them.
 - Windows PowerShell: use `npm.cmd` if script execution is disabled.
+- Cloud sessions: Claude Code reserves `ANTHROPIC_API_KEY`, so the key is saved as `TIRAEZ_ANTHROPIC_KEY`
+  in the environment settings. Run `ANTHROPIC_API_KEY="$TIRAEZ_ANTHROPIC_KEY" npm test`. Never print it.
+- Contract tests (from the repo root): `pip install -r contract/tests/requirements.txt`, then
+  `python3 contract/tests/validate.py`.
 
 ## Model
 

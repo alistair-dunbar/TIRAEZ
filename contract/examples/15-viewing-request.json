@@ -1,0 +1,23 @@
+{
+  "operation": "requestViewing",
+  "method": "POST",
+  "path": "/viewings/request",
+  "description": "The buyer can come Jan 15 or 16. Nothing is booked; Ana calls the buyer to confirm.",
+  "request": {
+    "lead_id": "lead_01JD8Z6K3M4XQ7R2S5T8V9W0YA",
+    "listing_ref": "CTH-1234",
+    "preferred_days": [
+      "2027-01-15",
+      "2027-01-16"
+    ],
+    "time_of_day": "morning",
+    "channel": "phone",
+    "notes": "Flying in Jan 14, staying in Marbella."
+  },
+  "status": 201,
+  "response": {
+    "request_id": "vrq_01JD8ZC3E6G9J2K5M8P1R4T7W0",
+    "status": "pending_agent_confirmation",
+    "agent_id": "ana"
+  }
+}

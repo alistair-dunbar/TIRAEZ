@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contract.tiraez.invalid/v2/lead.schema.json",
+  "title": "Lead",
+  "description": "One person per agency, shared by both channels. Matched on email or phone, so a buyer who emails and then calls is one lead. Part A owns the table; Part B writes only through the API.",
+  "type": "object",
+  "required": [
+    "lead_id", "agency_id", "name", "email", "phone", "language", "intent",
+    "listing_refs", "budget_min", "budget_max", "timing", "financing",
+    "travel_dates", "status", "first_contact_at", "first_reply_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "lead_id": { "$ref": "common.schema.json#/$defs/lead_id" },
+    "agency_id": { "$ref": "common.schema.json#/$defs/agency_id" },
+    "name": { "type": ["string", "null"] },
+    "email": { "anyOf": [{ "$ref": "common.schema.json#/$defs/email" }, { "type": "null" }] },
+    "phone": { "anyOf": [{ "$ref": "common.schema.json#/$defs/phone" }, { "type": "null" }] },
+    "language": { "$ref": "common.schema.json#/$defs/language" },
+    "intent": { "$ref": "#/$defs/intent" },
+    "listing_refs": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/listing_ref" },
+      "uniqueItems": true
+    },
+    "budget_min": { "anyOf": [{ "$ref": "common.schema.json#/$defs/money" }, { "type": "null" }], "description": "In the agency's currency. If the caller names another currency, never convert: leave the budget empty and put their own words in the agent summary." },
+    "budget_max": { "anyOf": [{ "$ref": "common.schema.json#/$defs/money" }, { "type": "null" }] },
+    "timing": { "$ref": "#/$defs/timing" },
+    "financing": { "$ref": "#/$defs/financing" },
+    "travel_dates": { "type": ["string", "null"], "maxLength": 120, "description": "Free text, e.g. Feb 10 to 17" },
+    "status": { "$ref": "#/$defs/status" },
+    "first_contact_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "first_reply_at": {
+      "anyOf": [{ "$ref": "common.schema.json#/$defs/timestamp" }, { "type": "null" }],
+      "description": "Used for the 60-second guarantee."
+    }
+  },
+  "$defs": {
+    "intent": { "type": "string", "enum": ["buyer", "seller", "other", "unknown"] },
+    "timing": { "type": "string", "enum": ["now", "3_months", "6_months", "later", "unknown"] },
+    "financing": { "type": "string", "enum": ["cash", "mortgage", "unknown"] },
+    "status": {
+      "type": "string",
+      "enum": ["new", "qualifying", "viewing_requested", "callback", "handoff", "closed", "opted_out"]
+    },
+    "patch": {
+      "title": "Lead update",
+      "description": "Body of PATCH /leads/{lead_id}. Send only the fields that changed.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "email": { "$ref": "common.schema.json#/$defs/email" },
+        "phone": { "$ref": "common.schema.json#/$defs/phone" },
+        "language": { "$ref": "common.schema.json#/$defs/language" },
+        "intent": { "$ref": "#/$defs/intent" },
+        "add_listing_refs": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/listing_ref" },
+          "minItems": 1
+        },
+        "budget_min": { "$ref": "common.schema.json#/$defs/money" },
+        "budget_max": { "$ref": "common.schema.json#/$defs/money" },
+        "timing": { "$ref": "#/$defs/timing" },
+        "financing": { "$ref": "#/$defs/financing" },
+        "travel_dates": { "type": "string", "maxLength": 120 },
+        "status": { "$ref": "#/$defs/status" }
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "operation": "notifyLead",
+  "method": "POST",
+  "path": "/notify/lead",
+  "description": "The lead said STOP on WhatsApp earlier, so nothing is sent on any channel.",
+  "request": {
+    "lead_id": "lead_01JD8Z7B2N5YR8S3T6V9W1X4ZB",
+    "channel": "whatsapp",
+    "template": "callback_booked",
+    "language": "sv",
+    "vars": {
+      "agent_name": "Ana",
+      "when_local": "2026-12-09T09:30"
+    }
+  },
+  "status": 409,
+  "response": {
+    "error": {
+      "code": "lead_opted_out",
+      "message": "This lead opted out on 2026-12-08. Nothing was sent."
+    }
+  }
+}

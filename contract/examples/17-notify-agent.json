@@ -1,0 +1,27 @@
+{
+  "operation": "notifyAgent",
+  "method": "POST",
+  "path": "/notify/agent",
+  "description": "Five lines in English; Part A sends them to Ana in Spanish by email and WhatsApp.",
+  "request": {
+    "agency_id": "costa-test-homes",
+    "lead_id": "lead_01JD8Z6K3M4XQ7R2S5T8V9W0YA",
+    "summary": [
+      "Markus Becker, German, called at 21:04 about villa CTH-1234.",
+      "Budget 1.0 to 1.4 million, paying cash, wants to buy within 3 months.",
+      "In Marbella Jan 14 to 18. Asked to view on Jan 15 or 16, mornings.",
+      "Asked whether the price is negotiable: told him you will call.",
+      "Next step: call him to confirm the viewing. Number +4915112345678."
+    ],
+    "urgency": "normal",
+    "source_channel": "phone",
+    "recording_url": "https://voice.example.com/recordings/call_7f3a9c"
+  },
+  "status": 200,
+  "response": {
+    "sent_to": [
+      "email",
+      "whatsapp"
+    ]
+  }
+}

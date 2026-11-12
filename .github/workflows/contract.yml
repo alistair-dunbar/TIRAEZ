@@ -1,0 +1,34 @@
+name: Contract tests
+
+on:
+  push:
+    paths:
+      - "contract/**"
+      - "fixtures/**"
+      - ".github/workflows/contract.yml"
+  pull_request:
+    paths:
+      - "contract/**"
+      - "fixtures/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r contract/tests/requirements.txt
+      - name: Feed is up to date with listings.json
+        run: |
+          python3 fixtures/build_feed.py
+          git diff --exit-code fixtures/agencies/costa-test-homes/feed.xml
+      - name: Contract bundle is up to date
+        run: |
+          python3 contract/bundle.py
+          git diff --exit-code contract/CONTRACT_BUNDLE.md
+      - name: Static contract tests
+        run: python3 contract/tests/validate.py
+      - name: Call scripts match the contract and the test agency
+        run: python3 fixtures/calls/check_calls.py
