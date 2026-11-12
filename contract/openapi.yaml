@@ -13,9 +13,9 @@ info:
     - Errors use status 4xx/5xx with the `Error` body. 429 carries `retry_after_s`.
     - Within v1, fields may be added but never renamed or removed. See CHANGELOG.md.
 servers:
-  - url: https://core.example.com/v1
-    description: Production (EU server). Replace example.com with the real domain.
-  - url: https://staging.core.example.com/v1
+  - url: https://core.tiraez.com/v1
+    description: Production (EU server). EU server.
+  - url: https://staging.core.tiraez.com/v1
     description: Staging, used for join 1 and join 2.
   - url: http://localhost:8787/v1
     description: Part B's mock, serving /fixtures.

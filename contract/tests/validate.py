@@ -11,7 +11,7 @@ Static mode (no server, runs in CI on every push):
 
 Live mode (against Part A's API, or Part B's mock):
     python3 contract/tests/validate.py --base-url http://localhost:8787/v1 --api-key test
-    python3 contract/tests/validate.py --base-url https://staging.core.example.com/v1 --api-key $KEY --include-stateful
+    python3 contract/tests/validate.py --base-url https://staging.core.tiraez.com/v1 --api-key $KEY --include-stateful
 
     Sends each example request and checks the status code and that the response
     matches the schema. Values are not compared, because a real server returns
