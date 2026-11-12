@@ -2,9 +2,9 @@
   "operation": "notifyLead",
   "method": "POST",
   "path": "/notify/lead",
-  "description": "The lead said STOP on WhatsApp earlier, so nothing is sent on any channel.",
+  "description": "This lead (a different one from Karin's) said STOP on WhatsApp earlier, so nothing is sent on any channel.",
   "request": {
-    "lead_id": "lead_01JD8Z7B2N5YR8S3T6V9W1X4ZB",
+    "lead_id": "lead_01JF2B4C6D8E0G2H4J6K8M0N2P",
     "channel": "whatsapp",
     "template": "callback_booked",
     "language": "sv",
