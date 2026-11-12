@@ -1,0 +1,9 @@
+From: CostaHomes Portal <leads@costahomes-portal.example>
+Subject: Neue Anfrage zu Objekt DCP-9999
+
+Objektreferenz: DCP-9999
+Name: Thomas Keller
+E-Mail: thomas.keller@example.de
+
+Nachricht:
+Hallo, ist diese Wohnung noch verfügbar? Wie viele Schlafzimmer hat sie und was kostet sie genau? Wir würden gern im Sommer kaufen.

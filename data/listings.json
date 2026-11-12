@@ -1,0 +1,68 @@
+[
+  {
+    "ref": "DCP-1001",
+    "title": "Sea-view apartment with large terrace",
+    "area": "Marbella – Golden Mile",
+    "price_eur": 695000,
+    "beds": 2,
+    "baths": 2,
+    "size_m2": 118,
+    "features": ["South-facing terrace of 35 m²", "Sea views", "Communal pool", "Underground parking space", "Gated complex with 24h security"],
+    "availability": "Available"
+  },
+  {
+    "ref": "DCP-1002",
+    "title": "Renovated townhouse near the old town",
+    "area": "Estepona",
+    "price_eur": 389000,
+    "beds": 3,
+    "baths": 2,
+    "size_m2": 142,
+    "features": ["Fully renovated", "Roof solarium", "Walking distance to the beach", "Private patio"],
+    "availability": "Available"
+  },
+  {
+    "ref": "DCP-1003",
+    "title": "Modern villa with private pool and mountain views",
+    "area": "Benahavís",
+    "price_eur": 1850000,
+    "beds": 5,
+    "baths": 5,
+    "size_m2": 410,
+    "features": ["Private heated pool", "Mountain and sea views", "Home cinema", "Underfloor heating", "Double garage"],
+    "availability": "Available"
+  },
+  {
+    "ref": "DCP-1004",
+    "title": "Frontline golf apartment",
+    "area": "Mijas Costa",
+    "price_eur": 315000,
+    "beds": 2,
+    "baths": 2,
+    "size_m2": 96,
+    "features": ["Frontline golf", "Two communal pools", "Fitted kitchen", "Storage room"],
+    "availability": "Under offer"
+  },
+  {
+    "ref": "DCP-1005",
+    "title": "Penthouse with rooftop terrace by the marina",
+    "area": "Fuengirola",
+    "price_eur": 549000,
+    "beds": 3,
+    "baths": 2,
+    "size_m2": 124,
+    "features": ["Private rooftop terrace with jacuzzi", "Marina views", "Lift", "Air conditioning throughout", "Parking space included"],
+    "availability": "Available"
+  },
+  {
+    "ref": "DCP-1006",
+    "title": "Traditional village house with garden",
+    "area": "Nerja",
+    "price_eur": 275000,
+    "beds": 3,
+    "baths": 1,
+    "size_m2": 110,
+    "features": ["Private garden", "Original Andalusian features", "Sea glimpses", "Short walk to the Balcón de Europa"],
+    "availability": "Reserved"
+  }
+]
