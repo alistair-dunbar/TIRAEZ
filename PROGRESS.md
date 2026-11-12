@@ -1,5 +1,23 @@
 # Progress
 
+## Handover note (2026-11-12): start here
+
+1. **Run the live tests in the cloud session.** The founder's laptop gets `403 Request not allowed`
+   from Anthropic because of a VPN he can't turn off, so live testing happens in a Claude Code cloud
+   session with `ANTHROPIC_API_KEY` set as an environment variable. Run `npm install` and `npm test`.
+   If the live tests are skipped, the key is not set in the environment. Fix the prompt in
+   `src/prompt.ts` until every live test passes, and re-run 2 to 3 times because output varies.
+2. **Finish plan phase A0** (see PLAN.md). Committed as work in progress: `src/api/` (router, in-memory
+   store, validator), `src/mock.ts`, `contract/schemas/`. Still to build:
+   - `fixtures/agency.json` (test agency id `costa-test-homes`), `fixtures/listings.json` and a Kyero
+     `fixtures/feed.xml` with the same 20 listings, and 30 sample enquiry emails with an answer key.
+     The mock server cannot start until these exist.
+   - `contract/examples/` (one request and response per endpoint), `contract/README.md` for Dakhil,
+     and `contract/CHANGELOG.md`
+   - Tests for the API against the schemas, and an `npm run mock` script
+   - Tighten the listing-ref regex in `src/parse.ts`: free text such as "June 2027" can be misread as a ref
+3. Work on branch `claude/adoring-mayer-kvv7pd` (PR #1).
+
 Last updated: 2026-11-12
 
 ## Finished (demo v0)
