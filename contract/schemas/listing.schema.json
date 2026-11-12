@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contract.tiraez.invalid/v1/listing.schema.json",
+  "title": "Listing",
+  "description": "One property, filled by Part A from the agency's feed every refresh. The AI may only state facts found here.",
+  "type": "object",
+  "required": [
+    "ref", "agency_id", "status", "type", "town", "area", "price_eur",
+    "beds", "baths", "built_m2", "plot_m2", "features", "url", "summary_en", "updated_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "ref": { "$ref": "common.schema.json#/$defs/listing_ref" },
+    "agency_id": { "$ref": "common.schema.json#/$defs/agency_id" },
+    "status": {
+      "type": "string",
+      "enum": ["available", "reserved", "sold"],
+      "description": "Never claim availability for anything but available."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["villa", "apartment", "penthouse", "townhouse", "plot", "other"]
+    },
+    "town": { "type": "string", "minLength": 1 },
+    "area": { "type": "string", "minLength": 1 },
+    "price_eur": { "$ref": "common.schema.json#/$defs/euros" },
+    "beds": { "type": "integer", "minimum": 0 },
+    "baths": { "type": "integer", "minimum": 0 },
+    "built_m2": { "type": "integer", "minimum": 0 },
+    "plot_m2": { "type": ["integer", "null"], "minimum": 0 },
+    "features": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "url": { "type": "string", "format": "uri" },
+    "summary_en": { "type": "string", "minLength": 1, "maxLength": 400 },
+    "updated_at": { "$ref": "common.schema.json#/$defs/timestamp" }
+  }
+}

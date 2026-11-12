@@ -1,0 +1,12 @@
+{
+  "operation": "getHealth",
+  "method": "GET",
+  "path": "/health",
+  "description": "Monitoring ping. No API key needed.",
+  "request": null,
+  "status": 200,
+  "response": {
+    "status": "ok",
+    "version": "1.0.0"
+  }
+}

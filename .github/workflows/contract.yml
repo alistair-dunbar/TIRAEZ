@@ -1,0 +1,28 @@
+name: Contract tests
+
+on:
+  push:
+    paths:
+      - "contract/**"
+      - "fixtures/**"
+      - ".github/workflows/contract.yml"
+  pull_request:
+    paths:
+      - "contract/**"
+      - "fixtures/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r contract/tests/requirements.txt
+      - name: Feed is up to date with listings.json
+        run: |
+          python3 fixtures/build_feed.py
+          git diff --exit-code fixtures/feed.xml
+      - name: Static contract tests
+        run: python3 contract/tests/validate.py

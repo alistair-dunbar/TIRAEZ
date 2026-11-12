@@ -1,0 +1,9 @@
+{
+  "operation": "getAgency",
+  "method": "GET",
+  "path": "/agency/costa-test-homes",
+  "description": "Both halves read agency settings on startup and cache them for 5 minutes.",
+  "request": null,
+  "status": 200,
+  "response_fixture": "agency.json"
+}

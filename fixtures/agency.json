@@ -1,0 +1,70 @@
+{
+  "agency_id": "costa-test-homes",
+  "name": "Costa Test Homes",
+  "timezone": "Europe/Madrid",
+  "languages": ["en", "es", "de", "sv", "nl", "fr"],
+  "office_hours": {
+    "mon": [["09:30", "14:00"], ["16:30", "20:00"]],
+    "tue": [["09:30", "14:00"], ["16:30", "20:00"]],
+    "wed": [["09:30", "14:00"], ["16:30", "20:00"]],
+    "thu": [["09:30", "14:00"], ["16:30", "20:00"]],
+    "fri": [["09:30", "14:00"], ["16:30", "19:00"]],
+    "sat": [["10:00", "13:00"]],
+    "sun": []
+  },
+  "agents": [
+    {
+      "agent_id": "ana",
+      "name": "Ana Morales",
+      "mobile": "+34600000001",
+      "email": "ana@costa-test-homes.example",
+      "summary_language": "es",
+      "on_duty": true
+    },
+    {
+      "agent_id": "james",
+      "name": "James Whitfield",
+      "mobile": "+34600000002",
+      "email": "james@costa-test-homes.example",
+      "summary_language": "en",
+      "on_duty": false
+    },
+    {
+      "agent_id": "lena",
+      "name": "Lena Lindqvist",
+      "mobile": "+34600000003",
+      "email": "lena@costa-test-homes.example",
+      "summary_language": "sv",
+      "on_duty": false
+    }
+  ],
+  "feed": {
+    "type": "kyero_xml",
+    "url": "https://costa-test-homes.example/feed.xml",
+    "refresh_minutes": 60
+  },
+  "channels": { "email": true, "whatsapp": true, "phone": true },
+  "phone": {
+    "ai_number": "+34951000000",
+    "transfer_timeout_s": 25,
+    "recording_retention_days": 90,
+    "included_minutes": 300
+  },
+  "faq": [
+    { "q": "Do buyers pay an agency fee?", "a": "No. In this test agency the seller pays the agency fee." },
+    { "q": "Can you arrange viewings by video call?", "a": "Yes. An agent can show any available property by video call." },
+    { "q": "Which languages does the team speak?", "a": "English, Spanish and Swedish in the office. The assistant answers in German, Dutch and French too." },
+    { "q": "Where is the office?", "a": "Avenida de la Prueba 1, Marbella. Free parking in front." },
+    { "q": "Do you help with NIE numbers, lawyers or mortgages?", "a": "An agent can introduce you to independent lawyers and mortgage brokers. The assistant does not give legal, tax or mortgage advice." }
+  ],
+  "handoff_topics": ["legal", "tax", "mortgage", "negotiation", "complaint", "valuation_price"],
+  "tone": "warm, short, professional",
+  "disclosure": {
+    "en": "I'm the AI assistant for Costa Test Homes.",
+    "es": "Soy el asistente de inteligencia artificial de Costa Test Homes.",
+    "de": "Ich bin der KI-Assistent von Costa Test Homes.",
+    "sv": "Jag är AI-assistenten för Costa Test Homes.",
+    "nl": "Ik ben de AI-assistent van Costa Test Homes.",
+    "fr": "Je suis l'assistant IA de Costa Test Homes."
+  }
+}

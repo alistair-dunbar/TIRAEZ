@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contract.tiraez.invalid/v1/event.schema.json",
+  "title": "Lead event",
+  "description": "Body of POST /leads/{lead_id}/events. Every message, call and decision is one event, so the lead log tells the whole story.",
+  "type": "object",
+  "required": ["type", "channel", "at", "payload"],
+  "additionalProperties": false,
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "message_in", "message_out", "call_started", "call_ended",
+        "transfer_attempted", "transfer_answered", "qualification",
+        "viewing_request", "callback_request", "handoff", "opt_out"
+      ]
+    },
+    "channel": { "$ref": "common.schema.json#/$defs/channel" },
+    "at": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "payload": { "type": "object" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "enum": ["message_in", "message_out"] } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["text", "language"],
+            "properties": {
+              "text": { "type": "string" },
+              "language": { "$ref": "common.schema.json#/$defs/language" },
+              "source": {
+                "type": "string",
+                "enum": ["idealista", "fotocasa", "kyero", "rightmove_overseas", "thinkspain", "aplaceinthesun", "green_acres", "web_form", "direct"]
+              },
+              "facts_used": {
+                "type": "array",
+                "description": "Listing refs and FAQ ids the reply drew on.",
+                "items": { "type": "string" }
+              },
+              "needs_approval": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "call_started" } } },
+      "then": {
+        "properties": {
+          "channel": { "const": "phone" },
+          "payload": {
+            "type": "object",
+            "required": ["call_id", "from", "to"],
+            "properties": {
+              "call_id": { "type": "string" },
+              "from": { "$ref": "common.schema.json#/$defs/phone" },
+              "to": { "$ref": "common.schema.json#/$defs/phone" },
+              "forwarded_from": { "$ref": "common.schema.json#/$defs/phone" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "call_ended" } } },
+      "then": {
+        "properties": {
+          "channel": { "const": "phone" },
+          "payload": {
+            "type": "object",
+            "required": ["call_id", "duration_s", "outcome", "transcript", "language"],
+            "properties": {
+              "call_id": { "type": "string" },
+              "duration_s": { "type": "integer", "minimum": 0 },
+              "outcome": {
+                "type": "string",
+                "enum": ["qualified", "viewing_requested", "callback_booked", "message_taken", "transferred", "hung_up", "wrong_number"]
+              },
+              "transcript": { "type": "string" },
+              "language": { "$ref": "common.schema.json#/$defs/voice_language" },
+              "recording_url": { "type": ["string", "null"], "format": "uri" },
+              "cost_eur_cents": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "enum": ["transfer_attempted", "transfer_answered"] } } },
+      "then": {
+        "properties": {
+          "channel": { "const": "phone" },
+          "payload": {
+            "type": "object",
+            "required": ["call_id", "agent_id"],
+            "properties": {
+              "call_id": { "type": "string" },
+              "agent_id": { "$ref": "common.schema.json#/$defs/agent_id" },
+              "whisper": { "type": "string", "maxLength": 200 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "handoff" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["topic"],
+            "properties": {
+              "topic": { "type": "string", "enum": ["legal", "tax", "mortgage", "negotiation", "complaint", "valuation_price", "asked_for_person", "other"] },
+              "note": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "opt_out" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": ["keyword"],
+            "properties": { "keyword": { "type": "string" } }
+          }
+        }
+      }
+    }
+  ]
+}

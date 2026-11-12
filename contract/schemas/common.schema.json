@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contract.tiraez.invalid/v1/common.schema.json",
+  "title": "Shared building blocks",
+  "description": "Formats every other schema reuses. Times are UTC ISO 8601, languages ISO 639-1, phones E.164, money whole euros.",
+  "$defs": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$",
+      "description": "UTC only, ending in Z. Example: 2026-12-08T21:04:00Z"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "language": {
+      "type": "string",
+      "enum": ["en", "es", "de", "sv", "nl", "fr", "no", "da", "pl"],
+      "description": "ISO 639-1. The first six are launch languages for text and voice; no, da and pl are text only."
+    },
+    "voice_language": {
+      "type": "string",
+      "enum": ["en", "es", "de", "sv", "nl", "fr"]
+    },
+    "phone": {
+      "type": "string",
+      "pattern": "^\\+[1-9]\\d{6,14}$",
+      "description": "E.164. Example: +34952000000"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "maxLength": 254
+    },
+    "euros": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Whole euros, no cents."
+    },
+    "agency_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 64,
+      "description": "Slug. Example: costa-test-homes"
+    },
+    "agent_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 64
+    },
+    "listing_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "The agency's own reference. Example: CTH-1234"
+    },
+    "ulid": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "lead_id": { "type": "string", "pattern": "^lead_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "event_id": { "type": "string", "pattern": "^evt_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "viewing_request_id": { "type": "string", "pattern": "^vrq_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "callback_id": { "type": "string", "pattern": "^cbk_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "message_id": { "type": "string", "pattern": "^msg_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "channel": {
+      "type": "string",
+      "enum": ["email", "portal", "web_form", "whatsapp", "phone", "sms"],
+      "description": "Where an interaction happened."
+    },
+    "error": {
+      "type": "object",
+      "description": "Body of every 4xx and 5xx response.",
+      "required": ["error"],
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "type": "object",
+          "required": ["code", "message"],
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "bad_request",
+                "unauthorized",
+                "agency_not_found",
+                "listing_not_found",
+                "lead_not_found",
+                "lead_opted_out",
+                "rate_limited",
+                "channel_unavailable",
+                "internal"
+              ]
+            },
+            "message": { "type": "string" },
+            "retry_after_s": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    }
+  }
+}
