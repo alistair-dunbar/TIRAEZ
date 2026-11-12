@@ -67,6 +67,13 @@ The legal footer is shown under the reply bubble, not inside the reply.
   recorded in `adjustments`.
 - **Tests** (`tests/`) check every rule against every sample. If you change the prompt, run the live tests.
 
+## Skills
+
+- `.claude/skills/llm-council/`: third-party "LLM Council" skill, copied unmodified from
+  github.com/aiwithremy/claude-skills-llm-council (no licence stated upstream). Say "council this: <decision>"
+  for business decisions with real trade-offs (pricing, positioning, which market first). It starts
+  11 sub-agents per run, so don't use it for simple questions.
+
 ## Conventions
 
 - Everything that varies per agency or region goes in `config/agency.*.json`, never in code.
