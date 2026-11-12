@@ -1,0 +1,83 @@
+{
+  "id": "costa-test-homes",
+  "agency_name": "Costa Test Homes",
+  "agency_location": "Estepona",
+  "agent_name": "Marta",
+  "region": "Costa del Sol, Spain",
+  "currency": "EUR",
+  "timezone": "Europe/Madrid",
+  "supported_languages": ["en", "es", "de", "sv", "nl", "fr"],
+  "fallback_language": "en",
+  "summary_language": "en",
+  "tone": "Warm, professional and concise. Friendly but not pushy. No emojis. Use the buyer's first name if known. Use the formal 'you' where the language has one (Sie, vous, u, usted).",
+  "max_reply_words": 90,
+  "booking_link": "https://example.com/book/costa-test-homes",
+  "ai_disclosure": {
+    "en": "Hello, I am the AI assistant of Costa Test Homes.",
+    "es": "Hola, soy el asistente de IA de Costa Test Homes.",
+    "de": "Guten Tag, ich bin der KI-Assistent von Costa Test Homes.",
+    "sv": "Hej, jag är AI-assistenten för Costa Test Homes.",
+    "nl": "Hallo, ik ben de AI-assistent van Costa Test Homes.",
+    "fr": "Bonjour, je suis l'assistant IA de Costa Test Homes."
+  },
+  "legal_footer": {
+    "en": "This reply was written by an AI assistant. Costa Test Homes is a fictional agency used for testing only. Your data is handled under the EU GDPR.",
+    "es": "Esta respuesta ha sido redactada por un asistente de IA. Costa Test Homes es una agencia ficticia utilizada solo para pruebas. Sus datos se tratan conforme al RGPD.",
+    "de": "Diese Antwort wurde von einem KI-Assistenten verfasst. Costa Test Homes ist eine fiktive Agentur, die nur für Tests verwendet wird. Ihre Daten werden gemäß DSGVO verarbeitet.",
+    "sv": "Detta svar skrevs av en AI-assistent. Costa Test Homes är en fiktiv byrå som endast används för tester. Dina uppgifter hanteras enligt GDPR.",
+    "nl": "Dit antwoord is geschreven door een AI-assistent. Costa Test Homes is een fictief makelaarskantoor, alleen voor tests. Uw gegevens worden verwerkt volgens de AVG.",
+    "fr": "Cette réponse a été rédigée par un assistant IA. Costa Test Homes est une agence fictive utilisée uniquement pour des tests. Vos données sont traitées conformément au RGPD."
+  },
+  "handoff_topics": ["legal", "tax", "mortgage", "residency", "visa", "inheritance", "NIE number", "lawyer", "notary"],
+  "faqs": [
+    {
+      "q": "When can I view a property?",
+      "a": "Viewings are available Monday to Saturday, 10:00 to 19:00. Video viewings can be arranged any day."
+    },
+    {
+      "q": "Do buyers pay an agency fee?",
+      "a": "No. Buyers pay no agency fee to Costa Test Homes; the commission is paid by the seller."
+    },
+    {
+      "q": "Which languages do you speak?",
+      "a": "Our team speaks English, Spanish, German, Dutch, Swedish and French."
+    },
+    {
+      "q": "Where is your office?",
+      "a": "Our office is in Estepona. Viewings start from the property itself."
+    },
+    {
+      "q": "How quickly will an agent contact me?",
+      "a": "Marta or a colleague will contact you within one working day."
+    }
+  ],
+  "agents": [
+    {
+      "id": "agent-marta",
+      "name": "Marta",
+      "email": "marta@costa-test-homes.example",
+      "phone": "+34 600 000 101",
+      "languages": ["es", "en", "fr"]
+    },
+    {
+      "id": "agent-jonas",
+      "name": "Jonas",
+      "email": "jonas@costa-test-homes.example",
+      "phone": "+34 600 000 102",
+      "languages": ["de", "nl", "sv", "en"]
+    }
+  ],
+  "office_hours": {
+    "mon": [["09:30", "14:00"], ["16:30", "19:30"]],
+    "tue": [["09:30", "14:00"], ["16:30", "19:30"]],
+    "wed": [["09:30", "14:00"], ["16:30", "19:30"]],
+    "thu": [["09:30", "14:00"], ["16:30", "19:30"]],
+    "fri": [["09:30", "14:00"], ["16:30", "19:30"]],
+    "sat": [["10:00", "14:00"]],
+    "sun": []
+  },
+  "feed": {
+    "format": "kyero",
+    "url": "https://feeds.example.com/costa-test-homes/kyero.xml"
+  }
+}
