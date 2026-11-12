@@ -44,6 +44,8 @@ Last updated: 2026-11-12
 
 ## Next steps
 
+The full plan after the demo is in PLAN.md (Part A, revised Nov 12). The steps below cover A0.
+
 0. Until the API key is added, use `DEMO_MODE=offline` to try the flow. Don't record the video with it.
    On a co-founder's Windows laptop, a live request returned `403 forbidden / Request not allowed` before
    a key with credit was set up. Retest once the key has credit, with any VPN off.

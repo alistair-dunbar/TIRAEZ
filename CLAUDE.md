@@ -15,7 +15,7 @@ A local web app for a 60-second sales video: enquiry in -> reply in the buyer's 
 English agent summary + seconds taken. No WhatsApp, Gmail, calendar or database yet. These
 sit behind interfaces in `src/channels/`, `src/calendar/` and `src/store/` with stub
 implementations. Add real ones by implementing those interfaces; don't change `respond.ts`.
-See PROGRESS.md for status and next steps.
+See PROGRESS.md for status and next steps, and PLAN.md for the agreed Part A plan (Nov 13 to Dec 18).
 
 ## Stack (ask before adding anything else)
 
