@@ -72,4 +72,6 @@ export interface EnquiryResult extends AssistantOutput {
   elapsed_ms: number;
   /** Server-side safety nets that changed the model's output, for transparency. */
   adjustments: string[];
+  /** True when DEMO_MODE=offline: the reply is pre-written, not AI output. */
+  offline?: boolean;
 }

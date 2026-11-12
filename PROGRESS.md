@@ -18,9 +18,12 @@ Last updated: 2026-11-12
       live timer. Works at phone width.
 - [x] Stub interfaces: `src/channels/` (outbound logs to the console), `src/calendar/` (static booking link),
       `src/store/` (in-memory)
-- [x] Tests: 48 offline tests pass (parser, rule checks, and safety nets using a fake model client).
+- [x] Tests: 55 offline tests pass (parser, rule checks, and safety nets using a fake model client).
       Live API tests are written and skip cleanly without a key.
 - [x] README, CLAUDE.md, .env.example, .gitignore
+- [x] Offline mode (`DEMO_MODE=offline`): pre-written replies for the 5 samples, a yellow banner on the page,
+      no API key needed. Tested: every pre-written reply passes the rule checks.
+- [x] Plain-language error messages for API failures (401/403/404/429/timeouts)
 
 ## Not finished / not verified
 
@@ -41,6 +44,9 @@ Last updated: 2026-11-12
 
 ## Next steps
 
+0. Until the API key is added, use `DEMO_MODE=offline` to try the flow. Don't record the video with it.
+   On a co-founder's Windows laptop, a live request returned `403 forbidden / Request not allowed` before
+   a key with credit was set up. Retest once the key has credit, with any VPN off.
 1. Add the API key (see README) and run `npm test`. Fix the prompt for any failing live test.
    Re-run 2–3 times, because model output varies between runs.
 2. Run `npm start`, pick the German sample, click Send, and screen-record the 60-second video.

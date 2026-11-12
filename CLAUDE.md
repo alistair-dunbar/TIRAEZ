@@ -31,6 +31,11 @@ See PROGRESS.md for status and next steps.
 - `npm start`: server on http://localhost:3000
 - `npm test`: all tests. Live API tests skip with a message if `ANTHROPIC_API_KEY` is unset.
 - `npm run typecheck`: `tsc --noEmit`
+- `DEMO_MODE=offline` in `.env`: no API key needed. The 5 samples get pre-written replies from
+  `data/offline-replies.json`, served through `respond()` with a stand-in client, so the safety nets
+  still run. Not AI output: never use it in the sales video or present it as live.
+  `tests/offline.test.ts` checks that these replies follow all 7 rules; keep them passing if you edit them.
+- Windows PowerShell: use `npm.cmd` if script execution is disabled.
 
 ## Model
 

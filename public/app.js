@@ -4,6 +4,7 @@ const $ = (id) => document.getElementById(id);
 const LANG_NAMES = { en: "English", de: "German", sv: "Swedish", nl: "Dutch", fr: "French", es: "Spanish", it: "Italian" };
 let samples = [];
 let timerFrame = null;
+let offlineMode = false;
 
 async function init() {
   const [config, sampleList] = await Promise.all([
@@ -13,7 +14,10 @@ async function init() {
   $("agency-name").textContent = `${config.agency_name}, ${config.agency_location}`;
   $("logo").textContent = config.agency_name.split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
   document.title = `${config.agency_name} · Enquiry Assistant`;
-  $("key-warning").hidden = config.api_key_configured;
+  $("key-warning").hidden = config.api_key_configured || config.offline;
+  $("offline-banner").hidden = !config.offline;
+  offlineMode = Boolean(config.offline);
+  if (config.offline) $("timer-label").textContent = "offline";
 
   samples = sampleList;
   for (const s of samples) {
@@ -52,7 +56,7 @@ function stopTimer(t0, ok) {
   cancelAnimationFrame(timerFrame);
   $("timer-value").textContent = ((performance.now() - t0) / 1000).toFixed(1);
   $("timer").className = ok ? "timer done" : "timer";
-  $("timer-label").textContent = ok ? "replied" : "failed";
+  $("timer-label").textContent = ok ? (offlineMode ? "offline" : "replied") : "failed";
 }
 
 function setField(id, value) {

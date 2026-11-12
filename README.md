@@ -33,7 +33,17 @@ Open http://localhost:3000, keep the German sample selected and click **Send**.
 npm test
 ```
 
-Without a key, `npm test` runs the 48 offline tests and skips the live API tests with a message.
+Without a key, `npm test` runs the 55 offline tests and skips the live API tests with a message.
+
+On Windows PowerShell, if `npm` says "running scripts is disabled", type `npm.cmd` instead of `npm`.
+
+### No API key yet? Offline mode
+
+Add `DEMO_MODE=offline` to `.env` and run `npm start`. The 5 samples then get **pre-written replies**
+from `data/offline-replies.json`, and anything else gets a placeholder. No key or internet is needed.
+The page shows a yellow "Offline demo" banner. These replies are not AI output, and the timer only
+measures how fast the page shows them, so **do not use offline mode for the sales video**.
+Remove the line to go back to live replies.
 
 ## Configuration
 
@@ -43,6 +53,7 @@ Without a key, `npm test` runs the 48 offline tests and skips the live API tests
 | `ANTHROPIC_MODEL` | `claude-haiku-5-5` | Any current Claude model ID. Haiku is the fast, low-cost default |
 | `PORT` | `3000` | Web server port |
 | `AGENCY_CONFIG` | `config/agency.demo.json` | Per-agency settings file |
+| `DEMO_MODE` | (unset) | `offline` = pre-written replies, no API key needed |
 
 Real environment variables take priority over `.env`.
 
@@ -73,10 +84,12 @@ Any fix it makes is listed in `adjustments` and shown in small print on the summ
 config/agency.demo.json   per-agency settings
 data/listings.json        6 fictional listings
 data/sample-enquiries/    5 portal emails: en, de, sv, nl, fr
+data/offline-replies.json pre-written replies for offline mode
 src/parse.ts              raw text -> name, contact, ref, message
 src/prompt.ts             system prompt + JSON schema
 src/respond.ts            the Claude call + safety nets
 src/checks.ts             rule checks used by the server and the tests
+src/offline.ts            offline mode (DEMO_MODE=offline)
 src/server.ts             Express: POST /enquiry, GET /api/config, GET /api/samples, static page
 src/channels/             inbound/outbound channel interface (stub logs to console)
 src/calendar/             calendar interface (stub returns the booking link)

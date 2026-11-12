@@ -1,0 +1,51 @@
+{
+  "_note": "Pre-written replies used only when DEMO_MODE=offline. Keyed by sample file name. Not AI output; never present these as live replies.",
+  "en-golden-mile-apartment": {
+    "language": "en",
+    "reply": "Hello, I am the AI assistant of Demo Coast Properties. Thank you for your interest in our Golden Mile apartment (DCP-1001), listed at €695,000 and currently available. It comes with an underground parking space; Laura will confirm whether it is included in the price. A viewing between 14 and 21 February is possible. When are you hoping to buy?\n\nhttps://example.com/book/demo-coast-properties",
+    "summary_en": "James Whitfield, a retired couple from Surrey, wants a winter base and is interested in DCP-1001. Asked whether the parking space is included in the price: please confirm. In Marbella 14-21 February and can view then.",
+    "qualification": { "budget": "Up to about €700,000", "area": "Marbella", "timing": null, "travel_dates": "14-21 February" },
+    "needs_human": false,
+    "reason": "Routine enquiry"
+  },
+  "de-benahavis-villa": {
+    "language": "de",
+    "reply": "Guten Tag, ich bin der KI-Assistent von Demo Coast Properties. Vielen Dank für Ihr Interesse an unserer Villa in Benahavís (DCP-1003, 1.850.000 €). Der private Pool ist beheizt, und es gibt eine Doppelgarage. Die Villa ist verfügbar, und eine Besichtigung im März ist gut möglich. An welchen Tagen wären Sie vor Ort?\n\nhttps://example.com/book/demo-coast-properties",
+    "summary_en": "Katrin Bauer is looking for a family home and is interested in villa DCP-1003. Confirmed the heated pool and double garage. Wants to buy in spring and view in March.",
+    "qualification": { "budget": null, "area": "Benahavís", "timing": "Spring", "travel_dates": "March" },
+    "needs_human": false,
+    "reason": "Routine enquiry"
+  },
+  "sv-fuengirola-penthouse": {
+    "language": "sv",
+    "reply": "Hej, jag är AI-assistenten för Demo Coast Properties. Tack för ert intresse för vår takvåning vid hamnen i Fuengirola (DCP-1005). Priset är 549 000 euro och en parkeringsplats ingår. Bostaden har en privat takterrass med jacuzzi och utsikt över marinan, och den är tillgänglig. När skulle ni kunna komma på visning?\n\nhttps://example.com/book/demo-coast-properties",
+    "summary_en": "Erik Lindqvist, a family from Gothenburg, is interested in penthouse DCP-1005. Confirmed parking is included. Budget fits the asking price; wants to buy within six months.",
+    "qualification": { "budget": "About €550,000", "area": "Fuengirola, near the marina", "timing": "Within six months", "travel_dates": null },
+    "needs_human": false,
+    "reason": "Routine enquiry"
+  },
+  "nl-estepona-townhouse": {
+    "language": "nl",
+    "reply": "Hallo, ik ben de AI-assistent van Demo Coast Properties. Hartelijk dank voor uw interesse in ons rijtjeshuis in Estepona (DCP-1002, € 389.000). Het huis is nog beschikbaar, volledig gerenoveerd en op loopafstand van het strand. Een bezichtiging in april is zeker mogelijk; Laura stemt de datum graag met u af. Wanneer bent u van plan te kopen?\n\nhttps://example.com/book/demo-coast-properties",
+    "summary_en": "Sanne de Vries wants a townhouse in Estepona within walking distance of the beach and is interested in DCP-1002. Confirmed it is available and fully renovated. In Spain for a week in April and wants to view.",
+    "qualification": { "budget": null, "area": "Estepona", "timing": null, "travel_dates": "A week in April" },
+    "needs_human": false,
+    "reason": "Routine enquiry"
+  },
+  "fr-mijas-golf": {
+    "language": "fr",
+    "reply": "Bonjour, je suis l'assistant IA de Demo Coast Properties. Merci pour votre intérêt pour notre appartement en première ligne de golf à Mijas Costa (DCP-1004, 315 000 €). Je dois vous signaler que ce bien est actuellement sous offre. Laura vous contactera personnellement sous un jour ouvré pour faire le point et organiser, si possible, une visite fin mai.\n\nhttps://example.com/book/demo-coast-properties",
+    "summary_en": "Claire Dubois, a Belgian golfing couple, is interested in DCP-1004, which is under offer. Wants to buy before summer and could view at the end of May. Please advise whether a viewing makes sense or suggest alternatives.",
+    "qualification": { "budget": null, "area": "Mijas Costa", "timing": "Before summer", "travel_dates": "End of May" },
+    "needs_human": true,
+    "reason": "Listing is under offer; Laura should advise the buyer personally."
+  },
+  "_fallback": {
+    "language": "en",
+    "reply": "Hello, I am the AI assistant of Demo Coast Properties. This demo is running in offline mode, so it only has pre-written replies for the five sample enquiries. Laura will reply to your message personally.\n\nhttps://example.com/book/demo-coast-properties",
+    "summary_en": "Offline mode: no pre-written reply exists for this enquiry. Switch to live mode to generate one.",
+    "qualification": { "budget": null, "area": null, "timing": null, "travel_dates": null },
+    "needs_human": true,
+    "reason": "Offline mode: no pre-written reply for this enquiry."
+  }
+}
