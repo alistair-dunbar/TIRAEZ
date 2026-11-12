@@ -21,7 +21,7 @@ agreeing between the two founders.
 **Hands to B:** the contract, a mock API and the fixtures.
 
 - [ ] Add Claude API credit with a spending cap, fix the 403, and run the live tests until they pass
-- [ ] Merge the demo PR into `main`
+- [x] Merge the demo PR into `main` (PR #1, Nov 12)
 - [x] Agree the contract. Replaced by contract v2.0.0 (Dakhil, agreed by both on Nov 12): 11 endpoints
       under `/v2`, `X-Api-Key` auth, 25 examples, contract tests in `contract/tests/validate.py`.
       Merged into the demo branch; the app moved to `core/`
