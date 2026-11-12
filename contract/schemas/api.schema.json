@@ -150,6 +150,8 @@
           "items": { "$ref": "common.schema.json#/$defs/date" }
         },
         "time_of_day": { "type": "string", "enum": ["morning", "afternoon", "any"], "default": "any" },
+        "preferred_agent_id": { "$ref": "common.schema.json#/$defs/agent_id", "description": "Ask for a specific agent, for example the one who showed the property. Part A uses it when that agent exists, otherwise falls back to the on-duty agent." },
+        "preferred_language": { "$ref": "common.schema.json#/$defs/language", "description": "The language the caller wants the agent to speak. Part A prefers an agent who speaks it (agency languages and agent summary_language are the guide)." },
         "channel": { "$ref": "common.schema.json#/$defs/channel" },
         "notes": { "type": "string", "maxLength": 500 }
       }
@@ -178,6 +180,8 @@
           "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$",
           "description": "Agency local time the caller asked for, or null for next office opening."
         },
+        "preferred_agent_id": { "$ref": "common.schema.json#/$defs/agent_id", "description": "Ask for a specific agent, for example the one who showed the property. Part A uses it when that agent exists, otherwise falls back to the on-duty agent." },
+        "preferred_language": { "$ref": "common.schema.json#/$defs/language", "description": "The language the caller wants the agent to speak. Part A prefers an agent who speaks it (agency languages and agent summary_language are the guide)." },
         "channel": { "$ref": "common.schema.json#/$defs/channel" },
         "note": { "type": "string", "maxLength": 500 }
       }

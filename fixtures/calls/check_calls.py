@@ -181,8 +181,11 @@ def check_script(path, meta, body, v, agency, listings, block_ids):
             check_ref(ref, fn)
         if "agent_id" in args and args["agent_id"] not in agent_ids:
             fail(name, f"{fn} names agent {args['agent_id']}, who is not in agency.json")
-        if "language" in args and args["language"] not in v["languages"]:
-            fail(name, f"{fn} language {args['language']} is not a contract language")
+        if "preferred_agent_id" in args and args["preferred_agent_id"] not in agent_ids:
+            fail(name, f"{fn} prefers agent {args['preferred_agent_id']}, who is not in agency.json")
+        for key in ("language", "preferred_language"):
+            if key in args and args[key] not in v["languages"]:
+                fail(name, f"{fn} {key} {args[key]} is not a contract language")
         if fn == "send_confirmation":
             if args.get("template") not in v["templates"]:
                 fail(name, f"template {args.get('template')} is not in the contract")

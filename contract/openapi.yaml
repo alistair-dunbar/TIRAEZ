@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Core API (shared contract between Part A and Part B)
-  version: 1.0.0
+  version: 1.1.0
   description: |
     The only link between Part A (core and text replies) and Part B (phone receptionist).
     Part A implements it. Part B calls it, and builds a mock of it until join 1 (Dec 7).
@@ -12,6 +12,7 @@ info:
     - Every response arrives within 800 ms at the 95th percentile.
     - Errors use status 4xx/5xx with the `Error` body. 429 carries `retry_after_s`.
     - Within v1, fields may be added but never renamed or removed. See CHANGELOG.md.
+    v1.1.0 adds optional preferred_agent_id and preferred_language to callbacks and viewing requests.
 servers:
   - url: https://core.tiraez.com/v1
     description: Production (EU server). EU server.

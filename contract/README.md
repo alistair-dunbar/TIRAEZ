@@ -1,4 +1,4 @@
-# Shared contract (v1.0.0, signed off)
+# Shared contract (v1.1.0)
 
 This folder is the only link between the two halves of the build:
 
@@ -18,7 +18,7 @@ If the code and the contract disagree, the contract wins until a pull request ch
 | `schemas/lead.schema.json` | One person per agency, shared by both channels, plus the shape of a lead update. |
 | `schemas/event.schema.json` | One logged message, call or decision. Each event type has its own required fields. |
 | `schemas/api.schema.json` | Every other request and response body. |
-| `examples/` | 19 request and response pairs, at least one per endpoint, including error cases. They are the test cases. |
+| `examples/` | 21 request and response pairs, at least one per endpoint, including error cases. They are the test cases. |
 | `tests/validate.py` | The contract tests. Both halves run them. |
 | `CHANGELOG.md` | Every change since v1.0.0. |
 
@@ -71,7 +71,7 @@ To check a running server against the contract (Part A's API, or Part B's mock):
 python3 contract/tests/validate.py --base-url http://localhost:8787/v1 --api-key test
 ```
 
-Add `--include-stateful` to also run the examples that need existing leads. Part B's mock should serve the example leads, so it passes all 19. Part A's staging server needs those leads seeded first.
+Add `--include-stateful` to also run the examples that need existing leads. Part B's mock should serve the example leads, so it passes all 21. Part A's staging server needs those leads seeded first.
 
 ## Changing the contract
 

@@ -16,7 +16,7 @@ expected_functions:
   - find_listing: {price_min: 1000000, price_max: 1300000}
   - save_answers: {name: "Karin Ekström", intent: buyer, budget_eur_max: 1300000, add_listing_refs: [CTH-1214, CTH-1217]}
   - get_duty_agent: {}
-  - book_callback: {reason: buyer_question, priority: normal, preferred_time: "2026-12-10T17:00"}
+  - book_callback: {reason: buyer_question, priority: normal, preferred_time: "2026-12-10T17:00", preferred_agent_id: lena, preferred_language: sv}
   - send_confirmation: {channel: whatsapp, template: listing_link, listing_ref: CTH-1214}
   - send_confirmation: {channel: whatsapp, template: listing_link, listing_ref: CTH-1217}
   - send_confirmation: {channel: whatsapp, template: callback_booked}
@@ -104,9 +104,9 @@ Karin Ekström, around 40, from Gothenburg. Last night she sent an enquiry about
 - **She says "Don't send anything, I'll just wait for the call":** the AI books the callback and sends nothing else.
 - **She wants the callback at two o'clock:** the office is closed from 14:00 to 16:30. The AI offers 13:30 or 16:30 instead.
 
-## Note for the contract
+## Note
 
-The callback endpoint has no field for choosing an agent or a language. For now, the preference goes in `note` ("Prefers Swedish: Lena"), and Part A's core decides who calls. If you want this guaranteed, propose an optional `preferred_agent_id` or `preferred_language` field as a v1.1 change. Both partners have to approve it.
+The callback uses `preferred_agent_id: lena` and `preferred_language: sv` (contract v1.1), so the request is a real field rather than a note.
 
 ## Agent summary
 

@@ -16,7 +16,7 @@ expected_functions:
   - find_listing: {area: Cancelada, type: villa}
   - save_answers: {name: "Ingrid Solberg", language: "no", intent: buyer, budget_eur_max: 1300000, financing: cash, timing: 6_months, travel_dates: "Feb 1 to 7", add_listing_refs: [CTH-1214]}
   - get_duty_agent: {}
-  - request_viewing: {listing_ref: CTH-1214, preferred_days: ["2027-02-02", "2027-02-03"], time_of_day: afternoon}
+  - request_viewing: {listing_ref: CTH-1214, preferred_days: ["2027-02-02", "2027-02-03"], time_of_day: afternoon, preferred_agent_id: lena, preferred_language: sv}
   - send_confirmation: {channel: sms, template: viewing_request_received, language: "no"}
   - log_call: {}
   - notify_agent: {}
@@ -28,7 +28,7 @@ pass_criteria:
   - "Follows her into Swedish mid-call without commenting on it"
   - "Doesn't claim the pool is heated (not in the feed)"
   - "Asks how she'd like the confirmation, and sends the SMS in Norwegian, since text supports it"
-  - "The note asks for a Swedish-speaking agent"
+  - "The viewing request carries preferred_agent_id lena and preferred_language sv"
 must_not:
   - "Try to speak Norwegian"
   - "Make her feel her language is a problem"
