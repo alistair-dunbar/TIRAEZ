@@ -1,4 +1,4 @@
-# Shared contract (v1.0.0)
+# Shared contract (v1.0.0, signed off)
 
 This folder is the only link between the two halves of the build:
 
@@ -83,5 +83,5 @@ Add `--include-stateful` to also run the examples that need existing leads. Part
 ## Still to add in phase 0
 
 - [ ] `fixtures/emails/`: 30 sample enquiry emails, 5 per launch language, from Idealista, Kyero, Rightmove Overseas and the web form (Part A)
-- [ ] `fixtures/calls/`: 15 call scripts matching the phone test matrix (Part B)
+- [ ] `fixtures/calls/`: 15 call scripts matching the phone test matrix (Part B writes these, later)
 - [ ] Real domain names in the `servers` list of `openapi.yaml`, once the domain is bought
