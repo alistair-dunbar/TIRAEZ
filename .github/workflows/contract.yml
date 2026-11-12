@@ -26,3 +26,5 @@ jobs:
           git diff --exit-code fixtures/feed.xml
       - name: Static contract tests
         run: python3 contract/tests/validate.py
+      - name: Call scripts match the contract and the test agency
+        run: python3 fixtures/calls/check_calls.py

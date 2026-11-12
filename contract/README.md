@@ -83,5 +83,5 @@ Add `--include-stateful` to also run the examples that need existing leads. Part
 ## Still to add in phase 0
 
 - [ ] `fixtures/emails/`: 30 sample enquiry emails, 5 per launch language, from Idealista, Kyero, Rightmove Overseas and the web form (Part A)
-- [ ] `fixtures/calls/`: 15 call scripts matching the phone test matrix (Part B writes these, later)
+- [x] `fixtures/calls/`: 15 call scripts covering the phone test matrix, built from reusable blocks (Part B). See `fixtures/calls/README.md`
 - [x] Real domain (tiraez.com) in the `servers` list of `openapi.yaml`
