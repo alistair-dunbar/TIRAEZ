@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contract.tiraez.invalid/v2/common.schema.json",
+  "title": "Shared building blocks",
+  "description": "Formats every other schema reuses. Times are UTC ISO 8601, languages ISO 639-1, countries ISO 3166-1, currencies ISO 4217, phones E.164, money in whole units of the agency's currency.",
+  "$defs": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$",
+      "description": "UTC only, ending in Z. Example: 2026-12-08T21:04:00Z"
+    },
+    "local_time": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$",
+      "description": "Agency local time with no zone, for what the AI says out loud. Example: 2026-12-09T09:30"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "language": {
+      "type": "string",
+      "enum": ["en", "es", "de", "sv", "nl", "fr", "ar", "ru", "hi", "ur", "zh", "no", "da", "pl"],
+      "description": "ISO 639-1. Every language the text channels can use. Which ones an agency offers is set in its own settings."
+    },
+    "voice_language": {
+      "type": "string",
+      "enum": ["en", "es", "de", "sv", "nl", "fr", "ar", "ru", "hi", "ur", "zh"],
+      "description": "Languages the phone receptionist can speak. no, da and pl are text only. Each agency switches on its own subset in phone.voice_languages."
+    },
+    "country": {
+      "type": "string",
+      "enum": ["ES", "PT", "AE", "SA"],
+      "description": "ISO 3166-1 alpha-2. Add a country here before onboarding an agency there, because country drives legal rules (recording notices, data region)."
+    },
+    "currency": {
+      "type": "string",
+      "enum": ["EUR", "AED", "SAR"],
+      "description": "ISO 4217. Each agency works in one currency. The AI never converts between currencies."
+    },
+    "timezone": {
+      "type": "string",
+      "enum": ["Europe/Madrid", "Europe/Lisbon", "Asia/Dubai", "Asia/Riyadh"],
+      "description": "IANA time zone of the agency's office."
+    },
+    "data_region": {
+      "type": "string",
+      "enum": ["eu", "uae", "ksa"],
+      "description": "Where the agency's personal data is stored. EU agencies use eu. Gulf agencies use the region their lawyer confirms (open question: UAE and Saudi data protection rules)."
+    },
+    "phone": {
+      "type": "string",
+      "pattern": "^\\+[1-9]\\d{6,14}$",
+      "description": "E.164. Example: +34952000000"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "maxLength": 254
+    },
+    "money": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Whole units of the agency's currency, no cents. Example: 1200000 means 1.2 million EUR for a Spanish agency, or 1.2 million AED for a Dubai agency."
+    },
+    "agency_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 64,
+      "description": "Slug. Example: costa-test-homes"
+    },
+    "agent_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 64
+    },
+    "listing_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "The agency's own reference. Example: CTH-1234"
+    },
+    "lead_id": { "type": "string", "pattern": "^lead_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "event_id": { "type": "string", "pattern": "^evt_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "viewing_request_id": { "type": "string", "pattern": "^vrq_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "callback_id": { "type": "string", "pattern": "^cbk_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "message_id": { "type": "string", "pattern": "^msg_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "channel": {
+      "type": "string",
+      "enum": ["email", "portal", "web_form", "whatsapp", "phone", "sms"],
+      "description": "Where an interaction happened."
+    },
+    "handoff_topic": {
+      "type": "string",
+      "enum": [
+        "legal", "tax", "mortgage", "negotiation", "complaint", "valuation_price",
+        "visa_residency", "investment_returns"
+      ],
+      "description": "Topics the AI never advises on. visa_residency covers residency-by-investment questions (for example the UAE Golden Visa). investment_returns covers rental yields, ROI and capital growth."
+    },
+    "error": {
+      "type": "object",
+      "description": "Body of every 4xx and 5xx response.",
+      "required": ["error"],
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "type": "object",
+          "required": ["code", "message"],
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "bad_request",
+                "unauthorized",
+                "agency_not_found",
+                "listing_not_found",
+                "lead_not_found",
+                "lead_opted_out",
+                "rate_limited",
+                "channel_unavailable",
+                "internal"
+              ]
+            },
+            "message": { "type": "string" },
+            "retry_after_s": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    }
+  }
+}

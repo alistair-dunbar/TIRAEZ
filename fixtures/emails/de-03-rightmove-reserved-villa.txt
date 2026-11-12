@@ -1,0 +1,14 @@
+From: Rightmove Overseas <overseas-leads@rightmove.example>
+Subject: Overseas enquiry for property CTH-1205
+
+A buyer has sent you an enquiry.
+
+Agent reference: CTH-1205
+Full name: Sabine Hoffmann
+Email: sabine.hoffmann@example.at
+Phone: +43 664 1234567
+
+Comments:
+Grüß Gott, ist die Villa in Nueva Andalucía noch zu haben? Wir sind Ende Januar in Marbella.
+--
+Rightmove Overseas lead service (test fixture)

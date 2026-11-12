@@ -1,0 +1,9 @@
+From: Costa Test Homes website <web@costa-test-homes.example>
+Subject: Website enquiry
+
+Name: Tom Hughes
+Email: tom.hughes@example.ie
+Phone: +353 87 123 4567
+Property: -
+Message: Looking for a 3 or 4 bed villa with a pool in Estepona, up to 1.5 million. We plan to buy in June 2027 once our house in Dublin is sold.
+--

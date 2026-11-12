@@ -1,0 +1,20 @@
+{
+  "operation": "createCallback",
+  "method": "POST",
+  "path": "/callbacks",
+  "description": "A seller wants a valuation: high priority, first thing next morning.",
+  "request": {
+    "lead_id": "lead_01JD8Z7B2N5YR8S3T6V9W1X4ZB",
+    "reason": "seller_valuation",
+    "priority": "high",
+    "preferred_time": null,
+    "channel": "phone",
+    "note": "3-bed townhouse in Bel Air, wants to sell in spring."
+  },
+  "status": 201,
+  "response": {
+    "callback_id": "cbk_01JD8ZD4F7H0K3M6N9Q2S5V8X1",
+    "agent_id": "ana",
+    "due_local": "2026-12-09T09:30"
+  }
+}

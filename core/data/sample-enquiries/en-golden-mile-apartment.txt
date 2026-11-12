@@ -1,0 +1,14 @@
+From: CostaHomes Portal <leads@costahomes-portal.example>
+Subject: New enquiry for property DCP-1001
+
+You have received a new enquiry via CostaHomes Portal.
+
+Property reference: DCP-1001
+Name: James Whitfield
+Email: james.whitfield@example.co.uk
+Phone: +44 7700 900123
+
+Message:
+Hi, we're a retired couple from Surrey looking for a winter base on the coast. The Golden Mile apartment looks lovely. Is it still available, and does the price include the parking space? We're over in Marbella from 14 to 21 February and could view then. Budget is up to about 700k.
+
+Sent at 23:47

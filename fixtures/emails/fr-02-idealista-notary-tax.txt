@@ -1,0 +1,14 @@
+From: idealista <noreply@idealista.example>
+Subject: Nuevo mensaje sobre tu anuncio CTH-1207
+
+Has recibido un mensaje de un usuario interesado en tu anuncio.
+
+Referencia: CTH-1207
+Nombre: Nicolas Lambert
+Correo electrónico: nicolas.lambert@example.fr
+Teléfono: +33 6 98 76 54 32
+
+Mensaje:
+Bonjour, quels sont les frais de notaire et les impôts à prévoir pour l'achat de cette villa ? Nous achèterions comptant.
+
+Enviado desde idealista a las 23:12

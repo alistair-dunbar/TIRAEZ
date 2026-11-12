@@ -1,0 +1,44 @@
+{
+  "operation": "searchListings",
+  "method": "POST",
+  "path": "/listings/search",
+  "description": "A caller wants a Marbella villa between 1 and 2.5 million with 4+ beds. CTH-1205 matches but is reserved, so it is left out by default.",
+  "request": {
+    "agency_id": "costa-test-homes",
+    "town": "Marbella",
+    "type": "villa",
+    "price_min": 1000000,
+    "price_max": 2500000,
+    "beds": 4
+  },
+  "status": 200,
+  "response": {
+    "results": [
+      {
+        "ref": "CTH-1234",
+        "agency_id": "costa-test-homes",
+        "status": "available",
+        "completion": "ready",
+        "type": "villa",
+        "town": "Marbella",
+        "area": "Nueva Andalucía",
+        "price": 1200000,
+        "currency": "EUR",
+        "beds": 4,
+        "baths": 4,
+        "built_m2": 340,
+        "plot_m2": 950,
+        "features": [
+          "golf views",
+          "pool",
+          "garden",
+          "garage"
+        ],
+        "url": "https://costa-test-homes.example/listings/cth-1234",
+        "summary_en": "Four-bed renovated villa in Nueva Andalucía with pool and golf views. Five minutes to Puerto Banús.",
+        "updated_at": "2026-11-11T09:38:00Z"
+      }
+    ],
+    "feed_age_hours": 0.6
+  }
+}

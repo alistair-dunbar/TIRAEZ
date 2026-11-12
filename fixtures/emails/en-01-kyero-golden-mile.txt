@@ -1,0 +1,14 @@
+From: Kyero <enquiries@kyero.example>
+Subject: New enquiry: CTH-1201 - Apartment in Marbella
+
+You have a new enquiry from Kyero.
+
+Property reference: CTH-1201
+Name: James Whitfield
+Email: james.whitfield@example.co.uk
+Telephone: +44 7700 900123
+
+Message:
+Hi, we're a retired couple from Surrey looking for a winter base. Is the Golden Mile apartment still available, and is the parking space included? We're in Marbella from 14 to 21 February and could view then. We'd pay cash, budget up to about 700k.
+
+Sent at 22:41 (Europe/Madrid)

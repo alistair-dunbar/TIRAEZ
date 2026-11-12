@@ -1,0 +1,14 @@
+From: Kyero <enquiries@kyero.example>
+Subject: New enquiry: CTH-1218 - Townhouse in Estepona
+
+You have a new enquiry from Kyero.
+
+Property reference: CTH-1218
+Name: Pablo Martín
+Email: pablo.martin@example.es
+Telephone: +34 622 334 455
+
+Message:
+Hola, ¿está disponible el adosado de Bel Air? Me gustaría verlo la semana que viene.
+
+Sent at 22:41 (Europe/Madrid)

@@ -1,0 +1,15 @@
+{
+  "operation": "searchListings",
+  "method": "POST",
+  "path": "/listings/search",
+  "description": "No match is an empty list, not an error.",
+  "request": {
+    "agency_id": "costa-test-homes",
+    "town": "Nerja"
+  },
+  "status": 200,
+  "response": {
+    "results": [],
+    "feed_age_hours": 0.6
+  }
+}

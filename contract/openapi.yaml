@@ -1,0 +1,255 @@
+openapi: 3.1.0
+info:
+  title: Core API (shared contract between Part A and Part B)
+  version: 2.0.0
+  description: |
+    The only link between Part A (core and text replies) and Part B (phone receptionist).
+    Part A implements it. Part B calls it, and builds a mock of it until join 1 (Dec 7).
+
+    Rules that apply to every endpoint:
+    - Auth: send the `X-Api-Key` header. Keys are per caller (`text`, `voice`) and rotate monthly.
+    - Times are UTC ISO 8601 ending in Z, except fields named `*_local`, which are agency local time (in the agency's own time zone) without a zone.
+    - Every response arrives within 800 ms at the 95th percentile.
+    - Errors use status 4xx/5xx with the `Error` body. 429 carries `retry_after_s`.
+    - Money is in whole units of the agency's currency (EUR, AED, SAR); the AI never converts currencies.
+    - Within v2, fields may be added but never renamed or removed. See CHANGELOG.md.
+servers:
+  - url: https://core.tiraez.com/v2
+    description: Production. One deployment per data region (eu, uae, ksa) once the Gulf launches; see agency.data_region. EU server.
+  - url: https://staging.core.tiraez.com/v2
+    description: Staging, used for join 1 and join 2.
+  - url: http://localhost:8787/v2
+    description: Part B's mock, serving /fixtures/agencies.
+security:
+  - apiKey: []
+
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Liveness check for monitoring
+      security: []
+      responses:
+        "200":
+          description: Up
+          content:
+            application/json:
+              schema: { $ref: "schemas/api.schema.json#/$defs/Health" }
+
+  /agency/{agency_id}:
+    get:
+      operationId: getAgency
+      summary: Agency settings
+      tags: [both]
+      parameters:
+        - $ref: "#/components/parameters/AgencyId"
+      responses:
+        "200":
+          description: The agency's settings
+          content:
+            application/json:
+              schema: { $ref: "schemas/agency.schema.json" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /agency/{agency_id}/duty:
+    get:
+      operationId: getDuty
+      summary: Whether the office is open now, and who takes live transfers
+      tags: [voice]
+      parameters:
+        - $ref: "#/components/parameters/AgencyId"
+      responses:
+        "200":
+          description: Duty status
+          content:
+            application/json:
+              schema: { $ref: "schemas/api.schema.json#/$defs/Duty" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /listings/search:
+    post:
+      operationId: searchListings
+      summary: Find up to 3 listings by reference or by criteria
+      tags: [both]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "schemas/api.schema.json#/$defs/ListingSearchRequest" }
+      responses:
+        "200":
+          description: Matches, best first. An empty list is not an error.
+          content:
+            application/json:
+              schema: { $ref: "schemas/api.schema.json#/$defs/ListingSearchResponse" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /leads/upsert:
+    post:
+      operationId: upsertLead
+      summary: Find the lead by email or phone, or create it
+      tags: [both]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "schemas/api.schema.json#/$defs/LeadUpsertRequest" }
+      responses:
+        "200":
+          description: The lead, with recent history for context
+          content:
+            application/json:
+              schema: { $ref: "schemas/api.schema.json#/$defs/LeadUpsertResponse" }
+        "400": { $ref: "#/components/responses/Error" }
+
+  /leads/{lead_id}:
+    patch:
+      operationId: patchLead
+      summary: Save qualifying answers or change status
+      tags: [both]
+      parameters:
+        - $ref: "#/components/parameters/LeadId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "schemas/api.schema.json#/$defs/LeadPatchRequest" }
+      responses:
+        "200":
+          description: The updated lead
+          content:
+            application/json:
+              schema: { $ref: "schemas/api.schema.json#/$defs/LeadResponse" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /leads/{lead_id}/events:
+    post:
+      operationId: createEvent
+      summary: Log a message, call or decision on the lead
+      tags: [both]
+      parameters:
+        - $ref: "#/components/parameters/LeadId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "schemas/api.schema.json#/$defs/EventCreateRequest" }
+      responses:
+        "201":
+          description: Logged
+          content:
+            application/json:
+              schema: { $ref: "schemas/api.schema.json#/$defs/EventCreateResponse" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /viewings/request:
+    post:
+      operationId: requestViewing
+      summary: Record a viewing request. The agent confirms by calling the buyer; nothing is booked in a calendar.
+      tags: [both]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "schemas/api.schema.json#/$defs/ViewingRequestCreate" }
+      responses:
+        "201":
+          description: Request saved and the agent notified
+          content:
+            application/json:
+              schema: { $ref: "schemas/api.schema.json#/$defs/ViewingRequestResponse" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /callbacks:
+    post:
+      operationId: createCallback
+      summary: Ask an agent to call the person back
+      tags: [both]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "schemas/api.schema.json#/$defs/CallbackCreate" }
+      responses:
+        "201":
+          description: Callback task created
+          content:
+            application/json:
+              schema: { $ref: "schemas/api.schema.json#/$defs/CallbackResponse" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /notify/agent:
+    post:
+      operationId: notifyAgent
+      summary: Send the agent a 5-line summary in their own language
+      tags: [both]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "schemas/api.schema.json#/$defs/AgentNotifyRequest" }
+      responses:
+        "200":
+          description: Sent
+          content:
+            application/json:
+              schema: { $ref: "schemas/api.schema.json#/$defs/AgentNotifyResponse" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /notify/lead:
+    post:
+      operationId: notifyLead
+      summary: Send the person an approved template by SMS, WhatsApp or email
+      tags: [both]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "schemas/api.schema.json#/$defs/LeadNotifyRequest" }
+      responses:
+        "200":
+          description: Sent
+          content:
+            application/json:
+              schema: { $ref: "schemas/api.schema.json#/$defs/LeadNotifyResponse" }
+        "400": { $ref: "#/components/responses/Error" }
+        "409":
+          description: The lead opted out (error code lead_opted_out). Nothing was sent.
+          content:
+            application/json:
+              schema: { $ref: "schemas/common.schema.json#/$defs/error" }
+        "503":
+          description: The channel is not set up for this agency yet (error code channel_unavailable)
+          content:
+            application/json:
+              schema: { $ref: "schemas/common.schema.json#/$defs/error" }
+
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+  parameters:
+    AgencyId:
+      name: agency_id
+      in: path
+      required: true
+      schema: { $ref: "schemas/common.schema.json#/$defs/agency_id" }
+    LeadId:
+      name: lead_id
+      in: path
+      required: true
+      schema: { $ref: "schemas/common.schema.json#/$defs/lead_id" }
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema: { $ref: "schemas/common.schema.json#/$defs/error" }

@@ -1,0 +1,14 @@
+From: CostaHomes Portal <leads@costahomes-portal.example>
+Subject: Neue Anfrage zu Objekt DCP-1003
+
+Sie haben eine neue Anfrage über CostaHomes Portal erhalten.
+
+Objektreferenz: DCP-1003
+Name: Katrin Bauer
+E-Mail: k.bauer@example.de
+Telefon: +49 151 23456789
+
+Nachricht:
+Guten Abend, wir interessieren uns sehr für die Villa in Benahavís. Ist der Pool beheizt und gibt es eine Garage? Wir suchen ein Haus für die ganze Familie und möchten idealerweise im Frühjahr kaufen. Wäre eine Besichtigung im März möglich?
+
+Gesendet um 22:15

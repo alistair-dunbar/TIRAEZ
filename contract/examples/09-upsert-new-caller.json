@@ -1,0 +1,20 @@
+{
+  "operation": "upsertLead",
+  "method": "POST",
+  "path": "/leads/upsert",
+  "description": "A first-time caller, identified by caller ID only.",
+  "request": {
+    "agency_id": "costa-test-homes",
+    "channel": "phone",
+    "phone": "+4915112345678",
+    "language": "de",
+    "contact_at": "2026-12-08T20:04:00Z"
+  },
+  "status": 200,
+  "response": {
+    "lead_id": "lead_01JD8Z6K3M4XQ7R2S5T8V9W0YA",
+    "is_new": true,
+    "opted_out": false,
+    "history": []
+  }
+}

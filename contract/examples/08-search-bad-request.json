@@ -1,0 +1,17 @@
+{
+  "operation": "searchListings",
+  "method": "POST",
+  "path": "/listings/search",
+  "description": "No reference and no criteria is refused.",
+  "request": {
+    "agency_id": "costa-test-homes"
+  },
+  "status": 400,
+  "request_invalid": true,
+  "response": {
+    "error": {
+      "code": "bad_request",
+      "message": "Give a ref or at least one search criterion."
+    }
+  }
+}

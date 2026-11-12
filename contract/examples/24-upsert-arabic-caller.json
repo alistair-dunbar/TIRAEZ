@@ -1,0 +1,20 @@
+{
+  "operation": "upsertLead",
+  "method": "POST",
+  "path": "/leads/upsert",
+  "description": "A first-time caller in Riyadh, speaking Arabic.",
+  "request": {
+    "agency_id": "riyadh-test-estates",
+    "channel": "phone",
+    "phone": "+966555123456",
+    "language": "ar",
+    "contact_at": "2026-12-11T10:20:00Z"
+  },
+  "status": 200,
+  "response": {
+    "lead_id": "lead_01JF2A3B4C5D6E7F8G9H0J1K2M",
+    "is_new": true,
+    "opted_out": false,
+    "history": []
+  }
+}

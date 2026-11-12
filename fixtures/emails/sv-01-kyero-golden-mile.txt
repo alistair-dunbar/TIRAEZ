@@ -1,0 +1,14 @@
+From: Kyero <enquiries@kyero.example>
+Subject: New enquiry: CTH-1217 - Apartment in Marbella
+
+You have a new enquiry from Kyero.
+
+Property reference: CTH-1217
+Name: Erik Lindqvist
+Email: erik.lindqvist@example.se
+Telephone: +46 70 123 45 67
+
+Message:
+Hej! Vi är intresserade av lägenheten på Golden Mile. Är den fortfarande till salu? Vi kommer till Marbella i mars och vill köpa inom tre månader. Budget runt 1,2 miljoner euro.
+
+Sent at 22:41 (Europe/Madrid)
