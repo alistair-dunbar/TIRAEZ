@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "listings-search.request",
+  "description": "All filters are optional and combine with AND. Sold listings are excluded unless include_sold is true. Results are sorted by price, lowest first.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agency_id"
+  ],
+  "properties": {
+    "agency_id": {
+      "type": "string"
+    },
+    "ref": {
+      "type": "string",
+      "description": "Exact listing reference, case-insensitive"
+    },
+    "town": {
+      "type": "string",
+      "description": "Town or area, case- and accent-insensitive"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "apartment",
+        "penthouse",
+        "townhouse",
+        "villa",
+        "house",
+        "plot"
+      ]
+    },
+    "min_price_eur": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "max_price_eur": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "min_beds": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "pool": {
+      "type": "boolean"
+    },
+    "include_sold": {
+      "type": "boolean"
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "description": "Default 5"
+    }
+  }
+}

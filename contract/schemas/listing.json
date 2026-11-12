@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "listing",
+  "description": "One property listing, mapped from the agency's feed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agency_id",
+    "ref",
+    "title",
+    "type",
+    "town",
+    "area",
+    "province",
+    "price_eur",
+    "beds",
+    "baths",
+    "built_m2",
+    "plot_m2",
+    "pool",
+    "features",
+    "status",
+    "url",
+    "description_en",
+    "updated_at"
+  ],
+  "properties": {
+    "agency_id": {
+      "type": "string"
+    },
+    "ref": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "apartment",
+        "penthouse",
+        "townhouse",
+        "villa",
+        "house",
+        "plot"
+      ]
+    },
+    "town": {
+      "type": "string"
+    },
+    "area": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "province": {
+      "type": "string"
+    },
+    "price_eur": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "beds": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "baths": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "built_m2": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "plot_m2": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "pool": {
+      "type": "boolean"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "reserved",
+        "sold"
+      ]
+    },
+    "url": {
+      "type": "string"
+    },
+    "description_en": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string",
+      "description": "ISO 8601 timestamp"
+    }
+  }
+}

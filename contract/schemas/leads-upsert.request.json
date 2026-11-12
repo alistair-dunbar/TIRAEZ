@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "leads-upsert.request",
+  "description": "Creates a lead, or updates the existing one with the same email or phone at this agency. email or phone is required. Fields left out or null are not changed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agency_id",
+    "channel"
+  ],
+  "properties": {
+    "agency_id": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "email",
+        "portal",
+        "web",
+        "whatsapp",
+        "phone"
+      ]
+    },
+    "name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "email": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "phone": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "language": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "listing_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "in_conversation",
+        "needs_human",
+        "suppressed"
+      ]
+    },
+    "qualification": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "budget": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "area": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "timing": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "travel_dates": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "financing": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

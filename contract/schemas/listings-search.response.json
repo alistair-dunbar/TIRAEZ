@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "listings-search.response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "total",
+    "results"
+  ],
+  "properties": {
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of matches before the limit"
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "$ref": "listing.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "lead",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "agency_id",
+    "name",
+    "email",
+    "phone",
+    "language",
+    "listing_ref",
+    "source_channel",
+    "status",
+    "qualification",
+    "first_contact_at",
+    "first_reply_at",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^lead_"
+    },
+    "agency_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "email": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "phone": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "language": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "listing_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_channel": {
+      "type": "string",
+      "enum": [
+        "email",
+        "portal",
+        "web",
+        "whatsapp",
+        "phone"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "in_conversation",
+        "needs_human",
+        "suppressed"
+      ]
+    },
+    "qualification": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "budget": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "area": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "timing": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "travel_dates": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "financing": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "budget",
+        "area",
+        "timing",
+        "travel_dates",
+        "financing"
+      ],
+      "description": "What the buyer said, in English. financing records only what the buyer stated (e.g. 'cash'); the AI never advises on it."
+    },
+    "first_contact_at": {
+      "type": "string"
+    },
+    "first_reply_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    }
+  }
+}
