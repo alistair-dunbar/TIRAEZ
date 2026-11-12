@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node --import tsx src/server.ts",
     "dev": "node --watch --import tsx src/server.ts",
-    "test": "node --import tsx --test --test-concurrency=1 tests/*.test.ts",
+    "test": "node --import tsx --test --test-reporter=spec --test-concurrency=1 tests/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

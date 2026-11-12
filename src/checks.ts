@@ -57,10 +57,11 @@ export function enforceBookingLink(reply: string, link: string): { reply: string
 
 // Word stems per language. Matched at the start of a word, case-insensitive.
 // A trailing "$" means whole word only (so "tax$" does not match "taxi").
+// A leading "*" also matches inside compound words (German "Grunderwerbsteuer").
 // Deliberately avoids ambiguous words (e.g. Swedish "visa" = "show", French "prêt" = "ready").
 const HANDOFF_STEMS: Record<string, string[]> = {
-  mortgage: ["mortgage", "remortgag", "hypothek", "hypotheek", "bolån", "hypothèque", "prêt immobilier", "crédit immobilier", "financing", "finanzierung", "financiering", "finansiering", "financement", "interest rate", "zinssatz", "ränta", "taux d'intérêt"],
-  tax: ["tax$", "taxes", "taxation", "steuer", "belasting", "skatt", "impôt", "impot", "taxe$", "taxes", "fiscal"],
+  mortgage: ["mortgage", "remortgag", "*hypothek", "*hypotheek", "*bolån", "hypothèque", "prêt immobilier", "crédit immobilier", "financing", "finanzierung", "financiering", "finansiering", "financement", "interest rate", "zinssatz", "ränta", "taux d'intérêt"],
+  tax: ["tax$", "taxes", "taxation", "*steuer", "*belasting", "*skatt", "impôt", "impot", "taxe$", "taxes", "fiscal"],
   legal: ["legal", "lawyer", "solicitor", "attorney", "notary", "contract", "anwalt", "rechtsanwalt", "notar", "vertrag", "rechtlich", "advocaat", "notaris", "juridisch", "advokat", "jurist", "juridisk", "avocat", "notaire", "juridique", "inheritance", "erbschaft", "erfenis", "succession"],
   residency: ["residency", "residence permit", "golden visa", "visum", "aufenthalt", "wohnsitz", "verblijfsvergunning", "residentie", "uppehållstillstånd", "résidence", "titre de séjour", "nie number", "nie-nummer", "numéro nie"],
 };
@@ -71,8 +72,9 @@ export function detectHandoffTopics(text: string): string[] {
   for (const [topic, stems] of Object.entries(HANDOFF_STEMS)) {
     const found = stems.some((stem) => {
       const whole = stem.endsWith("$");
-      const escaped = stem.replace(/\$$/, "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      return new RegExp(`(?<!\\p{L})${escaped}${whole ? "(?!\\p{L})" : ""}`, "u").test(lower);
+      const infix = stem.startsWith("*");
+      const escaped = stem.replace(/^\*|\$$/g, "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return new RegExp(`${infix ? "" : "(?<!\\p{L})"}${escaped}${whole ? "(?!\\p{L})" : ""}`, "u").test(lower);
     });
     if (found) hits.push(topic);
   }
