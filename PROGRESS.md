@@ -17,15 +17,15 @@
    residency (rule 4). Decide with Dakhil: add optional `booking_link` and `legal_footer` to the
    agency schema (a minor 2.1.0 change, needs both approvals), or change rule 7. Until then the demo
    keeps its own `core/config/agency.demo.json`.
-4. Work on branch `claude/adoring-mayer-kvv7pd` (PR #1).
+4. PR #1 is merged. New work: a new branch from `main`.
 
 Last updated: 2026-11-12
 
 ## A0 status
 
 - [ ] Live tests pass (blocked on the key, see 1)
-- [ ] Merge PR #1 into `main`. It now contains Dakhil's contract branch too, so merge his branch first or
-      close it in favour of this one
+- [x] PR #1 merged into `main` (Nov 12), contract v2 at `a4e6d2f` included. Dakhil's PR #2 adds one newer
+      commit (B1 mock core, contract 2.0.1) and now conflicts only in `.gitignore`: keep both sets of lines
 - [x] Contract agreed: v2.0.0
 - [x] Mock for B: B builds it from `fixtures/agencies/`
 - [x] Fixtures: Dakhil's `fixtures/agencies/costa-test-homes/` (agency, 20 listings, Kyero feed) and
