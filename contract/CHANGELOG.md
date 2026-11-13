@@ -2,6 +2,10 @@
 
 Every change to the shared contract, newest first. Each entry needs approval from both Part A and Part B.
 
+## 2.0.1 (Nov 12, 2026)
+
+- Examples only: example 19 (opted-out lead) now uses its own lead, so it no longer contradicts examples 10, 16, 20 and 21, which use Karin's lead as a normal returning buyer. No schema changes.
+
 ## 2.0.0 (Nov 12, 2026)
 
 Breaking: the contract now serves every market, ready for the Gulf launch after the build. Nothing had been built against v1, so this was the cheapest moment to break it. Approved by both partners (Europe: Part A partner, Gulf: Part B partner).

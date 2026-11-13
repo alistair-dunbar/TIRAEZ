@@ -1,4 +1,4 @@
-# Shared contract (v2.0.0)
+# Shared contract (v2.0.1)
 
 This folder is the only link between the two halves of the build:
 
