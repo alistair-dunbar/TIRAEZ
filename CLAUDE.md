@@ -72,9 +72,11 @@ See PROGRESS.md for status and next steps, and PLAN.md for the agreed Part A pla
    and tell the buyer an agent will follow up.
 5. One message, under 90 words, warm and professional.
 6. Ask at most two qualifying questions: when they plan to buy, and when they could view.
-7. End with the booking link from the config.
+7. End with the agency's booking link (`booking_link` in its settings). If the agency has none, end by
+   asking when they could view and saying an agent will confirm by phone.
 
-The legal footer is shown under the reply bubble, not inside the reply.
+The legal footer (`legal_footer`, one line per language) is shown under the reply bubble, not inside the reply.
+Both fields are optional in contract v2.1.0 agency settings.
 
 ### How the rules are enforced (keep both layers)
 

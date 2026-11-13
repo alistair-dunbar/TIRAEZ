@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Core API (shared contract between Part A and Part B)
-  version: 2.0.1
+  version: 2.1.0
   description: |
     The only link between Part A (core and text replies) and Part B (phone receptionist).
     Part A implements it. Part B calls it, and builds a mock of it until join 1 (Dec 7).

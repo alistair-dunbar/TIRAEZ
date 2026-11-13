@@ -29,7 +29,7 @@ python3 contract/tests/validate.py --base-url https://staging.core.tiraez.com/v2
 
 ## README
 
-## Shared contract (v2.0.1)
+## Shared contract (v2.1.0)
 
 This folder is the only link between the two halves of the build:
 
@@ -140,6 +140,14 @@ Add `--include-stateful` to also run the examples that need existing leads. Part
 
 Every change to the shared contract, newest first. Each entry needs approval from both Part A and Part B.
 
+### 2.1.0 (Nov 13, 2026)
+
+- Agency settings gain two optional fields for the text channels:
+  - `booking_link`: the agency's own viewing-booking page (https). When set, every text reply ends with it, as reply rule 7 requires. When missing, the reply asks when the buyer could view and the agent confirms by phone, as for calls.
+  - `legal_footer`: small print under every text reply, per language: that an AI wrote it and how the buyer's data is handled. When set, it needs a line for every language in `languages` (checked by `validate.py`). Final wording waits for the lawyer.
+- `costa-test-homes` sets both. `dubai-test-realty` and `riyadh-test-estates` set neither, so both cases are covered.
+- Not a breaking change: both fields are optional, and nothing else changed. Agreed by both partners (Part B verbally, Nov 13).
+
 ### 2.0.1 (Nov 12, 2026)
 
 - Examples only: example 19 (opted-out lead) now uses its own lead, so it no longer contradicts examples 10, 16, 20 and 21, which use Karin's lead as a normal returning buyer. No schema changes.
@@ -176,7 +184,7 @@ Breaking: the contract now serves every market, ready for the Gulf launch after 
 openapi: 3.1.0
 info:
   title: Core API (shared contract between Part A and Part B)
-  version: 2.0.1
+  version: 2.1.0
   description: |
     The only link between Part A (core and text replies) and Part B (phone receptionist).
     Part A implements it. Part B calls it, and builds a mock of it until join 1 (Dec 7).
@@ -690,6 +698,19 @@ components:
       "uniqueItems": true
     },
     "tone": { "type": "string", "maxLength": 200 },
+    "booking_link": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://",
+      "description": "Optional. The agency's own page where a buyer books a viewing (its website or booking tool; we host nothing). When set, every text reply ends with it. When missing, the reply asks when the buyer could view, and the agent confirms by phone (POST /viewings/request)."
+    },
+    "legal_footer": {
+      "type": "object",
+      "description": "Optional. Small print shown under every text reply, never inside it: that an AI wrote the reply and how the buyer's data is handled. When set, it needs English and a line for every language in languages. Wording to be confirmed by the lawyer. Text channels only.",
+      "required": ["en"],
+      "propertyNames": { "$ref": "common.schema.json#/$defs/language" },
+      "additionalProperties": { "type": "string", "minLength": 10, "maxLength": 400 }
+    },
     "disclosure": {
       "type": "object",
       "description": "The fixed AI disclosure line, one per language in languages. The prompt may not change it. Required by the EU AI Act (art. 50) in the EU, and used everywhere as good practice.",
@@ -1306,7 +1327,7 @@ components:
   "status": 200,
   "response": {
     "status": "ok",
-    "version": "2.0.1"
+    "version": "2.1.0"
   }
 }
 ```

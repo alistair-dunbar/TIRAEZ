@@ -40,7 +40,7 @@ sys.path.insert(0, str(ROOT / "contract" / "tests"))
 import validate as contract  # noqa: E402  (reuses the contract's schema loading)
 
 AGENCIES_DIR = ROOT / "fixtures" / "agencies"
-VERSION = "2.0.1"
+VERSION = "2.1.0"
 CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 

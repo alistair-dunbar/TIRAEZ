@@ -2,6 +2,14 @@
 
 Every change to the shared contract, newest first. Each entry needs approval from both Part A and Part B.
 
+## 2.1.0 (Nov 13, 2026)
+
+- Agency settings gain two optional fields for the text channels:
+  - `booking_link`: the agency's own viewing-booking page (https). When set, every text reply ends with it, as reply rule 7 requires. When missing, the reply asks when the buyer could view and the agent confirms by phone, as for calls.
+  - `legal_footer`: small print under every text reply, per language: that an AI wrote it and how the buyer's data is handled. When set, it needs a line for every language in `languages` (checked by `validate.py`). Final wording waits for the lawyer.
+- `costa-test-homes` sets both. `dubai-test-realty` and `riyadh-test-estates` set neither, so both cases are covered.
+- Not a breaking change: both fields are optional, and nothing else changed. Agreed by both partners (Part B verbally, Nov 13).
+
 ## 2.0.1 (Nov 12, 2026)
 
 - Examples only: example 19 (opted-out lead) now uses its own lead, so it no longer contradicts examples 10, 16, 20 and 21, which use Karin's lead as a normal returning buyer. No schema changes.

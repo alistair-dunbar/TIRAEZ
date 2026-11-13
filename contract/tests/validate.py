@@ -5,7 +5,7 @@ Static mode (no server, runs in CI on every push):
 
     - every schema is valid JSON Schema 2020-12
     - every test agency in fixtures/agencies/ matches the schemas, and its own
-      rules: one on-duty agent, a disclosure line for every language, voice
+      rules: one on-duty agent, a disclosure line (and legal_footer line, if set) for every language, voice
       languages offered in text too, listings in the agency's own currency
     - every endpoint in openapi.yaml has at least one success example
     - every example's request and response match the schemas for its status
@@ -126,6 +126,10 @@ def check_fixtures(registry):
         missing = set(agency["languages"]) - set(agency["disclosure"])
         if missing:
             fail(where, f"no disclosure line for {sorted(missing)}")
+        if "legal_footer" in agency:
+            missing = set(agency["languages"]) - set(agency["legal_footer"])
+            if missing:
+                fail(where, f"no legal_footer line for {sorted(missing)}")
         if "phone" in agency:
             ph = agency["phone"]
             if not set(ph["voice_languages"]) <= set(agency["languages"]):
