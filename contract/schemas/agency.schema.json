@@ -115,6 +115,19 @@
       "uniqueItems": true
     },
     "tone": { "type": "string", "maxLength": 200 },
+    "booking_link": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://",
+      "description": "Optional. The agency's own page where a buyer books a viewing (its website or booking tool; we host nothing). When set, every text reply ends with it. When missing, the reply asks when the buyer could view, and the agent confirms by phone (POST /viewings/request)."
+    },
+    "legal_footer": {
+      "type": "object",
+      "description": "Optional. Small print shown under every text reply, never inside it: that an AI wrote the reply and how the buyer's data is handled. When set, it needs English and a line for every language in languages. Wording to be confirmed by the lawyer. Text channels only.",
+      "required": ["en"],
+      "propertyNames": { "$ref": "common.schema.json#/$defs/language" },
+      "additionalProperties": { "type": "string", "minLength": 10, "maxLength": 400 }
+    },
     "disclosure": {
       "type": "object",
       "description": "The fixed AI disclosure line, one per language in languages. The prompt may not change it. Required by the EU AI Act (art. 50) in the EU, and used everywhere as good practice.",

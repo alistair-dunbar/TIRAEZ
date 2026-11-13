@@ -174,6 +174,18 @@
     "valuation_price"
   ],
   "tone": "warm, short, professional",
+  "booking_link": "https://costa-test-homes.example/book-a-viewing",
+  "legal_footer": {
+    "en": "This reply was written by an AI assistant for Costa Test Homes, a fictional agency used for testing. Your data is handled under the EU GDPR. Privacy notice: https://costa-test-homes.example/privacy",
+    "es": "Esta respuesta la ha redactado un asistente de IA de Costa Test Homes, una agencia ficticia de pruebas. Sus datos se tratan conforme al RGPD. Aviso de privacidad: https://costa-test-homes.example/privacy",
+    "de": "Diese Antwort wurde von einem KI-Assistenten für Costa Test Homes verfasst, eine fiktive Testagentur. Ihre Daten werden gemäß DSGVO verarbeitet. Datenschutzhinweis: https://costa-test-homes.example/privacy",
+    "sv": "Detta svar skrevs av en AI-assistent för Costa Test Homes, en fiktiv testbyrå. Dina uppgifter hanteras enligt GDPR. Integritetspolicy: https://costa-test-homes.example/privacy",
+    "nl": "Dit antwoord is geschreven door een AI-assistent van Costa Test Homes, een fictief testkantoor. Uw gegevens worden verwerkt volgens de AVG. Privacyverklaring: https://costa-test-homes.example/privacy",
+    "fr": "Cette réponse a été rédigée par un assistant IA pour Costa Test Homes, une agence fictive de test. Vos données sont traitées conformément au RGPD. Politique de confidentialité : https://costa-test-homes.example/privacy",
+    "no": "Dette svaret ble skrevet av en AI-assistent for Costa Test Homes, et fiktivt testbyrå. Dine data behandles etter GDPR. Personvernerklæring: https://costa-test-homes.example/privacy",
+    "da": "Dette svar er skrevet af en AI-assistent for Costa Test Homes, et fiktivt testbureau. Dine data behandles efter GDPR. Privatlivspolitik: https://costa-test-homes.example/privacy",
+    "pl": "Tę odpowiedź napisał asystent AI agencji Costa Test Homes, fikcyjnej agencji testowej. Twoje dane są przetwarzane zgodnie z RODO. Polityka prywatności: https://costa-test-homes.example/privacy"
+  },
   "disclosure": {
     "en": "I'm the AI assistant for Costa Test Homes.",
     "es": "Soy el asistente de inteligencia artificial de Costa Test Homes.",

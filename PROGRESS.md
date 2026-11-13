@@ -11,21 +11,20 @@
 2. **Contract v2.0.0 is agreed** (Dakhil's, Nov 12) and merged into this branch from
    `claude/cool-keller-1wzj7d`. It replaced the v1 work (router, store, validator, mock, v1 schemas and
    v1 fixtures), which was deleted. The Node app moved to `core/`. Part B builds its own mock.
-3. **Open decisions: contract v2 against the 7 reply rules in CLAUDE.md.** The v2 agency settings have no
-   `booking_link` (rule 7: every reply ends with the booking link) and no `legal_footer`, and viewings
-   are now requests that an agent confirms by phone. The Costa Test Homes `handoff_topics` leave out
-   residency (rule 4). Decide with Dakhil: add optional `booking_link` and `legal_footer` to the
-   agency schema (a minor 2.1.0 change, needs both approvals), or change rule 7. Until then the demo
-   keeps its own `core/config/agency.demo.json`.
-4. Work on branch `claude/adoring-mayer-kvv7pd` (PR #1).
+3. **Decided (Nov 13): contract 2.1.0** adds optional `booking_link` and `legal_footer` to the agency
+   settings (Dakhil agreed verbally). Rule 7 now says: end with the booking link if the agency has one,
+   otherwise ask when they could view and say an agent confirms by phone. The A1 settings loader and
+   `respond.ts` still need to read these fields; the demo keeps `core/config/agency.demo.json` until then.
+   Still open: Costa Test Homes' `handoff_topics` leave out residency (rule 4).
+4. PR #1 is merged. New work: a new branch from `main`.
 
 Last updated: 2026-11-12
 
 ## A0 status
 
 - [ ] Live tests pass (blocked on the key, see 1)
-- [ ] Merge PR #1 into `main`. It now contains Dakhil's contract branch too, so merge his branch first or
-      close it in favour of this one
+- [x] PR #1 merged into `main` (Nov 12), contract v2 at `a4e6d2f` included. Dakhil's PR #2 adds one newer
+      commit (B1 mock core, contract 2.0.1) and now conflicts only in `.gitignore`: keep both sets of lines
 - [x] Contract agreed: v2.0.0
 - [x] Mock for B: B builds it from `fixtures/agencies/`
 - [x] Fixtures: Dakhil's `fixtures/agencies/costa-test-homes/` (agency, 20 listings, Kyero feed) and
