@@ -39,7 +39,9 @@ agreeing between the two founders.
 listings sync hourly.
 **Hands to B and sales:** the demo videos, and the first two endpoints on a staging address.
 
-- [ ] Deploy the existing app to a managed EU host with managed Postgres and daily backups
+- [ ] Deploy the existing app to a managed EU host with managed Postgres and daily backups.
+      Chosen: Render, Frankfurt (`render.yaml`), `pg` for Postgres. App side ready (Nov 14): `/health`,
+      `DEMO_PASSWORD` on the demo page. Waiting on the Render account and first deploy
 - [ ] Tables: `agencies`, `listings`, `leads`, `events`, `messages`
 - [ ] Settings loader: `agency.json` is validated and stored
 - [ ] Listing sync: Kyero XML every 60 minutes, with missing listings marked `sold`

@@ -1,9 +1,11 @@
 import "./env.ts";
 import Anthropic from "@anthropic-ai/sdk";
 import express from "express";
+import { demoPassword } from "./auth.ts";
 import { StaticLinkCalendar } from "./calendar/static-link.ts";
 import { ConsoleOutbound } from "./channels/console.ts";
 import { loadConfig, loadListings, repoPath } from "./data.ts";
+import { databaseStatus } from "./db.ts";
 import { isOfflineMode, loadOfflineReplies, OFFLINE_MODEL_LABEL, offlineClient, offlineOutputFor } from "./offline.ts";
 import { MissingApiKeyError, modelName, respond } from "./respond.ts";
 import { loadSamples } from "./samples.ts";
@@ -19,6 +21,14 @@ const offline = isOfflineMode();
 const offlineReplies = offline ? loadOfflineReplies() : {};
 
 const app = express();
+
+// Health check for the host and uptime alerts. Before the password, so monitors can reach it.
+app.get("/health", async (_req, res) => {
+  const database = await databaseStatus();
+  res.status(database === "down" ? 503 : 200).json({ status: database === "down" ? "degraded" : "ok", database });
+});
+
+app.use(demoPassword(process.env.DEMO_PASSWORD));
 app.use(express.json({ limit: "100kb" }));
 app.use(express.static(repoPath("public")));
 
@@ -121,6 +131,7 @@ app.listen(port, () => {
   if (!offline && customBaseUrl()) {
     console.warn(`Note: ANTHROPIC_BASE_URL is set to ${customBaseUrl()}, so requests do not go to api.anthropic.com.`);
   }
+  if (!process.env.DEMO_PASSWORD) console.log("DEMO_PASSWORD is not set: the page is open to anyone who can reach it.");
   if (!offline && !process.env.ANTHROPIC_API_KEY) {
     console.warn("ANTHROPIC_API_KEY is not set: the page will load but Send will fail. See README.");
   }

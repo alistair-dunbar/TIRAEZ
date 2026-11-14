@@ -1,0 +1,35 @@
+# Render Blueprint: the core app and its Postgres database, both in Frankfurt (EU).
+# In Render: New > Blueprint, pick this repo and the main branch. Render reads this file,
+# creates both, and asks for the values marked "sync: false" (never put secrets in this file).
+# Every merge to main redeploys the app.
+services:
+  - type: web
+    name: tiraez-core
+    runtime: node
+    region: frankfurt
+    plan: starter # paid plan: no sleeping. Check the price on Render before confirming.
+    rootDir: core
+    # tsx runs the TypeScript directly, so the dev dependencies are needed at run time too.
+    buildCommand: npm ci --include=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: ANTHROPIC_MODEL
+        value: claude-haiku-5-5
+      - key: ANTHROPIC_API_KEY
+        sync: false # paste a new key in Render. Not the one shown in the old screenshot.
+      - key: DEMO_PASSWORD
+        sync: false # any strong password; the browser asks for it on the demo page
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tiraez-db
+          property: connectionString
+
+databases:
+  - name: tiraez-db
+    region: frankfurt # same region as the app, so it connects over Render's private network
+    plan: basic-256mb # paid plan with daily backups. The free plan has none and expires.
+    databaseName: tiraez
+    user: tiraez

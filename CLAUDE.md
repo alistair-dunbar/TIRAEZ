@@ -37,7 +37,8 @@ See PROGRESS.md for status and next steps, and PLAN.md for the agreed Part A pla
 - One plain HTML/CSS/JS page in `public/`. No frontend framework.
 - Tests: built-in `node:test`. No test framework.
 - `.env` loaded with Node's `process.loadEnvFile` (no dotenv).
-- Dev-only: `tsx`, `typescript`, `@types/express`, `@types/node`.
+- Postgres via `pg` (approved Nov 14), only when `DATABASE_URL` is set. Hosting: Render, Frankfurt (`render.yaml`).
+- Dev-only: `tsx`, `typescript`, `@types/express`, `@types/node`, `@types/pg`.
 - **Ask the user before adding any other dependency.**
 
 ## Commands (run from `core/`)
