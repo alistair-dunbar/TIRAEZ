@@ -1,13 +1,7 @@
-# TIRAEZ
+# Photo-to-video ads
 
-Multilingual AI receptionist for estate agencies: instant text replies and an AI phone receptionist. Spain first, then Dubai and Saudi Arabia.
+Self-serve, credit-based web app that turns one product photo into a vertical video ad
+(TikTok, Reels, Snapchat). See `docs/PLAN.md` for the business plan and build order.
 
-| Folder | Owner | What it holds |
-| --- | --- | --- |
-| `contract/` | Both (changes need both approvals) | The API between the two halves, its schemas, examples and tests |
-| `fixtures/agencies/` | Both | Test agencies: Costa Test Homes (Spain), Dubai Test Realty, Riyadh Test Estates |
-| `fixtures/calls/` | Part B | Phone test scripts, per test agency, built from shared conversation blocks |
-| `core/` | Part A | Core platform and text responder |
-| `voice/` | Part B | AI phone receptionist |
-
-Start with `contract/README.md`.
+The previous project in this repo (estate-agency AI assistant and AI receptionist) is in
+git history and on `main`.

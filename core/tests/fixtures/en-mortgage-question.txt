@@ -1,9 +1,0 @@
-From: CostaHomes Portal <leads@costahomes-portal.example>
-Subject: New enquiry for property DCP-1002
-
-Property reference: DCP-1002
-Name: Olivia Grant
-Email: olivia.grant@example.co.uk
-
-Message:
-Hello, I love the Estepona townhouse. As a UK resident, can I get a Spanish mortgage for 70% of the price, and what interest rate should I expect? Also, how much tax would I pay when buying?
