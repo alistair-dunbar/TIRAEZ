@@ -5,7 +5,7 @@ Context for Claude Code sessions on this repo. Two co-founders work on it. Keep 
 ## The business
 
 A 100% self-serve, credit-based web app: a merchant picks a template, uploads 1 product photo,
-types a one-line offer and gets a vertical video ad in ~60 seconds. First market: Saudi
+gets a text-free, silent vertical video ad in ~60 seconds. First market: Saudi
 Salla/Zid merchants. Full plan: `docs/PLAN.md`.
 
 ## Hard rules
@@ -14,11 +14,12 @@ Salla/Zid merchants. Full plan: `docs/PLAN.md`.
 - The merchant's product never goes through the video model: it is cut out and composited,
   unchanged, onto an AI-generated background scene. Labels, logos and Arabic text must never be altered.
 - Background scenes are product-independent and reused from a library; don't re-render per order.
+- Videos have no text and no music by default. Captions are a separate optional feature; music is added by the merchant in TikTok/Instagram.
 - Prepaid credits only, no unlimited plans.
 
 ## Current stage
 
-Week 1 render test (Nov 16-22 2026): a command-line script, photo + template + offer -> mp4.
+Week 1 render test (Nov 16-22 2026): a command-line script, photo + template -> mp4.
 No web app, accounts or database yet.
 
 ## Conventions

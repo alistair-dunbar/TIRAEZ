@@ -8,9 +8,9 @@
 
 A **100% self-serve, credit-based web app** that turns one product photo into a ready-to-post vertical video ad for TikTok, Instagram Reels and Snapchat.
 
-**What the merchant does:** buys credits → picks a template (e.g. "Luxury Product Reveal", "Cafe Pour", "Property Tour") → uploads 1 photo → types a one-line offer → gets a finished video in about 60 seconds.
+**What the merchant does:** buys credits → picks a template (e.g. "Luxury Product Reveal", "Cafe Pour", "Property Tour") → uploads 1 photo → gets a finished, text-free video in about 60 seconds.
 
-**What happens behind the scenes:** the product is cut out of the photo and placed, **unchanged**, on an AI-generated background scene. Captions, music and an end card are added automatically, and 1 credit is deducted.
+**What happens behind the scenes:** the product is cut out of the photo and placed, **unchanged**, on an AI-generated background scene. No text or music is added by default, and 1 credit is deducted. Captions are a separate, optional feature (see below). Merchants add music themselves inside TikTok or Instagram.
 
 **Hard rule:** no agency work. No client management, no calls, no custom edits.
 
@@ -26,7 +26,8 @@ A **100% self-serve, credit-based web app** that turns one product photo into a 
 | **Market to one group first** | Build for everyone, but spend the first marketing money on one group so samples, ads and outreach all speak to the same merchant. Start with Saudi Salla and Zid merchants. |
 | **The product never goes through the AI model** | It is cut out and laid on top of an AI-generated background. Labels, logos and Arabic text can't be damaged. This applies to every template. |
 | **Background scenes are reusable** | Scenes don't depend on the merchant's product, so they're rendered once into a library and reused. That makes each video cost about SAR 1 instead of SAR 4.5. |
-| **Opening lines written by people** | Saudi copywriters write the library of opening lines. The AI only picks and adapts them to the merchant's offer. |
+| **Videos are text-free and silent by default** | Captions (offer lines, opening lines) live in a **separate captions feature** the merchant chooses to use. Music is left to the merchant in TikTok or Instagram, which also removes music licensing. |
+| **Caption lines written by people** | For the captions feature, Saudi copywriters write the library of lines. The AI only picks and adapts them. |
 | **One pack at launch** | **SAR 250 for 15 videos (SAR 16.7 per video).** Add smaller and larger packs once you know where buyers hesitate. |
 | **Global English market dropped** | Too crowded (Creatify, Topview, Arcads, Pippit) and acquisition costs are too high. |
 
@@ -46,7 +47,7 @@ A **100% self-serve, credit-based web app** that turns one product photo into a 
 - **Speed:** 60 seconds instead of 3–5 days.
 - **Price:** ~SAR 17 per video, against SAR 150–500 for a freelance reel.
 - **Label guarantee:** the real product photo is never altered.
-- **Local taste:** Gulf Arabic opening lines and seasonal templates (Ramadan, Eid, Founding Day, National Day, White Friday).
+- **Local taste:** Gulf Arabic caption lines (optional feature) and seasonal templates (Ramadan, Eid, Founding Day, National Day, White Friday).
 
 ### Channels
 | Stage | Channel |
@@ -84,14 +85,14 @@ Treat every app-store install as a contact you own (WhatsApp opt-in and email on
 - **Payments:** a mada-capable gateway (Moyasar, Tap or HyperPay) that works with your company setup.
 - **Distribution:** Salla App Store and Zid App Market.
 - **People:** 2–3 Saudi copywriters, paid per batch.
-- **Licensed assets:** commercial Arabic fonts and a music library cleared for ads.
+- **Licensed assets:** commercial Arabic fonts for the captions feature. No music library needed.
 - **Affiliates:** Saudi e-commerce creators, paid a **one-off SAR 40** when a referred merchant buys their first pack. Affiliates must hold a Mawthooq licence.
 
 ### Cost structure
 
 | Credit type | What it is | Cost to make | Credits charged |
 |---|---|---|---|
-| **Studio** (standard) | Library scene + real product on top + opening line + music | ~SAR 1 ($0.25) | 1 |
+| **Studio** (standard) | Library scene + real product on top (captions optional, no music) | ~SAR 1 ($0.25) | 1 |
 | **Cinematic** (premium) | Scene generated for this order, with a visual label check | ~SAR 8 ($2.10, incl. retries) | 3 |
 
 - **Fixed:** hosting, tools and licences about SAR 1,500 a month. Company registration and accounting depend on where you incorporate.
@@ -121,7 +122,7 @@ Start building now, but build the piece that tests the biggest unknown first, no
 
 | Dates | Step | Pass rule (miss it = stop or change direction) |
 |---|---|---|
-| **Nov 16–22** | **Render test.** A rough script: photo → cut out product → place on AI background → captions + music → vertical video. Run it on ~30 products across 3 templates (fragrance, coffee shop, real estate). Blind-test with 10 merchants or ad buyers. | Composite videos rated as good as fully AI-generated ones by 6 of 10. Real cost per video ≤ SAR 2. |
+| **Nov 16–22** | **Render test.** A rough script: photo → cut out product → place on AI background → vertical video (no text, no music). Run it on ~30 products across 3 templates (fragrance, coffee shop, real estate). Blind-test with 10 merchants or ad buyers. | Composite videos rated as good as fully AI-generated ones by 6 of 10. Real cost per video ≤ SAR 2. |
 | **Nov 16–22** (alongside) | **Admin checks:** mada payment link, Salla/Zid app terms, approved cosmetics wording, the model's commercial-use terms. | A working mada payment link exists. |
 | **Nov 23 – Dec 13** | **Manual sales test.** Message 150 businesses, each with a finished sample ad made from their own store photo (sent privately, never published). They see only a form, a payment link and an automatic delivery link. No chatting. | **10 packs paid** · **≥60% of credits used within 30 days** · **≥70% of videos downloaded and reported as posted** |
 | **Dec 14 – Jan 10** | **Build the real self-serve app:** accounts, credits, checkout, job queue, scene library, WhatsApp bot. Submit Salla and Zid listings. | Full flow works with no one involved. |
@@ -139,7 +140,7 @@ Start building now, but build the piece that tests the biggest unknown first, no
 | Item | Why it matters |
 |---|---|
 | Company registration and payment gateway | Moyasar and HyperPay generally require a Saudi commercial registration. Find a mada-capable gateway that works with your company. |
-| Cosmetics ad claims | The Saudi Food and Drug Authority restricts claims like "whitening" or "cures acne". Opening lines must use approved wording. |
+| Cosmetics ad claims | The Saudi Food and Drug Authority restricts claims like "whitening" or "cures acne". Caption lines must use approved wording. |
 | Affiliate licence | Saudi influencers running paid promotion need a Mawthooq licence. |
 | Commercial use of AI output | Read the video model's and fal.ai's terms. |
 | AI content labels | TikTok requires realistic AI content to be labelled. Build it into the export. |
@@ -151,6 +152,6 @@ Start building now, but build the piece that tests the biggest unknown first, no
 
 1. **Will the composite look fake?** If the product looks pasted on, the label guarantee costs you the premium look. The Nov 16–22 render test is mainly about this.
 2. **Do the videos actually sell anything?** No ad-results data yet. The screenshot-for-credits offer is the only early signal.
-3. **Will Salla or Zid build this themselves?** Compositing is easier to copy than tuned prompts. Your protection is the scene library, the human-written opening lines and how fast you ship seasonal templates.
+3. **Will Salla or Zid build this themselves?** Compositing is easier to copy than tuned prompts. Your protection is the scene library, the human-written caption lines and how fast you ship seasonal templates.
 4. **Can you get a paying merchant for SAR 100 or less?** Unproven on every channel.
 5. **Can you stay fully self-serve under pressure?** Ramadan is when merchants will message you. Decide now what the WhatsApp bot says, and stick to it.
