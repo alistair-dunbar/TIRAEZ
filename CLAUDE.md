@@ -14,6 +14,9 @@ Salla/Zid merchants. Full plan: `docs/PLAN.md`.
 - The merchant's product never goes through the video model: it is cut out and composited,
   unchanged, onto an AI-generated background scene. Labels, logos and Arabic text must never be altered.
 - Background scenes are product-independent and reused from a library; don't re-render per order.
+- Direction under test (15 Nov 2026): the founder found the cut-out composites unconvincing and prefers
+  fully AI-generated video. The two rules above apply to the composite method only; whether a merchant's
+  own product survives full generation with its label intact has not been tested yet.
 - Videos have no text and no music by default. Captions are a separate optional feature; music is added by the merchant in TikTok/Instagram.
 - Prepaid credits only, no unlimited plans.
 
@@ -28,6 +31,9 @@ No web app, accounts or database yet. First results: `docs/RENDER-TEST.md`.
 - fal.ai called with plain `fetch` (no SDK). Dev-only deps: `tsx`, `typescript`, `@types/node`.
 - `npm run samples`, `npm run scenes -- --template <id>`, `npm run render -- --photo <f> --template <id>`,
   `npm run typecheck`. Usage details in README.md.
+- `npm run ai-video -- --spec ads/<id>.json` (paid, fully AI-generated) and
+  `npm run finish -- --video <f> --spec ads/<id>.json` (free finishing pass: auto-edit + natural look).
+  Looks live in `looks/*.json`, shot lists in the spec's `edit.shots`; nothing per video is hard-coded.
 - Cloud sessions: prefix with `NODE_USE_ENV_PROXY=1`. The fal.ai key is a network secret injected by the proxy.
 - Spending: hard cap `BUDGET_USD` (default $5), ledger `data/spend.csv`. Never raise the cap without asking.
 - Scenes cost money: they are committed in `scenes/`; never delete or re-render them without asking.

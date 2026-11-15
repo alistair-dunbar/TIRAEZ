@@ -1,0 +1,12 @@
+{
+  "saturation": 0.86,
+  "contrast": 0.96,
+  "blackLift": 0.035,
+  "whiteCeiling": 0.955,
+  "soften": 0.6,
+  "fringe": 1,
+  "vignette": 0.35,
+  "grain": 9,
+  "shakePx": 5,
+  "shakeDegrees": 0.15
+}

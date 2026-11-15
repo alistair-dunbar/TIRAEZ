@@ -71,3 +71,30 @@ The scene position (where the product stands) still has to be set by eye per sce
 2. Blind test with 10 merchants or ad buyers: composite vs fully AI-generated (plan, section 4).
 3. Add 3–4 more scenes per template once the blind test passes (~$0.40 each).
 4. Real estate: try a blurred-background fill for wide photos, and a Kling version as a premium option.
+
+---
+
+## Update, same day: composites rejected, fully AI-generated video tested
+
+**Verdict on the composites: not good enough.** A product cut out of a photo and placed on
+high-quality AI footage looks pasted on; the mismatch makes the whole video look bad.
+
+**Test 2: one fully AI-generated video** (`ads/coffee-machine.mp4`): an espresso machine pouring
+a shot, 10 s, 1080p, Flux 2 Pro still animated with Kling v4. Cost **$1.66** ($0.09 still + $1.57 video).
+Quality is far better than the composites, but it "looks very AI generated".
+
+**Finishing pass (free, `npm run finish`)** to reduce the AI look, applied to the same clip
+(`ads/coffee-machine-finished.mp4`):
+- Auto-edit: the single 10 s push-in becomes a 7 s edit of 4 shots (cut, punch-in, speed-up, punch-in).
+- Natural look (`looks/natural.json`): saturation down 14%, lifted blacks, rolled-off highlights,
+  slight blur against over-sharpening, 1 px colour fringing, vignette, film grain, handheld shake.
+
+**Not done yet (needs paid generation):**
+- A phone-footage-style prompt (`ads/coffee-machine-phone.json`), about $0.88 for 5 s. Glossy
+  "commercial" prompts are a large part of the AI look.
+- A merchant's real product as the first frame, to see whether labels survive full generation.
+
+**Cost if every order is generated from scratch:** about $0.16 per second with Kling v4, so
+~$0.80 (SAR 3) for 5 s or ~$1.60 (SAR 6) for 10 s, against SAR 16.7 revenue per video.
+
+Total fal.ai spend so far: $3.32.

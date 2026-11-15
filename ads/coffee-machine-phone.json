@@ -1,0 +1,14 @@
+{
+  "id": "coffee-machine-phone",
+  "note": "NOT GENERATED YET. Same subject as coffee-machine, prompted to look like real phone footage instead of a glossy commercial. 5 s at Kling v4 = about $0.88 including the still.",
+  "seconds": 5,
+  "still": "Vertical phone photo taken by a barista in a small, busy neighbourhood coffee shop. An ordinary, slightly used espresso machine seen from the customer side of the counter: the group head with a portafilter locked in and a plain white ceramic espresso cup on the drip tray under the spouts. Everyday clutter around it: a folded cloth, a milk jug, a few coffee grounds and water spots on the steel, a stack of paper cups at the edge of frame. Flat natural daylight from a window mixed with ordinary overhead lighting, no dramatic lighting, no bokeh lights. Everything in focus, slightly off-centre framing, a little tilted, as if snapped quickly on a smartphone. Realistic muted colours, mild phone-camera noise, unedited. No people, no hands, no text, no logos.",
+  "motion": "Handheld smartphone video, the camera held by hand with small natural wobble and a slight drift closer, no smooth gliding. Espresso starts to drip and then pour in two thin streams from the portafilter into the white cup, filling it with dark espresso and a light brown crema. A little steam. Ordinary real-time speed, plain everyday footage like a barista's quick clip for social media, not a commercial. No people, no hands, no text.",
+  "edit": {
+    "shots": [
+      { "from": 0.0, "to": 1.4 },
+      { "from": 1.8, "to": 3.2, "zoom": 1.3, "focusX": 0.5, "focusY": 0.6 },
+      { "from": 3.4, "to": 5.0, "zoom": 1.12, "focusX": 0.5, "focusY": 0.65 }
+    ]
+  }
+}

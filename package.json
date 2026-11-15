@@ -10,7 +10,8 @@
     "scenes": "tsx render/build-scenes.ts",
     "render": "tsx render/render.ts",
     "typecheck": "tsc --noEmit",
-    "ai-video": "tsx render/ai-video.ts"
+    "ai-video": "tsx render/ai-video.ts",
+    "finish": "tsx render/finish.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
