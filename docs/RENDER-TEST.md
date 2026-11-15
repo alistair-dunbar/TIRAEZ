@@ -98,3 +98,13 @@ Quality is far better than the composites, but it "looks very AI generated".
 ~$0.80 (SAR 3) for 5 s or ~$1.60 (SAR 6) for 10 s, against SAR 16.7 revenue per video.
 
 Total fal.ai spend so far: $3.32.
+
+## Test 3: phone-footage-style prompt (15 Nov 2026)
+
+`ads/coffee-machine-phone.mp4`: same subject, prompted as an ordinary barista's phone clip (used
+machine, grounds on the counter, flat window light, handheld). 5 s, Kling v4, **$0.88**
+($0.09 still + $0.79 video). In sampled frames it reads as real phone footage, far less "AI"
+than the glossy commercial version. The only giveaway seen in stills is a garbled brand badge on
+the machine. `-finished.mp4` is the same clip cut into 3 shots with the natural look (free).
+
+Total fal.ai spend: $4.20 of the $5 cap.
