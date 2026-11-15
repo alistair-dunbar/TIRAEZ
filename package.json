@@ -9,7 +9,8 @@
     "samples": "tsx render/fetch-samples.ts",
     "scenes": "tsx render/build-scenes.ts",
     "render": "tsx render/render.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "ai-video": "tsx render/ai-video.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

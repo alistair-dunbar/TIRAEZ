@@ -14,6 +14,8 @@ export const PRICES = {
   "fal-ai/kling-video/v2.5-turbo/pro/image-to-video": { unit: "seconds", usd: 0.07 },
   "fal-ai/birefnet/v2": { unit: "compute seconds", usd: 0.000575 },
   "fal-ai/sam-3/image": { unit: "image", usd: 0.005 },
+  "fal-ai/flux-2-pro": { unit: "processed megapixels", usd: 0.03 },
+  "kling/v4/image-to-video": { unit: "seconds", usd: 0.157 },
 } as const;
 
 export type Endpoint = keyof typeof PRICES;
