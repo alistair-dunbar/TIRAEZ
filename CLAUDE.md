@@ -12,7 +12,9 @@ Salla/Zid merchants. Full plan: `docs/PLAN.md`.
 
 The founder decided to pivot away from video generation and focus on social media templates.
 First deliverable: `docs/SOCIAL-TEMPLATES.md`, 50 copy-and-paste post templates (10 niches x 5 types).
-How templates will be sold or delivered is not decided yet. The video code (`render/`, `scenes/`, `ads/`)
+First paid pack in progress: `docs/packs/coffee-shops-ar.md`, 30 Arabic (Saudi dialect) templates for specialty
+coffee shops plus a 30-day calendar. It is an AI draft and must be reviewed by a native Saudi speaker before sale.
+Plan: sell as a one-off pack on a ready-made checkout; nothing else decided yet. The video code (`render/`, `scenes/`, `ads/`)
 and `docs/PLAN.md` describe the earlier video product and are paused, not deleted. The sections below
 that describe the video product are kept for reference until the new plan is written.
 
