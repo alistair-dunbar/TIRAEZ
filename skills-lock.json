@@ -1,6 +1,12 @@
 {
   "version": 2,
   "skills": {
+    "business-model": {
+      "source": "phuryn/pm-skills",
+      "sourceType": "github",
+      "skillPath": "pm-product-strategy/skills/business-model/SKILL.md",
+      "computedHash": "b15f59099f1a7dfbcc59cf416fd11db5a90ad3f8bc531374675c73a28eaa244a"
+    },
     "grill-me": {
       "source": "mattpocock/skills",
       "sourceType": "github",
