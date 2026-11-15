@@ -32,3 +32,5 @@ time,endpoint,usd,note
 2026-11-15T10:33:30.956Z,kling/v4/image-to-video,1.5700,coffee-machine video 10s
 2026-11-15T11:21:49.854Z,fal-ai/flux-2-pro,0.0900,coffee-machine-phone still
 2026-11-15T11:26:55.350Z,kling/v4/image-to-video,0.7850,coffee-machine-phone video 5s
+2026-11-15T11:32:19.658Z,fal-ai/flux-2-pro,0.0900,coffee-bright still
+2026-11-15T11:32:35.100Z,fal-ai/flux-2-pro,0.0900,coffee-warm still
