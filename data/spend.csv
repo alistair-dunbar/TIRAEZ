@@ -1,0 +1,30 @@
+time,endpoint,usd,note
+2026-11-15T09:00:00.000Z,fal-ai/birefnet,0.0020,manual key check (estimated)
+2026-11-15T10:11:30.210Z,fal-ai/flux/dev,0.0518,fragrance scene 1 still
+2026-11-15T10:13:39.823Z,fal-ai/kling-video/v2.5-turbo/pro/image-to-video,0.3500,fragrance scene 1 video
+2026-11-15T10:13:54.321Z,fal-ai/birefnet/v2,0.0002,cutout fragrance-05.jpg
+2026-11-15T10:14:07.282Z,fal-ai/birefnet/v2,0.0002,cutout fragrance-04.jpg
+2026-11-15T10:15:03.877Z,fal-ai/flux/dev,0.0518,fragrance scene 2 still
+2026-11-15T10:15:36.698Z,fal-ai/birefnet/v2,0.0002,cutout fragrance-01.jpg
+2026-11-15T10:15:45.445Z,fal-ai/birefnet/v2,0.0002,cutout fragrance-02.jpg
+2026-11-15T10:15:54.461Z,fal-ai/birefnet/v2,0.0002,cutout fragrance-03.jpg
+2026-11-15T10:16:17.117Z,fal-ai/kling-video/v2.5-turbo/pro/image-to-video,0.3500,fragrance scene 2 video
+2026-11-15T10:16:28.243Z,fal-ai/flux/dev,0.0518,coffee scene 1 still
+2026-11-15T10:16:34.022Z,fal-ai/sam-3/image,0.0050,sam-3 test fragrance-01
+2026-11-15T10:16:36.890Z,fal-ai/sam-3/image,0.0050,sam-3 test fragrance-03
+2026-11-15T10:17:15.353Z,fal-ai/sam-3/image,0.0050,subject "perfume bottle" fragrance-01.jpg
+2026-11-15T10:17:25.546Z,fal-ai/sam-3/image,0.0050,subject "perfume bottle" fragrance-03.jpg
+2026-11-15T10:17:35.513Z,fal-ai/sam-3/image,0.0050,subject "perfume bottle" fragrance-02.jpg
+2026-11-15T10:17:38.640Z,fal-ai/kling-video/v2.5-turbo/pro/image-to-video,0.3500,coffee scene 1 video
+2026-11-15T10:17:49.449Z,fal-ai/flux/dev,0.0518,coffee scene 2 still
+2026-11-15T10:18:06.481Z,fal-ai/birefnet/v2,0.0009,cutout coffee-01.jpg
+2026-11-15T10:18:10.142Z,fal-ai/sam-3/image,0.0050,subject "coffee cup" coffee-01.jpg
+2026-11-15T10:18:20.288Z,fal-ai/birefnet/v2,0.0006,cutout coffee-02.jpg
+2026-11-15T10:18:23.485Z,fal-ai/sam-3/image,0.0050,subject "coffee cup" coffee-02.jpg
+2026-11-15T10:18:32.917Z,fal-ai/birefnet/v2,0.0002,cutout coffee-03.jpg
+2026-11-15T10:18:36.045Z,fal-ai/sam-3/image,0.0050,subject "coffee cup" coffee-03.jpg
+2026-11-15T10:18:44.947Z,fal-ai/birefnet/v2,0.0001,cutout coffee-04.jpg
+2026-11-15T10:18:47.855Z,fal-ai/sam-3/image,0.0050,subject "coffee cup" coffee-04.jpg
+2026-11-15T10:18:56.615Z,fal-ai/birefnet/v2,0.0002,cutout coffee-05.jpg
+2026-11-15T10:18:59.917Z,fal-ai/sam-3/image,0.0050,subject "coffee cup" coffee-05.jpg
+2026-11-15T10:19:18.597Z,fal-ai/kling-video/v2.5-turbo/pro/image-to-video,0.3500,coffee scene 2 video

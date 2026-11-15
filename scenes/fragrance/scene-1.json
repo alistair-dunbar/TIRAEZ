@@ -1,0 +1,12 @@
+{
+  "template": "fragrance",
+  "index": 1,
+  "still": "Luxury perfume advertising backdrop, vertical composition. An empty round black marble pedestal centered in the lower third of the frame, its flat top completely empty. Dark warm background, soft golden rim light, thin wisps of smoke drifting behind the pedestal. Photorealistic studio photography. No text, no logos, no products, no bottles, nothing on the pedestal.",
+  "motion": "Static locked-off camera with no camera movement. Smoke drifts slowly and the golden light shimmers softly. The pedestal stays perfectly still and empty.",
+  "stillFile": "scene-1.jpg",
+  "videoFile": "scene-1.mp4",
+  "costUsd": 0.40184000000000003,
+  "placement": {
+    "baseY": 0.735
+  }
+}

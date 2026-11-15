@@ -1,0 +1,17 @@
+{
+  "template": "fragrance",
+  "index": 2,
+  "still": "Elegant beauty product advertising backdrop, vertical composition. An empty cream travertine plinth centered in the lower third of the frame, its flat top completely empty. Beige silk fabric draped softly behind, warm sunlight with gentle palm-leaf shadows on the wall. Photorealistic studio photography. No text, no logos, no products, nothing on the plinth.",
+  "motion": "Static locked-off camera with no camera movement. The palm-leaf shadows sway gently and the silk ripples slightly. The plinth stays perfectly still and empty.",
+  "stillFile": "scene-2.jpg",
+  "videoFile": "scene-2.mp4",
+  "costUsd": 0.40184000000000003,
+  "placement": {
+    "baseY": 0.73,
+    "grade": {
+      "brightness": 0.0,
+      "contrast": 1.0,
+      "warmth": 0.04
+    }
+  }
+}

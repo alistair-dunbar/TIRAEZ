@@ -1,0 +1,19 @@
+{
+  "name": "photo-to-video-ads",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.21"
+  },
+  "scripts": {
+    "samples": "tsx render/fetch-samples.ts",
+    "scenes": "tsx render/build-scenes.ts",
+    "render": "tsx render/render.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

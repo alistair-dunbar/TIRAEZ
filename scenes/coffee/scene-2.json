@@ -1,0 +1,18 @@
+{
+  "template": "coffee",
+  "index": 2,
+  "still": "Moody coffee advertising backdrop, vertical composition. An empty dark slate surface filling the lower third of the frame, a few roasted coffee beans scattered only at the far left and right edges, the centre completely empty. Dark brown background with a soft warm spotlight. Photorealistic studio photography. No text, no logos, no cups, nothing in the centre.",
+  "motion": "Static locked-off camera with no camera movement. A faint wisp of steam drifts across the background and the warm light flickers gently. The surface stays perfectly still and empty.",
+  "stillFile": "scene-2.jpg",
+  "videoFile": "scene-2.mp4",
+  "costUsd": 0.40184000000000003,
+  "placement": {
+    "baseY": 0.875,
+    "maxH": 0.28,
+    "grade": {
+      "brightness": -0.08,
+      "contrast": 1.05,
+      "warmth": 0.07
+    }
+  }
+}

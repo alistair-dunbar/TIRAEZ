@@ -1,0 +1,13 @@
+{
+  "template": "coffee",
+  "index": 1,
+  "still": "Specialty coffee shop advertising backdrop, vertical composition. An empty light oak counter top filling the lower third of the frame, the centre of the counter completely empty. Softly blurred cozy cafe background with warm bokeh lights and a beam of morning sunlight. Photorealistic photography. No text, no logos, no cups, no people, nothing on the counter.",
+  "motion": "Static locked-off camera with no camera movement. Dust particles float in the sunbeam and the background bokeh lights twinkle softly. The counter stays perfectly still and empty.",
+  "stillFile": "scene-1.jpg",
+  "videoFile": "scene-1.mp4",
+  "costUsd": 0.40184000000000003,
+  "placement": {
+    "baseY": 0.935,
+    "maxH": 0.3
+  }
+}

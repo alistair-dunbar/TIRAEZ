@@ -20,7 +20,18 @@ Salla/Zid merchants. Full plan: `docs/PLAN.md`.
 ## Current stage
 
 Week 1 render test (Nov 16-22 2026): a command-line script, photo + template -> mp4.
-No web app, accounts or database yet.
+No web app, accounts or database yet. First results: `docs/RENDER-TEST.md`.
+
+## Stack and commands
+
+- Node 22.21+, TypeScript run with `tsx` (no build step), system `ffmpeg` for all image/video work.
+- fal.ai called with plain `fetch` (no SDK). Dev-only deps: `tsx`, `typescript`, `@types/node`.
+- `npm run samples`, `npm run scenes -- --template <id>`, `npm run render -- --photo <f> --template <id>`,
+  `npm run typecheck`. Usage details in README.md.
+- Cloud sessions: prefix with `NODE_USE_ENV_PROXY=1`. The fal.ai key is a network secret injected by the proxy.
+- Spending: hard cap `BUDGET_USD` (default $5), ledger `data/spend.csv`. Never raise the cap without asking.
+- Scenes cost money: they are committed in `scenes/`; never delete or re-render them without asking.
+- Test photos are openly licensed stock, listed with credits in `samples/sources.json`; the images aren't committed.
 
 ## Conventions
 
