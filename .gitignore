@@ -13,3 +13,4 @@ out/
 samples/*.jpg
 samples/*.jpeg
 samples/*.png
+packs/build/

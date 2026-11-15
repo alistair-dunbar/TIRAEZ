@@ -8,6 +8,24 @@ Self-serve, credit-based web app that turns one product photo into a vertical vi
 `docs/SOCIAL-TEMPLATES.md`: 50 copy-and-paste post templates across 10 niches. The video work
 below is paused.
 
+## Template packs
+
+- `docs/packs/coffee-shops-ar.md`: the Arabic pack "شهر قهوة" (30 templates + calendar). This file is the
+  single source of the text. Listing and sales page: `docs/packs/coffee-shops-ar-listing.md`.
+- PDFs: `docs/packs/shahr-qahwa.pdf` (full pack) and `docs/packs/shahr-qahwa-preview.pdf` (5 free templates).
+
+Rebuild the PDFs after editing the markdown:
+
+```bash
+python3 packs/build_pdf.py docs/packs/coffee-shops-ar.md
+node packs/print-pdf.mjs
+cp packs/build/*.pdf docs/packs/
+```
+
+Needs Chromium via Playwright (pre-installed in cloud sessions, not a project dependency). Fonts
+(IBM Plex Sans Arabic, OFL licence) are in `packs/fonts/`. Brand name, price, preview picks and the
+store link are in `BRAND` at the top of `packs/build_pdf.py`.
+
 ## Render test (week 1)
 
 A command-line script: product photo + template → silent, text-free 1080×1920 mp4.
