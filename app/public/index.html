@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reel-in-60</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/">Reel-in-60</a>
+    <nav>
+      <span id="credits" class="pill" hidden></span>
+      <button id="lang" class="link" type="button"></button>
+      <button id="logout" class="link" type="button" hidden data-t="logout"></button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Signed out -->
+    <section id="landing" hidden>
+      <div class="hero">
+        <h1 data-t="heroTitle"></h1>
+        <p data-t="heroText"></p>
+      </div>
+      <form id="auth" class="card narrow" novalidate>
+        <div class="tabs">
+          <button type="button" id="tabSignup" class="tab on" data-t="signup"></button>
+          <button type="button" id="tabLogin" class="tab" data-t="login"></button>
+        </div>
+        <label><span data-t="email"></span><input id="email" type="email" autocomplete="email" required dir="ltr"></label>
+        <label><span data-t="password"></span><input id="password" type="password" autocomplete="current-password" required minlength="8" dir="ltr"></label>
+        <p id="authError" class="error" role="alert"></p>
+        <button id="authSubmit" class="primary" type="submit"></button>
+      </form>
+    </section>
+
+    <!-- Signed in -->
+    <section id="dash" hidden>
+      <div id="buy" class="card notice" hidden>
+        <div>
+          <h2 data-t="buyTitle"></h2>
+          <p id="packText"></p>
+        </div>
+        <button id="buyBtn" class="primary" type="button"></button>
+      </div>
+      <p id="buyError" class="error" role="alert"></p>
+
+      <h2 data-t="step1"></h2>
+      <div id="templates" class="grid"></div>
+
+      <h2 data-t="step2"></h2>
+      <div class="card">
+        <p class="hint" data-t="photoHint"></p>
+        <label class="file">
+          <input id="photo" type="file" accept="image/jpeg,image/png,image/webp">
+          <span id="photoName" data-t="choosePhoto"></span>
+        </label>
+        <button id="clearPhoto" class="link" type="button" hidden data-t="removePhoto"></button>
+      </div>
+
+      <button id="make" class="primary big" type="button" disabled></button>
+      <p id="makeError" class="error" role="alert"></p>
+
+      <h2 data-t="myVideos"></h2>
+      <p id="noVideos" class="hint" data-t="noVideos"></p>
+      <div id="videos" class="grid"></div>
+    </section>
+  </main>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

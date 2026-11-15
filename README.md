@@ -8,6 +8,21 @@ Self-serve, credit-based web app that turns one product photo into a vertical vi
 `docs/SOCIAL-TEMPLATES.md`: 50 copy-and-paste post templates across 10 niches. The video work
 below is paused.
 
+## The web service
+
+```bash
+npm install
+PAYMENTS=test ENGINE=mock npm start     # http://localhost:3000
+npm test                                # 9 end-to-end tests, no cost
+```
+
+Sign up, buy the pack (test payments grant credits without charging), pick a style, optionally add a
+product photo, and order a video. One credit is taken per order and refunded automatically if the
+video fails. With `ENGINE=mock` every order delivers a sample video after a few seconds, for free.
+`ENGINE=fal` generates a real video with Kling v4 (about $0.79 per 5 seconds).
+
+![The service](docs/service-screenshot.png)
+
 ## Template packs
 
 - `docs/packs/coffee-shops-ar.md`: the Arabic pack "شهر قهوة" (30 templates + calendar). This file is the

@@ -14,3 +14,6 @@ samples/*.jpg
 samples/*.jpeg
 samples/*.png
 packs/build/
+data/app.db*
+data/uploads/
+data/videos/

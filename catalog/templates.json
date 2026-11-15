@@ -1,0 +1,18 @@
+[
+  {
+    "id": "coffee-bright",
+    "niche": "coffee",
+    "name": { "ar": "قهوة: مشرق وبسيط", "en": "Coffee: bright and minimal" },
+    "description": { "ar": "بار أبيض نظيف، ضو الصبح، كوب سيراميك.", "en": "A clean white bar, morning light, a ceramic cup." },
+    "spec": "ads/coffee-bright.json",
+    "preview": "ads/coffee-bright-still.jpg"
+  },
+  {
+    "id": "coffee-warm",
+    "niche": "coffee",
+    "name": { "ar": "قهوة: دافي وفخم", "en": "Coffee: warm boutique" },
+    "description": { "ar": "خشب غامق، ضو العصر، كوب أسود.", "en": "Dark wood, late-afternoon light, a black cup." },
+    "spec": "ads/coffee-warm.json",
+    "preview": "ads/coffee-warm-still.jpg"
+  }
+]

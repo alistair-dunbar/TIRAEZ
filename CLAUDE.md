@@ -18,6 +18,22 @@ Plan: sell as a one-off pack on a ready-made checkout; nothing else decided yet.
 and `docs/PLAN.md` describe the earlier video product and are paused, not deleted. The sections below
 that describe the video product are kept for reference until the new plan is written.
 
+## The service (built 15 Nov 2026, `app/`)
+
+The founder's priority is finishing the full self-serve service; video quality experiments are paused.
+`app/` is the web service: accounts, prepaid credits, template catalogue, optional photo upload, video
+orders with automatic refund on failure, download. Zero dependencies (node:http, node:sqlite, node:crypto).
+
+- `npm start` (set `PAYMENTS=test ENGINE=mock` locally), `npm test` (9 end-to-end tests, free).
+- `ENGINE=mock` (default) delivers a sample video and costs nothing. `ENGINE=fal` spends real money per
+  order through the cap in `render/budget.ts`. Never switch to `fal` without the user asking.
+- `PAYMENTS=test` grants credits without charging and refuses to run in production. No real gateway yet:
+  it plugs into `PaymentProvider` in `app/credits.ts`.
+- Packs: `config/packs.json`. Templates: `catalog/templates.json` (each points at a prompt spec in `ads/`).
+- UI text: `STRINGS` in `app/public/app.js`, Arabic first with an English toggle. The Arabic is an AI draft.
+- Not built yet: real payments, email verification and password reset, login rate limiting, hosting,
+  a durable job queue, an admin view. The merchant-photo path of the fal engine is untested.
+
 ## Hard rules
 
 - No agency work: no client servicing, calls or custom edits. Everything must be self-serve.
