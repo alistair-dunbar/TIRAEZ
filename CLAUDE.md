@@ -8,6 +8,14 @@ A 100% self-serve, credit-based web app: a merchant picks a template, uploads 1 
 gets a text-free, silent vertical video ad in ~60 seconds. First market: Saudi
 Salla/Zid merchants. Full plan: `docs/PLAN.md`.
 
+## Pivot (15 Nov 2026): social media templates
+
+The founder decided to pivot away from video generation and focus on social media templates.
+First deliverable: `docs/SOCIAL-TEMPLATES.md`, 50 copy-and-paste post templates (10 niches x 5 types).
+How templates will be sold or delivered is not decided yet. The video code (`render/`, `scenes/`, `ads/`)
+and `docs/PLAN.md` describe the earlier video product and are paused, not deleted. The sections below
+that describe the video product are kept for reference until the new plan is written.
+
 ## Hard rules
 
 - No agency work: no client servicing, calls or custom edits. Everything must be self-serve.

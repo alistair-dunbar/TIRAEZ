@@ -4,6 +4,10 @@ Self-serve, credit-based web app that turns one product photo into a vertical vi
 (TikTok, Reels, Snapchat). See `docs/PLAN.md` for the business plan and build order, and
 `docs/RENDER-TEST.md` for the first render-test results.
 
+**Current focus (from 15 Nov 2026): social media templates.** The library is in
+`docs/SOCIAL-TEMPLATES.md`: 50 copy-and-paste post templates across 10 niches. The video work
+below is paused.
+
 ## Render test (week 1)
 
 A command-line script: product photo + template → silent, text-free 1080×1920 mp4.
