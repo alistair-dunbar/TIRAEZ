@@ -6,7 +6,7 @@ import { createReadStream, existsSync, statSync, writeFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { SESSION_MAX_AGE, UserError, createSession, endSession, login, signup, userFromSession, type User } from "./auth.ts";
-import { balance, buy, packs } from "./credits.ts";
+import { balance, buy, confirmPurchase, packs, paymentProvider, purchaseByRef, purchaseOwner } from "./credits.ts";
 import { db } from "./db.ts";
 import { engine } from "./engine/index.ts";
 import { DATA_DIR, catalog, createVideo, listVideos, recoverInterrupted, videoFile } from "./videos.ts";
@@ -70,6 +70,17 @@ function sendFile(req: IncomingMessage, res: ServerResponse, file: string, extra
 
 async function api(req: IncomingMessage, res: ServerResponse, path: string): Promise<void> {
   const method = req.method ?? "GET";
+
+  // Payment provider's server-to-server notice. Its content is not trusted: it only tells us
+  // which invoice to go and check with the provider ourselves.
+  if (method === "POST" && path === "/api/webhooks/moyasar") {
+    const body = await json(req);
+    const purchaseId = typeof body?.id === "string" ? purchaseByRef(body.id) : undefined;
+    send(res, 200, {}); // answer first, as the provider requires, then verify
+    if (purchaseId) confirmPurchase(purchaseId).catch((e) => console.error("webhook verify failed", e));
+    return;
+  }
+
   // Browsers can't add this header on a cross-site form post, which blocks request forgery.
   if (method !== "GET" && req.headers["x-requested-with"] !== "app") throw new UserError("forbidden", 403);
 
@@ -95,6 +106,13 @@ async function api(req: IncomingMessage, res: ServerResponse, path: string): Pro
     const { packId } = await json(req);
     const result = await buy(u.id, u.email, packId);
     send(res, 200, { ...result, credits: balance(u.id) });
+  } else if (method === "GET" && /^\/api\/purchases\/\d+\/return$/.test(path)) {
+    // The buyer comes back here from the checkout page.
+    const u = need();
+    const id = Number(path.split("/")[3]);
+    const paid = purchaseOwner(id) === u.id && (await confirmPurchase(id).catch(() => false));
+    res.writeHead(303, { Location: paid ? "/?paid=1" : "/?paid=0", "Cache-Control": "no-store" });
+    res.end();
   } else if (method === "PUT" && path === "/api/uploads") {
     const u = need();
     const buf = await readBody(req, MAX_UPLOAD);
@@ -129,6 +147,7 @@ export const server = createServer(async (req, res) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "same-origin");
   try {
+    if (path === "/healthz") { send(res, 200, { ok: true }); return; }
     if (path.startsWith("/api/")) { await api(req, res, path); return; }
     if (req.method !== "GET" && req.method !== "HEAD") { send(res, 405, { error: "method_not_allowed" }); return; }
     const preview = path.match(/^\/previews\/([a-z0-9-]+)\.jpg$/);
@@ -150,6 +169,13 @@ export const server = createServer(async (req, res) => {
 });
 
 if (import.meta.url === `file://${process.argv[1]}`) {
+  // A live site must say explicitly how it takes money and makes videos; the free defaults are for development.
+  if (process.env.NODE_ENV === "production") {
+    for (const name of ["PAYMENTS", "ENGINE", "APP_URL"]) {
+      if (!process.env[name]) throw new Error(`${name} must be set in production`);
+    }
+    paymentProvider(); // refuses PAYMENTS=test on a live site
+  }
   const refunded = recoverInterrupted();
   if (refunded) console.log(`Refunded ${refunded} order(s) interrupted by the last shutdown`);
   const port = Number(process.env.PORT ?? 3000);

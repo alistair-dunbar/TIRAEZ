@@ -1,0 +1,11 @@
+.git
+node_modules
+.cache
+out
+samples
+data
+packs/build
+docs
+*.log
+.env
+.env.*

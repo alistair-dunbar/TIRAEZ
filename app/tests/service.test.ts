@@ -23,9 +23,9 @@ after(() => new Promise<void>((r) => { server.close(() => r()); }));
 /** A tiny browser: keeps the session cookie between calls. */
 function client() {
   let cookie = "";
-  return async (method: string, path: string, body?: unknown, opts: { raw?: Buffer; noHeader?: boolean } = {}) => {
+  return async (method: string, path: string, body?: unknown, opts: { raw?: Buffer; noHeader?: boolean; location?: boolean } = {}) => {
     const res = await fetch(base + path, {
-      method,
+      method, redirect: "manual",
       headers: { ...(opts.noHeader ? {} : { "X-Requested-With": "app" }), ...(cookie ? { Cookie: cookie } : {}),
         ...(body ? { "Content-Type": "application/json" } : {}) },
       body: opts.raw ? new Uint8Array(opts.raw) : body ? JSON.stringify(body) : undefined,
@@ -33,8 +33,14 @@ function client() {
     const set = res.headers.get("set-cookie");
     if (set) cookie = set.split(";")[0];
     const type = res.headers.get("content-type") ?? "";
+    if (opts.location) return { status: res.status, type, data: res.headers.get("location") as any };
     return { status: res.status, type, data: type.includes("json") ? await res.json() : await res.arrayBuffer() };
   };
+}
+
+/** Follows the session but not the redirect, and returns where it points. */
+async function fetchNoFollow(c: ReturnType<typeof client>, path: string): Promise<string | null> {
+  return (await c("GET", path, undefined, { location: true })).data as any;
 }
 
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
@@ -149,4 +155,70 @@ test("static files are served, and paths can't escape the public folder", async 
   assert.equal((await fetch(base + "/previews/coffee-bright.jpg")).headers.get("content-type"), "image/jpeg");
   assert.equal((await fetch(base + "/..%2f..%2fpackage.json")).status, 404);
   assert.equal((await fetch(base + "/%2e%2e/server.ts")).status, 404);
+});
+
+test("moyasar: credits are granted only after the provider confirms the exact payment", async () => {
+  const { http } = await import("../moyasar.ts");
+  const realFetch = http.fetch;
+  process.env.PAYMENTS = "moyasar";
+  process.env.MOYASAR_SECRET_KEY = "sk_test_example";
+  process.env.APP_URL = "https://shop.example.com";
+  // A stand-in for Moyasar: remembers created invoices and reports whatever status we set.
+  const invoices = new Map<string, any>();
+  http.fetch = async (url: string, init?: RequestInit) => {
+    assert.match(String((init?.headers as any).Authorization), /^Basic /);
+    if (init?.method === "POST") {
+      const body = JSON.parse(String(init.body));
+      const inv = { id: `inv_${invoices.size + 1}`, url: "https://checkout.example.com/pay", status: "initiated", ...body };
+      invoices.set(inv.id, inv);
+      return new Response(JSON.stringify(inv), { status: 201 });
+    }
+    return new Response(JSON.stringify(invoices.get(url.split("/").pop()!)), { status: 200 });
+  };
+  try {
+    const { c } = await newUser();
+    const start = await c("POST", "/api/purchases", { packId: "launch" });
+    assert.equal(start.data.status, "redirect");
+    assert.equal(start.data.url, "https://checkout.example.com/pay");
+    assert.equal(start.data.credits, 0, "nothing is granted before payment");
+    const inv = invoices.get("inv_1");
+    assert.equal(inv.amount, 25000);
+    assert.equal(inv.currency, "SAR");
+    assert.equal(inv.success_url, `https://shop.example.com/api/purchases/${start.data.purchaseId}/return`);
+
+    // Returning without having paid grants nothing, even though the URL is the "success" one.
+    const back = await fetchNoFollow(c, `/api/purchases/${start.data.purchaseId}/return`);
+    assert.equal(back, "/?paid=0");
+    assert.equal((await c("GET", "/api/me")).data.credits, 0);
+
+    // A forged webhook naming the invoice grants nothing either: we check with the provider.
+    await client()("POST", "/api/webhooks/moyasar", { id: "inv_1", status: "paid" }, { noHeader: true });
+    await new Promise((r) => setTimeout(r, 20));
+    assert.equal((await c("GET", "/api/me")).data.credits, 0);
+
+    // Paid, but the wrong amount: refused.
+    inv.status = "paid"; inv.amount = 100;
+    assert.equal(await fetchNoFollow(c, `/api/purchases/${start.data.purchaseId}/return`), "/?paid=0");
+
+    // Paid in full: granted, and only once however many times we're told.
+    inv.amount = 25000;
+    await client()("POST", "/api/webhooks/moyasar", { id: "inv_1" }, { noHeader: true });
+    await new Promise((r) => setTimeout(r, 20));
+    assert.equal(await fetchNoFollow(c, `/api/purchases/${start.data.purchaseId}/return`), "/?paid=1");
+    assert.equal((await c("GET", "/api/me")).data.credits, 15);
+
+    // Someone else can't claim the purchase by visiting its return address.
+    const { c: other } = await newUser();
+    assert.equal(await fetchNoFollow(other, `/api/purchases/${start.data.purchaseId}/return`), "/?paid=0");
+    assert.equal((await other("GET", "/api/me")).data.credits, 0);
+  } finally {
+    http.fetch = realFetch;
+    process.env.PAYMENTS = "test";
+  }
+});
+
+test("repeated wrong passwords pause logins for that email", async () => {
+  const { email } = await newUser();
+  for (let i = 0; i < 8; i++) assert.equal((await client()("POST", "/api/login", { email, password: "wrong-password" })).status, 401);
+  assert.equal((await client()("POST", "/api/login", { email, password: "password123" })).status, 429);
 });

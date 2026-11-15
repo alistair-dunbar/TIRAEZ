@@ -1,9 +1,10 @@
 // Prepaid credits. Packs and prices live in config/packs.json, never in code.
-// Payments go through a provider interface; the only one implemented is "test",
-// which grants credits without charging and must never run in production.
+// Payments go through a provider interface: PAYMENTS=moyasar (real, see moyasar.ts) or
+// PAYMENTS=test, which grants credits without charging and must never run in production.
 import { readFileSync } from "node:fs";
 import { UserError } from "./auth.ts";
 import { db, tx } from "./db.ts";
+import { moyasar } from "./moyasar.ts";
 
 export interface Pack { id: string; credits: number; priceSar: number }
 
@@ -13,11 +14,14 @@ export interface PaymentProvider {
   name: string;
   /** Starts a payment. "paid" means credits can be granted now; "redirect" sends the buyer to a checkout page. */
   start(purchaseId: number, pack: Pack, email: string): Promise<{ status: "paid"; ref: string } | { status: "redirect"; url: string; ref: string }>;
+  /** Asks the provider directly what was paid. The only thing we trust when granting credits. */
+  verify(ref: string): Promise<{ paid: boolean; amountHalalas: number; currency: string; purchaseId: string | undefined }>;
 }
 
 const testProvider: PaymentProvider = {
   name: "test",
   async start(purchaseId) { return { status: "paid", ref: `test-${purchaseId}` }; },
+  async verify() { throw new Error("test payments are granted at purchase time"); },
 };
 
 export function paymentProvider(): PaymentProvider {
@@ -26,7 +30,7 @@ export function paymentProvider(): PaymentProvider {
     if (process.env.NODE_ENV === "production") throw new Error("PAYMENTS=test is not allowed in production");
     return testProvider;
   }
-  // A real gateway (Moyasar, Tap, HyperPay) plugs in here once one is chosen.
+  if (name === "moyasar") return moyasar;
   throw new UserError("payments_not_configured", 503);
 }
 
@@ -60,6 +64,29 @@ export function markPaid(purchaseId: number): void {
     db.prepare("UPDATE purchases SET status = 'paid' WHERE id = ?").run(purchaseId);
     change(p.user_id, p.credits, "purchase", String(purchaseId));
   });
+}
+
+/**
+ * Called when the buyer returns from checkout or the provider's webhook arrives. Neither is
+ * trusted: we ask the provider what was actually paid and compare it with our own record.
+ */
+export async function confirmPurchase(purchaseId: number): Promise<boolean> {
+  const p = db.prepare("SELECT id, price_sar, provider, provider_ref, status FROM purchases WHERE id = ?").get(purchaseId) as any;
+  if (!p) return false;
+  if (p.status === "paid") return true;
+  if (p.provider !== "moyasar" || !p.provider_ref) return false;
+  const v = await moyasar.verify(p.provider_ref);
+  const ok = v.paid && v.currency === "SAR" && v.amountHalalas === p.price_sar * 100 && v.purchaseId === String(p.id);
+  if (ok) markPaid(p.id);
+  return ok;
+}
+
+export function purchaseByRef(ref: string): number | undefined {
+  return (db.prepare("SELECT id FROM purchases WHERE provider_ref = ?").get(ref) as any)?.id;
+}
+
+export function purchaseOwner(purchaseId: number): number | undefined {
+  return (db.prepare("SELECT user_id FROM purchases WHERE id = ?").get(purchaseId) as any)?.user_id;
 }
 
 /** Takes one credit for a video. Throws if the balance is empty. Call inside a transaction. */

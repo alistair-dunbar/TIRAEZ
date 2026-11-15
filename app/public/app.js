@@ -22,7 +22,8 @@ const STRINGS = {
       email_taken: "هذا الإيميل مسجّل. جرّب تدخل.", bad_login: "الإيميل أو كلمة المرور غلط.",
       no_credits: "رصيدك خلص. اشترِ باقة عشان تكمّل.", not_an_image: "الملف مو صورة. ارفع JPG أو PNG.",
       too_large: "الصورة أكبر من ١٠ ميجا.", payments_not_configured: "الدفع مو مفعّل لسا. جرّب بعدين.",
-      login_required: "سجّل دخولك أول.", default: "صار خطأ. جرّب مرة ثانية.",
+      login_required: "سجّل دخولك أول.", too_many_attempts: "محاولات كثيرة. جرّب بعد ربع ساعة.",
+      payment_failed: "ما قدرنا نفتح صفحة الدفع. جرّب مرة ثانية.", not_paid: "الدفع ما اكتمل. ما انخصم منك شي.", default: "صار خطأ. جرّب مرة ثانية.",
     },
   },
   en: {
@@ -46,7 +47,8 @@ const STRINGS = {
       email_taken: "That email is already registered. Try logging in.", bad_login: "Wrong email or password.",
       no_credits: "You're out of credits. Buy a pack to continue.", not_an_image: "That file isn't an image. Upload a JPG or PNG.",
       too_large: "The photo is larger than 10 MB.", payments_not_configured: "Payments aren't switched on yet. Try again later.",
-      login_required: "Please log in first.", default: "Something went wrong. Please try again.",
+      login_required: "Please log in first.", too_many_attempts: "Too many attempts. Try again in 15 minutes.",
+      payment_failed: "We couldn't open the payment page. Please try again.", not_paid: "The payment wasn't completed. You haven't been charged.", default: "Something went wrong. Please try again.",
     },
   },
 };
@@ -177,4 +179,8 @@ $("make").onclick = async () => {
     api("GET", "/api/me"), api("GET", "/api/templates"), api("GET", "/api/packs")]);
   render();
   await refresh();
+  // Back from the checkout page.
+  const paid = new URLSearchParams(location.search).get("paid");
+  if (paid === "0") $("buyError").textContent = t().errors.not_paid;
+  if (paid) history.replaceState(null, "", "/");
 })().catch(() => render());

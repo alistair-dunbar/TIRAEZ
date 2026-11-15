@@ -4,7 +4,9 @@ import { createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypt
 import { db } from "./db.ts";
 
 export class UserError extends Error {
-  constructor(public code: string, public status = 400) { super(code); }
+  code: string;
+  status: number;
+  constructor(code: string, status = 400) { super(code); this.code = code; this.status = status; }
 }
 
 const SESSION_DAYS = 30;
@@ -33,13 +35,25 @@ export function signup(email: string, password: string): User {
   return { id: Number(r.lastInsertRowid), email, credits: 0 };
 }
 
+// Slows password guessing: after 8 wrong passwords for one email, logins for it pause for 15 minutes.
+// In memory, so it resets on restart; good enough for one server.
+const MAX_FAILS = 8;
+const LOCK_MS = 15 * 60_000;
+const fails = new Map<string, { n: number; until: number }>();
+
 export function login(email: string, password: string): User {
   email = String(email ?? "").trim().toLowerCase();
+  const f = fails.get(email);
+  if (f && f.n >= MAX_FAILS && Date.now() < f.until) throw new UserError("too_many_attempts", 429);
   const row = db.prepare("SELECT id, email, credits, password_hash FROM users WHERE email = ?").get(email) as any;
   // Same error for unknown email and wrong password, so accounts can't be enumerated.
   if (!row || typeof password !== "string" || !verifyPassword(password, row.password_hash)) {
+    const cur = f && Date.now() < f.until ? f.n : 0;
+    if (fails.size > 10_000) fails.clear();
+    fails.set(email, { n: cur + 1, until: Date.now() + LOCK_MS });
     throw new UserError("bad_login", 401);
   }
+  fails.delete(email);
   return { id: row.id, email: row.email, credits: row.credits };
 }
 
