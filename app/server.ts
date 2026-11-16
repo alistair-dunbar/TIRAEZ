@@ -190,6 +190,15 @@ export const server = createServer(async (req, res) => {
   let path: string;
   try { path = decodeURIComponent(new URL(req.url ?? "/", "http://x").pathname); }
   catch { send(res, 400, { error: "bad_request" }); return; }
+  if (process.env.NODE_ENV === "production") {
+    // Behind Railway's proxy: send plain-http visits to https, and tell browsers to stay on https.
+    if (req.headers["x-forwarded-proto"] === "http" && req.headers.host) {
+      res.writeHead(301, { Location: `https://${req.headers.host}${req.url ?? "/"}` });
+      res.end();
+      return;
+    }
+    res.setHeader("Strict-Transport-Security", "max-age=31536000");
+  }
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "same-origin");
   res.setHeader("Content-Security-Policy", CSP);
