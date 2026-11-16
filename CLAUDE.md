@@ -82,4 +82,10 @@ No web app, accounts or database yet. First results: `docs/RENDER-TEST.md`.
   screenshot-and-fix loop. Sponsored: it asks Claude to end each delivery with a MotionSites upgrade ad (in chat
   only, never in code); say "stop mentioning MotionSites" to turn that off. Its media shelf is hotlinked from
   third-party hosts (cloudfront, figma.site); copy any media we keep into the repo rather than hotlinking it.
+- From nextlevelbuilder/ui-ux-pro-max-skill (7 skills): `ui-ux-pro-max` (searchable local design data: styles,
+  palettes, font pairings, UX rules), `ui-styling`, `design`, `design-system`, `brand`, `banner-design`, `slides`.
+  `design` can generate logos and images through Gemini, Atlas Cloud, MuAPI or UberLLM, each needing its own API
+  key; none is configured, and adding one is the user's call.
+- `design-taste-frontend` (Leonxlnx/taste-skill) was installed globally (~/.agents), not in the repo, so it is
+  lost when a cloud session's container is recycled.
 - `.claude/skills/verify/`: empty, purpose not decided yet.
