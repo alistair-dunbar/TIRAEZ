@@ -12,18 +12,25 @@ below is paused.
 
 ```bash
 npm install
-PAYMENTS=test ENGINE=mock npm start     # http://localhost:3000
-npm test                                # 11 end-to-end tests, no cost
+npm start                    # http://localhost:3000, generation and payments off
+npm test                     # 20 end-to-end tests with a test-only provider; no cost
+npm run credits -- you@example.com 5 "note"   # give an account credits (operator tool)
 ```
 
-Sign up, buy the pack (test payments grant credits without charging), pick a style, optionally add a
-product photo, and order a video. One credit is taken per order and refunded automatically if the
-video fails. With `ENGINE=mock` every order delivers a sample video after a few seconds, for free.
-`ENGINE=fal` generates a real video with Kling v4 (about $0.79 per 5 seconds).
+A typography-led landing page, a template catalogue (search, niche and format filters), template
+pages, and a creation workspace: upload a photo, frame it, fill in the template's short form, choose
+format and resolution, generate. Jobs run on the server and survive refreshes and restarts; finished
+videos are saved to the account (My videos) for playback and download. Failed jobs return their
+credits automatically.
 
-Going live (Moyasar payments, Railway hosting): see `docs/DEPLOY.md`. Settings: `.env.example`.
-
-![The service](docs/service-screenshot.png)
+- Templates: `catalog/templates/*.json` (one file each; the prompt parts stay on the server).
+  Niches: `catalog/niches.json`. Brand name and pricing display: `config/site.json`. Credit costs:
+  `config/pricing.json`. Upload limits and job behaviour: `config/generation.json`. Model settings:
+  `config/models.json`.
+- Generation: `ENGINE=fal` with `FAL_KEY` (see `.env.example`). Without it the site says generation
+  isn't switched on and templates can only be browsed.
+- Template preview media: see `docs/MEDIA.md`. None is approved, so none is shown.
+- Going live: `docs/DEPLOY.md`.
 
 ## Template packs
 

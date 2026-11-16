@@ -36,31 +36,33 @@ and what your invoices must show, before taking real payments.
 2. Add a **Volume** to the service, mounted at **`/data`**. Without it, the database, uploads and
    videos are lost on every deploy.
 3. Under **Networking**, generate a domain (or attach your own). That address is `APP_URL`.
-4. Under **Variables**, set:
+4. Under **Variables**, set what you are switching on (all optional; see `.env.example`):
 
    | Variable | Value |
    |---|---|
-   | `APP_URL` | the https address from step 3, no trailing slash |
-   | `PAYMENTS` | `moyasar` |
-   | `MOYASAR_SECRET_KEY` | your Moyasar secret key |
-   | `ENGINE` | `mock` to start (sample videos, free), `fal` for real videos |
-   | `FAL_KEY` | your fal.ai key, only when `ENGINE=fal` |
-   | `BUDGET_USD` | total fal.ai spending cap, only when `ENGINE=fal` |
+   | `ENGINE` | `fal` to switch generation on. Leave unset to run the site with generation off |
+   | `FAL_KEY` | your fal.ai key, when `ENGINE=fal` |
+   | `GENERATION_BUDGET_USD` | optional cap on estimated fal.ai spend, across all customers |
+   | `PAYMENTS` | `moyasar` when you take payments. Leave unset until then |
+   | `MOYASAR_SECRET_KEY`, `APP_URL` | with `PAYMENTS=moyasar` |
 
 5. Deploy. `https://<your address>/healthz` should return `{"ok":true}`.
+6. Give testers credits without payments: open the Railway shell and run
+   `node app/grant-credits.ts someone@example.com 5 "tester"` (the account must exist first).
 
-The server refuses to start in production if `APP_URL`, `PAYMENTS` or `ENGINE` is missing, if
-payments are in test mode, or (when buying) if the Moyasar key is not a live key.
+The server refuses to start in production with the test stand-ins (`PAYMENTS=test`, `ENGINE=mock`),
+or with `PAYMENTS=moyasar` but no `APP_URL`.
 
 ## Before real customers
 
-- **Don't sell with `ENGINE=mock`.** Every order would deliver the same sample video.
-- **`ENGINE=fal` spending:** each order costs about $0.79. The cap in `BUDGET_USD` counts spending
-  recorded in `data/spend.csv` inside the container, which is reset on each deploy. Treat it as a
-  safety net, and also set a spending limit in the fal.ai dashboard.
-- **Not built yet:** email verification, password reset, an admin view, a privacy policy and terms
-  page, refunds of money (as opposed to credits), a durable job queue.
-- **One server only.** The job queue and login limits live in memory; keep `numReplicas` at 1.
+- **First live generation:** no paid generation has been run through the service yet. Make one with your own account before inviting customers, and check the result page, My videos and the download.
+- **`ENGINE=fal` spending:** a 5-second video costs about $0.79. `GENERATION_BUDGET_USD` counts estimated
+  spend in the database (kept on the volume). Treat it as a safety net, and also set a limit in the fal.ai dashboard.
+- **Not built yet:** email verification, password reset, an admin view, refunds of money (as opposed to
+  credits). Terms and privacy pages were left out of this build on purpose; you will need them before
+  taking payments.
+- **One server only.** Jobs are stored in the database and resumed after a restart, but only one
+  server should run them; keep `numReplicas` at 1.
 - **Data location:** Railway has no Saudi region, so customer emails and photos are stored abroad.
   Check this against Saudi data-protection law (PDPL) before scaling.
 - **Untested:** the Docker image has not been built (no Docker daemon in the development

@@ -1,0 +1,105 @@
+{
+  "id": "coffee-morning-bar",
+  "slug": "coffee-morning-bar",
+  "version": 1,
+  "name": "Morning light on the bar",
+  "niche": "coffee",
+  "summary": "Your bar in soft daylight, with a slow camera move and rising steam.",
+  "outcome": "A slow camera move across your bar or espresso machine in soft morning daylight, with a little steam rising and light moving over the counter.",
+  "photoGuidance": [
+    "A photo of your bar, counter or espresso machine.",
+    "Daylight works best. Avoid heavy filters.",
+    "Keep the counter clear of clutter you don't want in the video."
+  ],
+  "limitations": [
+    "Text and logos in your photo may change in the video. Check the result before you post it."
+  ],
+  "inputs": [
+    {
+      "id": "subject",
+      "type": "text",
+      "label": "What's in the photo",
+      "help": "A few words, such as 'espresso machine and two cups on an oak counter'.",
+      "required": true,
+      "maxLength": 80,
+      "example": "Espresso machine on an oak counter"
+    },
+    {
+      "id": "motion",
+      "type": "select",
+      "label": "Camera movement",
+      "help": null,
+      "required": true,
+      "default": "push",
+      "options": [
+        {
+          "value": "gentle",
+          "label": "Gentle",
+          "prompt": "The camera moves very little, a slow and steady drift."
+        },
+        {
+          "value": "push",
+          "label": "Slow push-in",
+          "prompt": "The camera pushes in slowly and steadily towards the subject."
+        },
+        {
+          "value": "glide",
+          "label": "Sideways glide",
+          "prompt": "The camera glides slowly and steadily to one side, keeping the subject in frame."
+        }
+      ]
+    },
+    {
+      "id": "keep",
+      "type": "text",
+      "label": "Details to keep as they are",
+      "help": "Optional. For example, the colour of your cups or the shape of a sign.",
+      "required": false,
+      "maxLength": 120
+    },
+    {
+      "id": "avoid",
+      "type": "text",
+      "label": "Anything to leave out",
+      "help": "Optional. For example, no smoke or no people.",
+      "required": false,
+      "maxLength": 120
+    }
+  ],
+  "output": {
+    "aspectRatios": [
+      "9:16",
+      "1:1",
+      "16:9"
+    ],
+    "defaultAspectRatio": "9:16",
+    "durations": [
+      5
+    ],
+    "defaultDuration": 5,
+    "resolutions": [
+      "1080p",
+      "720p"
+    ],
+    "defaultResolution": "1080p"
+  },
+  "model": "kling-v4",
+  "availability": "available",
+  "preview": {
+    "asset": null,
+    "approved": false
+  },
+  "prompt": {
+    "preserve": "Keep everything in the photo recognisable: the same objects, shapes, colours and proportions. Keep any printed text, labels and logos as they are.",
+    "avoid": "Do not add people, hands, text, captions, logos or new objects. No sudden cuts, no camera shake, no warping or melting of surfaces.",
+    "subject": "The photo shows {subject} in a specialty coffee shop.",
+    "composition": "Keep the framing of the photo, with the bar as the main subject.",
+    "environment": "The cafe is clean and tidy, as in the photo.",
+    "camera": {
+      "input": "motion"
+    },
+    "subjectMotion": "A thin wisp of steam rises from the machine or the cups. Everything else on the counter stays still.",
+    "lighting": "Soft morning daylight from a window, with gentle light moving slowly across the counter.",
+    "mood": "Calm and inviting, like the first quiet minutes after opening."
+  }
+}

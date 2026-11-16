@@ -1,0 +1,104 @@
+{
+  "id": "coffee-warm-counter",
+  "slug": "coffee-warm-counter",
+  "version": 1,
+  "name": "Warm counter, late afternoon",
+  "niche": "coffee",
+  "summary": "Low, warm sunlight on your counter and a slow drift of the camera.",
+  "outcome": "Your counter in low, warm late-afternoon light, with a slow drift of the camera and faint steam rising from the cups.",
+  "photoGuidance": [
+    "A photo of your counter, cups or machine.",
+    "Shoot from the customer's side of the counter.",
+    "A tidy counter with two or three items reads best."
+  ],
+  "limitations": [
+    "Text and logos in your photo may change in the video. Check the result before you post it."
+  ],
+  "inputs": [
+    {
+      "id": "subject",
+      "type": "text",
+      "label": "What's in the photo",
+      "help": "A few words, such as 'black cup on a walnut counter'.",
+      "required": true,
+      "maxLength": 80,
+      "example": "Black cup on a walnut counter"
+    },
+    {
+      "id": "motion",
+      "type": "select",
+      "label": "Camera movement",
+      "help": null,
+      "required": true,
+      "default": "push",
+      "options": [
+        {
+          "value": "gentle",
+          "label": "Gentle",
+          "prompt": "The camera moves very little, a slow and steady drift."
+        },
+        {
+          "value": "push",
+          "label": "Slow push-in",
+          "prompt": "The camera pushes in slowly and steadily towards the subject."
+        },
+        {
+          "value": "glide",
+          "label": "Sideways glide",
+          "prompt": "The camera glides slowly and steadily to one side, keeping the subject in frame."
+        }
+      ]
+    },
+    {
+      "id": "keep",
+      "type": "text",
+      "label": "Details to keep as they are",
+      "help": "Optional. For example, the colour of your cups or the shape of a sign.",
+      "required": false,
+      "maxLength": 120
+    },
+    {
+      "id": "avoid",
+      "type": "text",
+      "label": "Anything to leave out",
+      "help": "Optional. For example, no smoke or no people.",
+      "required": false,
+      "maxLength": 120
+    }
+  ],
+  "output": {
+    "aspectRatios": [
+      "9:16",
+      "1:1"
+    ],
+    "defaultAspectRatio": "9:16",
+    "durations": [
+      5
+    ],
+    "defaultDuration": 5,
+    "resolutions": [
+      "1080p",
+      "720p"
+    ],
+    "defaultResolution": "1080p"
+  },
+  "model": "kling-v4",
+  "availability": "available",
+  "preview": {
+    "asset": null,
+    "approved": false
+  },
+  "prompt": {
+    "preserve": "Keep everything in the photo recognisable: the same objects, shapes, colours and proportions. Keep any printed text, labels and logos as they are.",
+    "avoid": "Do not add people, hands, text, captions, logos or new objects. No sudden cuts, no camera shake, no warping or melting of surfaces.",
+    "subject": "The photo shows {subject} in a coffee shop.",
+    "composition": "Keep the framing of the photo.",
+    "environment": "The space stays exactly as in the photo, tidy and warm.",
+    "camera": {
+      "input": "motion"
+    },
+    "subjectMotion": "Faint steam rises from any cup. Nothing else on the counter moves.",
+    "lighting": "Low, warm late-afternoon sunlight with soft shadows, slowly shifting.",
+    "mood": "Warm, unhurried and welcoming."
+  }
+}

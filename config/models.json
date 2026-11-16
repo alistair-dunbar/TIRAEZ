@@ -1,0 +1,11 @@
+{
+  "kling-v4": {
+    "provider": "fal",
+    "endpoint": "kling/v4/image-to-video",
+    "usdPerSecond": 0.157,
+    "checked": "2026-11-16: input/output schema from fal.ai OpenAPI for kling/v4/image-to-video; price from api.fal.ai/v1/models/pricing",
+    "image": { "minWidth": 300, "minHeight": 300, "minAspect": 0.4, "maxAspect": 2.5, "maxBytes": 31457280 },
+    "supports": { "minDuration": 3, "maxDuration": 30, "resolutions": ["720p", "1080p"], "negativePrompt": false, "audio": false },
+    "aspectRatioFromImage": true
+  }
+}

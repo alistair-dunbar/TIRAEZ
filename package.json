@@ -13,7 +13,8 @@
     "render": "tsx render/render.ts",
     "typecheck": "tsc --noEmit",
     "ai-video": "tsx render/ai-video.ts",
-    "finish": "tsx render/finish.ts"
+    "finish": "tsx render/finish.ts",
+    "credits": "tsx app/grant-credits.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

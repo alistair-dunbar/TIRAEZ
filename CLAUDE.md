@@ -18,22 +18,33 @@ Plan: sell as a one-off pack on a ready-made checkout; nothing else decided yet.
 and `docs/PLAN.md` describe the earlier video product and are paused, not deleted. The sections below
 that describe the video product are kept for reference until the new plan is written.
 
-## The service (built 15 Nov 2026, `app/`)
+## The service (`app/`, rebuilt 16 Nov 2026)
 
 The founder's priority is finishing the full self-serve service; video quality experiments are paused.
-`app/` is the web service: accounts, prepaid credits, template catalogue, optional photo upload, video
-orders with automatic refund on failure, download. Zero dependencies (node:http, node:sqlite, node:crypto).
+Zero dependencies (node:http, node:sqlite, node:crypto, system ffmpeg). Plain JS front end in `app/public/js`.
 
-- `npm start` (set `PAYMENTS=test ENGINE=mock` locally), `npm test` (11 end-to-end tests, free).
-- `ENGINE=mock` (default) delivers a sample video and costs nothing. `ENGINE=fal` spends real money per
-  order through the cap in `render/budget.ts`. Never switch to `fal` without the user asking.
-- `PAYMENTS=test` grants credits without charging and refuses to run in production. `PAYMENTS=moyasar`
-  (`app/moyasar.ts`, hosted invoices) is written and tested against a stand-in, not yet against real Moyasar.
-- Hosting: `Dockerfile` + `railway.json` for Railway, steps in `docs/DEPLOY.md`. Production runs with plain
-  `node app/server.ts` (no tsx), so keep the code to erasable TypeScript (`erasableSyntaxOnly` enforces it).
-- Packs: `config/packs.json`. Templates: `catalog/templates.json` (each points at a prompt spec in `ads/`).
-- UI text: `STRINGS` in `app/public/app.js`, Arabic first with an English toggle. The Arabic is an AI draft.
-- Not built yet: email verification and password reset, a durable job queue, an admin view, terms/privacy pages. The merchant-photo path of the fal engine is untested.
+- Journey: landing -> catalogue (`/templates`) -> template (`/templates/<slug>`) -> workspace
+  (`/create/<slug>`: upload, framing, schema-built form, settings, review) -> job (`/videos/<id>`) -> My videos.
+- `npm start`, `npm test` (20 end-to-end tests, test-only mock provider, free), `npm run credits`.
+- Generation: `ENGINE=fal` + `FAL_KEY` (or `FAL_AUTH=proxy` in cloud sessions). Unset = switched off and
+  the site says so. `ENGINE=mock` exists for tests only and is refused outside `NODE_ENV=test`: never
+  show simulated or prerecorded output to customers. Never switch on `fal` without the user asking.
+- fal adapter (`app/providers/fal.ts`) follows fal's docs as checked 16 Nov 2026: CDN upload, queue submit,
+  status, result. A submit that may have been accepted is never resent automatically. Live-verified:
+  the CDN upload only. Submitting a generation costs money and has not been run through this code.
+- Jobs (`app/jobs.ts`) are persisted at every step and resumed on start-up; failures refund credits once.
+- Templates: `catalog/templates/*.json`; prompts stay server-side (`app/prompt.ts` assembles them).
+- Media: no sample or preview media is approved. Never add any without the founders' explicit approval
+  (`docs/MEDIA.md`).
+- Brief exclusions for the website (16 Nov 2026): no gradients, Lucide, em dashes, Inter/Geist/Space
+  Grotesk, side stripes, fake proof, bento grids, terminal mock-ups, "not X but Y" slogans, checkmark
+  bullets, three-tier pricing, pill or soft rounded shapes (0-4px radius), purple, skeleton loaders,
+  radial orbs, dot grids, sparkles, animated arrows, neon, pastel palettes, Terms/Privacy pages. UK English.
+- Payments: `PAYMENTS=moyasar` written, tested against a stand-in; off by the founder's choice for now.
+- Hosting: `Dockerfile` + `railway.json`, steps in `docs/DEPLOY.md`. Production runs plain `node`, so keep
+  the code to erasable TypeScript (`erasableSyntaxOnly`).
+- Not built yet: email verification, password reset, an admin view, Arabic interface (the UI copy is
+  English only in `app/public/js/copy.js` and the views).
 
 ## Hard rules
 
@@ -47,10 +58,9 @@ orders with automatic refund on failure, download. Zero dependencies (node:http,
 - Videos have no text and no music by default. Captions are a separate optional feature; music is added by the merchant in TikTok/Instagram.
 - Prepaid credits only, no unlimited plans.
 
-## Current stage
+## Earlier render test
 
-Week 1 render test (Nov 16-22 2026): a command-line script, photo + template -> mp4.
-No web app, accounts or database yet. First results: `docs/RENDER-TEST.md`.
+The command-line render experiments (`render/`, results in `docs/RENDER-TEST.md`) are paused.
 
 ## Stack and commands
 

@@ -1,0 +1,78 @@
+{
+  "id": "beauty-salon-space",
+  "slug": "beauty-salon-space",
+  "version": 1,
+  "name": "Salon interior",
+  "niche": "beauty",
+  "summary": "A slow glide through your salon, with soft reflections.",
+  "outcome": "A slow glide through your salon, with mirrors and lights catching gentle reflections.",
+  "photoGuidance": [
+    "A photo of your salon with the lights on.",
+    "Chairs and stations tidy.",
+    "Taken from the door or a corner."
+  ],
+  "limitations": [
+    "The video stays within what your photo shows. It can't show rooms, angles or parts of the space that aren't in the photo.",
+    "Text and logos in your photo may change in the video. Check the result before you post it."
+  ],
+  "inputs": [
+    {
+      "id": "subject",
+      "type": "text",
+      "label": "The space",
+      "help": "For example, 'salon with four styling chairs'.",
+      "required": true,
+      "maxLength": 80,
+      "example": "Salon with four styling chairs"
+    },
+    {
+      "id": "keep",
+      "type": "text",
+      "label": "Details to keep as they are",
+      "help": "Optional. For example, the colour of your cups or the shape of a sign.",
+      "required": false,
+      "maxLength": 120
+    },
+    {
+      "id": "avoid",
+      "type": "text",
+      "label": "Anything to leave out",
+      "help": "Optional. For example, no smoke or no people.",
+      "required": false,
+      "maxLength": 120
+    }
+  ],
+  "output": {
+    "aspectRatios": [
+      "16:9",
+      "9:16"
+    ],
+    "defaultAspectRatio": "16:9",
+    "durations": [
+      5
+    ],
+    "defaultDuration": 5,
+    "resolutions": [
+      "1080p",
+      "720p"
+    ],
+    "defaultResolution": "1080p"
+  },
+  "model": "kling-v4",
+  "availability": "available",
+  "preview": {
+    "asset": null,
+    "approved": false
+  },
+  "prompt": {
+    "preserve": "Keep everything in the photo recognisable: the same objects, shapes, colours and proportions. Keep any printed text, labels and logos as they are.",
+    "avoid": "Do not add people, hands, text, captions, logos or new objects. No sudden cuts, no camera shake, no warping or melting of surfaces.",
+    "subject": "The photo shows {subject}.",
+    "composition": "Keep the layout and straight lines as in the photo.",
+    "environment": "The salon stays as in the photo, with no people.",
+    "camera": "The camera glides slowly and smoothly to one side.",
+    "subjectMotion": "Nothing in the room moves.",
+    "lighting": "Soft interior light with gentle reflections in the mirrors.",
+    "mood": "Fresh and calm."
+  }
+}

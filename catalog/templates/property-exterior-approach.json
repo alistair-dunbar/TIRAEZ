@@ -1,0 +1,101 @@
+{
+  "id": "property-exterior-approach",
+  "slug": "property-exterior-approach",
+  "version": 1,
+  "name": "Exterior, slow approach",
+  "niche": "real-estate",
+  "summary": "A slow forward glide towards the building, with clouds drifting.",
+  "outcome": "A slow forward glide towards the building in your photo, with clouds drifting and natural daylight.",
+  "photoGuidance": [
+    "A photo of the front of the property in daylight.",
+    "Straight lines: hold the camera level.",
+    "The whole building in frame, with some sky above it."
+  ],
+  "limitations": [
+    "The video stays within what your photo shows. It can't show rooms, angles or parts of the property that aren't in the photo.",
+    "Text and logos in your photo may change in the video. Check the result before you post it."
+  ],
+  "inputs": [
+    {
+      "id": "subject",
+      "type": "text",
+      "label": "The property",
+      "help": "For example, 'two-storey villa with a garden'.",
+      "required": true,
+      "maxLength": 80,
+      "example": "Two-storey villa with a garden"
+    },
+    {
+      "id": "sky",
+      "type": "select",
+      "label": "Sky",
+      "help": null,
+      "required": true,
+      "default": "as-photo",
+      "options": [
+        {
+          "value": "as-photo",
+          "label": "As in the photo",
+          "prompt": "The sky stays as in the photo, with slight natural movement."
+        },
+        {
+          "value": "clouds",
+          "label": "Drifting clouds",
+          "prompt": "Soft white clouds drift slowly across a clear sky."
+        }
+      ]
+    },
+    {
+      "id": "keep",
+      "type": "text",
+      "label": "Details to keep as they are",
+      "help": "Optional. For example, the colour of your cups or the shape of a sign.",
+      "required": false,
+      "maxLength": 120
+    },
+    {
+      "id": "avoid",
+      "type": "text",
+      "label": "Anything to leave out",
+      "help": "Optional. For example, no smoke or no people.",
+      "required": false,
+      "maxLength": 120
+    }
+  ],
+  "output": {
+    "aspectRatios": [
+      "16:9",
+      "9:16"
+    ],
+    "defaultAspectRatio": "16:9",
+    "durations": [
+      5
+    ],
+    "defaultDuration": 5,
+    "resolutions": [
+      "1080p",
+      "720p"
+    ],
+    "defaultResolution": "1080p"
+  },
+  "model": "kling-v4",
+  "availability": "available",
+  "preview": {
+    "asset": null,
+    "approved": false
+  },
+  "prompt": {
+    "preserve": "Keep everything in the photo recognisable: the same objects, shapes, colours and proportions. Keep any printed text, labels and logos as they are.",
+    "avoid": "Do not add people, hands, text, captions, logos or new objects. No sudden cuts, no camera shake, no warping or melting of surfaces.",
+    "subject": "The photo shows the exterior of {subject}.",
+    "composition": "Keep the building whole and level in the frame.",
+    "environment": "The surroundings stay exactly as in the photo.",
+    "camera": "The camera glides slowly and smoothly forward towards the building.",
+    "subjectMotion": {
+      "input": "sky"
+    },
+    "lighting": "Natural daylight, as in the photo.",
+    "mood": "Bright and welcoming.",
+    "preserveExtra": "Keep the building's windows, doors and roofline exactly as they are."
+  }
+}

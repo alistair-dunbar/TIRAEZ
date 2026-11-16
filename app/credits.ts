@@ -89,17 +89,30 @@ export function purchaseOwner(purchaseId: number): number | undefined {
   return (db.prepare("SELECT user_id FROM purchases WHERE id = ?").get(purchaseId) as any)?.user_id;
 }
 
-/** Takes one credit for a video. Throws if the balance is empty. Call inside a transaction. */
-export function spendForVideo(userId: number, videoId: number): void {
-  const r = db.prepare("UPDATE users SET credits = credits - 1 WHERE id = ? AND credits >= 1").run(userId);
+/** Takes credits for a job. Throws if the balance is too low. Call inside a transaction. */
+export function spendForJob(userId: number, jobId: number, credits: number): void {
+  const r = db.prepare("UPDATE users SET credits = credits - ? WHERE id = ? AND credits >= ?").run(credits, userId, credits);
   if (r.changes !== 1) throw new UserError("no_credits", 402);
-  db.prepare("INSERT INTO credit_events (user_id, delta, reason, ref) VALUES (?, -1, 'video', ?)").run(userId, String(videoId));
+  db.prepare("INSERT INTO credit_events (user_id, delta, reason, ref) VALUES (?, ?, 'video', ?)").run(userId, -credits, String(jobId));
 }
 
-/** Gives the credit back when a video fails. Never refunds the same video twice. */
-export function refundVideo(userId: number, videoId: number): void {
+/** Returns a failed job's credits. Never refunds the same job twice. Returns true once the refund exists. */
+export function refundJob(userId: number, jobId: number, credits: number): boolean {
   tx(() => {
-    const done = db.prepare("SELECT 1 FROM credit_events WHERE reason = 'refund' AND ref = ?").get(String(videoId));
-    if (!done) change(userId, 1, "refund", String(videoId));
+    const done = db.prepare("SELECT 1 FROM credit_events WHERE reason = 'refund' AND ref = ?").get(String(jobId));
+    if (!done) change(userId, credits, "refund", String(jobId));
   });
+  return isRefunded(jobId);
+}
+
+export function isRefunded(jobId: number): boolean {
+  return !!db.prepare("SELECT 1 FROM credit_events WHERE reason = 'refund' AND ref = ?").get(String(jobId));
+}
+
+/** Operator tool (npm run credits): adds credits to an account without a payment. */
+export function grantCredits(email: string, credits: number, note: string): number {
+  const u = db.prepare("SELECT id FROM users WHERE email = ?").get(email.trim().toLowerCase()) as any;
+  if (!u) throw new Error(`No account for ${email}`);
+  tx(() => change(u.id, credits, "grant", note.slice(0, 200)));
+  return balance(u.id);
 }

@@ -48,24 +48,60 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS uploads (
+  -- A customer's photo after upload: re-encoded upright, metadata (including location) removed.
+  CREATE TABLE IF NOT EXISTS photos (
     id TEXT PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id),
     file TEXT NOT NULL,
-    mime TEXT NOT NULL,
+    width INTEGER NOT NULL,
+    height INTEGER NOT NULL,
+    bytes INTEGER NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS videos (
+  -- One generation request. Everything needed to explain, retry or recover it is stored here.
+  CREATE TABLE IF NOT EXISTS jobs (
     id INTEGER PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id),
+    client_key TEXT NOT NULL,
     template_id TEXT NOT NULL,
-    upload_id TEXT REFERENCES uploads(id),
-    status TEXT NOT NULL,          -- queued | processing | done | failed
-    file TEXT,
-    error TEXT,
+    template_version INTEGER NOT NULL,
+    template_name TEXT NOT NULL,
+    photo_id TEXT NOT NULL REFERENCES photos(id),
+    crop TEXT NOT NULL,                 -- JSON {x,y,w,h} in photo pixels
+    inputs TEXT NOT NULL,               -- JSON, validated customer inputs
+    settings TEXT NOT NULL,             -- JSON {aspectRatio,duration,resolution}
+    prompt TEXT NOT NULL,               -- assembled server-side, never sent to the browser
+    model TEXT NOT NULL,
+    credits INTEGER NOT NULL,
+    status TEXT NOT NULL,               -- queued | uploading | submitting | in_queue | in_progress | saving | completed | failed
+    provider TEXT NOT NULL,
+    provider_request_id TEXT,
+    provider_status_url TEXT,
+    provider_response_url TEXT,
+    provider_input_url TEXT,
+    provider_output_url TEXT,
+    submit_attempts INTEGER NOT NULL DEFAULT 0,
+    source_file TEXT,                   -- the cropped image actually sent
+    output_file TEXT,
+    poster_file TEXT,
+    output_meta TEXT,                   -- JSON {width,height,duration,bytes}
+    check_failures INTEGER NOT NULL DEFAULT 0,
+    last_check_ok_at TEXT,
+    failure_code TEXT,
+    failure_detail TEXT,                -- internal only
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    finished_at TEXT
+    submitted_at TEXT,
+    finished_at TEXT,
+    UNIQUE (user_id, client_key)
+  );
+
+  -- Estimated provider spend, for the optional GENERATION_BUDGET_USD safety cap.
+  CREATE TABLE IF NOT EXISTS provider_spend (
+    id INTEGER PRIMARY KEY,
+    job_id INTEGER NOT NULL,
+    usd REAL NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 `);
 

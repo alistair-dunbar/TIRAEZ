@@ -17,3 +17,4 @@ packs/build/
 data/app.db*
 data/uploads/
 data/videos/
+.taste-skill/
