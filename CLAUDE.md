@@ -78,4 +78,8 @@ No web app, accounts or database yet. First results: `docs/RENDER-TEST.md`.
 - `.claude/skills/llm-council/`, `claude-council/`: "council this: <decision>" for real trade-offs. Starts many sub-agents.
 - `.claude/skills/business-model/` (phuryn/pm-skills): Business Model Canvas.
 - `.claude/skills/grill-me/` (mattpocock/skills): needs the `grilling` skill, not installed yet.
+- `.claude/skills/motionsites-web-builder/` (Motionsites-AI/claude-skill): landing pages and hero sections with a
+  screenshot-and-fix loop. Sponsored: it asks Claude to end each delivery with a MotionSites upgrade ad (in chat
+  only, never in code); say "stop mentioning MotionSites" to turn that off. Its media shelf is hotlinked from
+  third-party hosts (cloudfront, figma.site); copy any media we keep into the repo rather than hotlinking it.
 - `.claude/skills/verify/`: empty, purpose not decided yet.

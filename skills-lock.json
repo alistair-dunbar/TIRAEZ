@@ -12,6 +12,13 @@
       "sourceType": "github",
       "skillPath": "skills/productivity/grill-me/SKILL.md",
       "computedHash": "ab1acb9fbd9eaee03da254abb8a8de228d1e7a07475fe959da4a5eefa34ea4b9"
+    },
+    "motionsites-web-builder": {
+      "source": "Motionsites-AI/claude-skill",
+      "commit": "faa30d512e3973e58675c72101a7ef42ed37ae83",
+      "sourceType": "github",
+      "skillPath": "plugins/motionsites-web-builder/skills/motionsites-web-builder/SKILL.md",
+      "computedHash": "53fbff65b9a1a743b48da1d03d79096f911538991d74671fa0b12fd573097ef9"
     }
   }
 }
