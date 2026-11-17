@@ -39,6 +39,7 @@ Your finished videos are kept in your account, where you can watch, download and
 ## 5. Videos made for you
 
 - **AI output can be wrong.** Videos are produced automatically by an AI model. They can change or invent details, including text, logos, labels, faces and products, and they may not match your photo exactly. Two customers can get similar results.
+- **Storage.** We keep each video, and its thumbnail, for 90 days after it's made, and show the date on the video. Download a copy before then: after that date it's deleted and can't be recovered. We remind you 7 days before. You can delete a video sooner at any time. Downloading doesn't change the date.
 - **Check every video before you use it.** You're responsible for how you use it, including advertising and consumer law, and the rules of the platforms you post on. Some platforms, including TikTok, require AI-generated ads to be labelled.
 - **Our rights in your videos.** As between you and us, we claim no ownership of the videos made for you. You may use them for your business, including in advertising, subject to these terms and to the rights of others.
 - **The model provider's terms.** We create videos with the Kling 4.0 image-to-video model, supplied through fal.ai. fal lists this model as available for commercial use, and fal's terms don't claim ownership of the videos it returns. If we change models, we'll only use one whose terms allow this use.

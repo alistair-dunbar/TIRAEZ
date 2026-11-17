@@ -2,7 +2,7 @@
 import { api, ApiError, uploadPhoto } from "../api.js";
 import { cropper, framingFromPixels } from "../crop.js";
 import { h, id } from "../dom.js";
-import { credits, errorText, formatName, tooLarge, tooSmall } from "../copy.js";
+import { RETENTION_NOTICE, credits, errorText, formatName, tooLarge, tooSmall } from "../copy.js";
 import { navigate, setUser } from "../main.js";
 import { getDraft, loadCatalogue, newKey, nicheLabel, setDraft, store } from "../state.js";
 import { notice, progress, setBusy, spinner } from "./parts.js";
@@ -38,7 +38,7 @@ export async function createView(ctx) {
         inputs: job.inputs, settings: job.settings, clientKey: newKey(), fromJob: job.id,
       };
       notes.push(notice("Your earlier details are filled in", `Check them, change anything you like, then generate. A new version uses ${credits(t.cost[job.settings.duration] ?? 1)}.`));
-      if (!job.photo) notes.push(notice("Your earlier photo is no longer available", "Upload a photo to continue."));
+      if (!job.photo) notes.push(notice("Your earlier photo is no longer available", "We delete source photos 7 days after a video is finished. Upload the photo again to continue; your details are kept."));
       if (job.template.id === t.id && !job.template.current) notes.push(notice("This template has changed", "It has been updated since your earlier video, so the new version may look different."));
       history.replaceState(null, "", `/create/${t.slug}`);
     } catch { /* fall back to whatever draft there is */ }
@@ -251,6 +251,7 @@ export async function createView(ctx) {
       h("dt", {}, "Settings"), revFormat,
       h("dt", {}, "Cost"), revCost),
     creditNote,
+    h("p", { class: "notice-text" }, RETENTION_NOTICE),
     h("div", { class: "review__bar" }, generate, status),
   );
 

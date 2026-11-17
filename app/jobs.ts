@@ -12,6 +12,7 @@ import { creditsFor, generation, models } from "./config.ts";
 import { balance, consumeJob, isRefunded, refundJob, spendForJob } from "./credits.ts";
 import { db, tx } from "./db.ts";
 import { redact } from "./guard.ts";
+import { retention } from "./legal.ts";
 import { cropPhoto, posterFrame, probe } from "./media.ts";
 import { DATA_DIR, photoFor } from "./photos.ts";
 import { assemblePrompt, validateInputs, validateSettings, type FieldErrors } from "./prompt.ts";
@@ -161,6 +162,24 @@ function fail(job: Row, code: string, detail: string): void {
 }
 
 const now = () => new Date().toISOString().replace("T", " ").slice(0, 19);
+const daysFromNow = (days: number) => new Date(Date.now() + days * 86_400_000).toISOString().replace("T", " ").slice(0, 19);
+
+/**
+ * Jobs still marked as in progress long after they should have ended, with nothing in this process
+ * working on them (for example after a crash). They're failed and their credits returned, so they
+ * stop holding a photo and credits indefinitely.
+ */
+export function failStaleJobs(hours: number): number[] {
+  const rows = db.prepare(`SELECT * FROM jobs WHERE status IN (${ACTIVE.map(() => "?").join(",")}) AND created_at < datetime('now', ?)`)
+    .all(...ACTIVE, `-${hours} hours`) as Row[];
+  const failed: number[] = [];
+  for (const j of rows) {
+    if (timers.has(j.id) || running.has(j.id)) continue;
+    fail(j, "timeout", "stale: no progress recorded for too long");
+    if (get(j.id)?.status === "failed") failed.push(j.id);
+  }
+  return failed;
+}
 const ageMinutes = (ts: string | null) => (ts ? (Date.now() - Date.parse(`${ts.replace(" ", "T")}Z`)) / 60_000 : 0);
 const backoff = (failures: number) => Math.min(60_000, POLL_MS * 2 ** Math.min(failures, 6));
 
@@ -263,7 +282,8 @@ async function advance(id: number): Promise<void> {
       const meta = await probe(out);
       await posterFrame(out, poster);
       const bytes = readFileSync(out).length;
-      if (set(id, { status: "completed", output_file: out, poster_file: poster, finished_at: now(),
+      // The storage deadline starts at successful completion, on the server's clock.
+      if (set(id, { status: "completed", output_file: out, poster_file: poster, finished_at: now(), expires_at: daysFromNow(retention.videoDays),
         output_meta: JSON.stringify({ width: meta.width, height: meta.height, duration: meta.duration, bytes }) })) consumeJob(job.user_id, id);
     } catch (e) {
       rmSync(out, { force: true });
@@ -319,14 +339,20 @@ export function publicJob(job: Row) {
     createdAt: job.created_at,
     finishedAt: job.finished_at,
     output: job.status === "completed" ? { available: Boolean(fileThere), ...(meta ?? {}) } : null,
+    // Storage deadline (set by the server at completion); expired = the files were deleted on that date.
+    expiresAt: job.status === "completed" ? job.expires_at ?? null : null,
+    expired: Boolean(job.media_deleted_at),
+    expiredAt: job.media_deleted_at ?? null,
+    expiringSoon: Boolean(job.status === "completed" && !job.media_deleted_at && job.expires_at &&
+      Date.parse(`${String(job.expires_at).replace(" ", "T")}Z`) - Date.now() <= retention.expiryNoticeDays * 86_400_000),
     poster: job.poster_file && existsSync(job.poster_file) ? `/api/jobs/${job.id}/poster.jpg` : null,
     failure: job.status === "failed" ? { code: job.failure_code, refunded: isRefunded(job.id) } : null,
   };
 }
 
 function photoMeta(id: string): { id: string; width: number; height: number } | null {
-  const p = db.prepare("SELECT id, width, height, file FROM photos WHERE id = ?").get(id) as Row | undefined;
-  return p && existsSync(p.file) ? { id: p.id, width: p.width, height: p.height } : null;
+  const p = db.prepare("SELECT id, width, height, file, deleted_at FROM photos WHERE id = ?").get(id) as Row | undefined;
+  return p && !p.deleted_at && existsSync(p.file) ? { id: p.id, width: p.width, height: p.height } : null;
 }
 
 export function jobFor(userId: number, id: number): Row | null {

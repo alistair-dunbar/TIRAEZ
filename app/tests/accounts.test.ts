@@ -20,7 +20,8 @@ const { db } = await import("../db.ts");
 const { grantCredits } = await import("../credits.ts");
 const { legal, business, retention, compliance, termsVersion, LEGAL_DOCS } = await import("../legal.ts");
 const { resetLimits, redact } = await import("../guard.ts");
-const { runRetention, liftAgeRestriction } = await import("../account.ts");
+const { liftAgeRestriction } = await import("../account.ts");
+const { runRetention } = await import("../retention.ts");
 const { refundPurchase, creditSummary } = await import("../credits.ts");
 const { suspend } = await import("../reports.ts");
 
@@ -221,10 +222,10 @@ test("restricted accounts are deleted after the retention period unless correcte
   const { c, email: e } = await legacyUser();
   const id = (db.prepare("SELECT id FROM users WHERE email = ?").get(e) as any).id;
   await c("POST", "/api/onboarding", { name: "Kid", age: "15", confirmAdult: true, agreeTerms: true, termsVersion: termsVersion() });
-  runRetention();
+  await runRetention();
   assert.ok(db.prepare("SELECT 1 FROM users WHERE id = ?").get(id), "kept during the period");
   db.prepare("UPDATE users SET age_restricted_at = datetime('now', ?) WHERE id = ?").run(`-${retention.ageRestrictedDays + 1} days`, id);
-  runRetention();
+  await runRetention();
   assert.equal(db.prepare("SELECT 1 FROM users WHERE id = ?").get(id), undefined);
 });
 
@@ -265,7 +266,9 @@ test("legal pages: server-rendered, every footer link works, drafts are marked",
     assert.match(html, /data-static="\/legal\//);
     assert.match(html, /<h1 class="h1">/);
     assert.doesNotMatch(html, /\{\{/, `${slug} has no raw tokens`);
-    assert.match(html, /Draft for review, not in force/);
+    // Pages still waiting for operator facts are marked as drafts; complete ones aren't.
+    if (/mark class="todo"/.test(html)) assert.match(html, /Draft for review, not in force/);
+    else assert.doesNotMatch(html, /Draft for review/);
   }
   assert.equal((await fetch(base + "/legal/nothing")).status, 404);
 });
@@ -429,13 +432,13 @@ test("retention: unused photos past the limit, expired sessions and partial uplo
   const { c } = await eligibleUser();
   const photo = (await c("POST", "/api/photos", undefined, { raw: PHOTO })).data;
   const file = (db.prepare("SELECT file FROM photos WHERE id = ?").get(photo.id) as any).file;
-  db.prepare("UPDATE photos SET created_at = datetime('now', ?) WHERE id = ?").run(`-${retention.unusedPhotosDays + 1} days`, photo.id);
+  db.prepare("UPDATE photos SET created_at = datetime('now', ?) WHERE id = ?").run(`-${retention.abandonedUploadDays + 1} days`, photo.id);
   db.prepare("UPDATE sessions SET expires_at = datetime('now', '-1 minute') WHERE token_hash = (SELECT token_hash FROM sessions ORDER BY rowid DESC LIMIT 1)").run();
   const stray = join(process.env.DATA_DIR!, "photos", "stray.upload");
   writeFileSync(stray, "x");
   utimesSync(stray, new Date(Date.now() - 2 * 3600_000), new Date(Date.now() - 2 * 3600_000));
-  const r = runRetention();
-  assert.ok(r.photos >= 1 && r.sessions >= 1 && r.strays >= 1);
+  const r = await runRetention();
+  assert.ok(r.abandoned >= 1 && r.sessions >= 1 && r.strays >= 1);
   assert.ok(!existsSync(file)); assert.ok(!existsSync(stray));
 });
 

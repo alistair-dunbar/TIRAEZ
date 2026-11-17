@@ -25,8 +25,19 @@ Zero dependencies (node:http, node:sqlite, node:crypto, system ffmpeg). Plain JS
 
 - Journey: landing -> catalogue (`/templates`) -> template (`/templates/<slug>`) -> workspace
   (`/create/<slug>`: upload, framing, schema-built form, settings, review) -> job (`/videos/<id>`) -> My videos.
-- `npm start`, `npm test` (62 end-to-end tests, test-only mock provider and mail outbox, free), `npm run credits`,
-  `npm run reports`, `npm run suspend`, `npm run refunds`, `npm run launch-check` (what each production gate waits for).
+- `npm start`, `npm test` (75 end-to-end tests, test-only mock provider and mail outbox, free), `npm run credits`,
+  `npm run reports`, `npm run suspend`, `npm run refunds`, `npm run launch-check` (what each production gate waits for),
+  `npm run retention -- --inventory|--dry-run|--enforce`.
+- Retention (approved 17 Nov 2026, `config/retention.json`, `app/retention.ts`, `docs/RETENTION.md`):
+  - videos 90 days from completion (`jobs.expires_at`, server-set);
+  - source photos 7 days after the last job using them ends;
+  - abandoned uploads 7 days;
+  - unverified accounts 30 days from creation;
+  - restricted accounts 30 days;
+  - reset links 1 hour.
+
+  The job runs hourly. The media rules are dry-run until `RETENTION_MEDIA=enforce`. Never touch credit or payment records.
+- Contact: support@tiraez.com (domain mail is on Zoho). Policies publish one by one as soon as every value they use is filled in.
 - Operator (17 Nov 2026): an individual with a Saudi freelance document (not a commercial registration; an
   e-commerce "practitioner"). Facts go in `config/business.json`, never invented. Gates are scoped: policies,
   accounts (also needs the Railway and Resend transfer safeguards in `config/compliance.json`), generation

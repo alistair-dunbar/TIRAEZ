@@ -39,6 +39,12 @@ Error if left unticked: "Confirm that you are at least 18 years old."
 
 > Your photo and details are stored in your account and sent to our video model provider, fal.ai, and the model's developer, Kling, to make your video. We don't use them to train AI models. Only upload photos you have the right to use, and don't include people without their permission. See the [Acceptable Use and AI Content Policy] and the [Privacy Policy].
 
+## Before generating (review step)
+
+> Generated videos are stored for 90 days. Download a copy before the expiry date.
+
+On the result page and in My videos: "Available to download until [date]." Within 7 days of that date: "This video will be deleted soon. Download a copy before [date]. After that it can't be recovered. Downloading doesn't change the date." Once expired: "The video file was deleted on [date]."
+
 ## Before paying (shown next to the pay button once payments are switched on)
 
 Button: "Pay SAR [price] for [n] credits"

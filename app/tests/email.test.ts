@@ -21,7 +21,7 @@ const { db } = await import("../db.ts");
 const { outbox } = await import("../mail.ts");
 const { termsVersion } = await import("../legal.ts");
 const { resetLimits } = await import("../guard.ts");
-const { runRetention } = await import("../account.ts");
+const { runRetention } = await import("../retention.ts");
 
 let base = "";
 before(() => new Promise<void>((r) => server.listen(0, () => { base = `http://localhost:${(server.address() as any).port}`; r(); })));
@@ -249,7 +249,7 @@ test("abandoned sign-ups that never confirmed are deleted after the retention pe
   const { email } = await signUp();
   const id = (db.prepare("SELECT id FROM users WHERE email = ?").get(email) as any).id;
   db.prepare("UPDATE users SET created_at = datetime('now', '-31 days') WHERE id = ?").run(id);
-  const r = runRetention();
+  const r = await runRetention();
   assert.ok(r.unverified >= 1);
   assert.equal(db.prepare("SELECT 1 FROM users WHERE id = ?").get(id), undefined);
   assert.equal((db.prepare("SELECT COUNT(*) AS n FROM email_tokens WHERE user_id = ?").get(id) as any).n, 0);

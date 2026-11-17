@@ -10,7 +10,7 @@ These notes aren't shown to customers. Each one points at a clause in `legal/*.m
 |---|---|---|
 | `[LEGAL OPERATOR NAME]` | Terms (intro, §13), Privacy, Contact | `operatorName`, the name you trade under as the operator. |
 | `[BUSINESS ADDRESS REQUIRED FOR PUBLICATION]` | Terms, Privacy, Contact | `address`. E-Commerce Law Art 6 requires an address unless your store is authenticated through the Ministry-linked platform. |
-| `[PUBLIC CONTACT EMAIL]` | all | `contactEmail`. |
+| (filled) | all | `contactEmail` = support@tiraez.com. tiraez.com's MX records point to Zoho; check the mailbox exists. |
 | `[FREELANCE LICENCE DETAILS, IF APPLICABLE]` | Contact | `licenceDetails`. Optional: set it to `""` to show nothing, or to e.g. "Freelance licence: FL-…". Law Art 6(c) mentions a registration number "if any, or of any other publicly available register". Showing the licence number is a reasonable way to meet that, but it isn't a stated requirement. No copy of the licence or ID is needed. |
 
 **`config/legal.json`**
@@ -27,11 +27,11 @@ These notes aren't shown to customers. Each one points at a clause in `legal/*.m
 | `[HOW LONG A REFUND TAKES TO REACH THE CARD]` | Billing | Payments only. Check with Moyasar. |
 | `[CONFIRMED RETENTION PERIOD FOR PURCHASE RECORDS]` | Privacy | Payments only. Ask an accountant. |
 
-**`config/retention.json`** (set `"confirmed": true` once approved)
+**`config/retention.json`** (approved on 17 Nov 2026; see docs/RETENTION.md)
 
 | Placeholder | Where | Note |
 |---|---|---|
-| `[CONFIRMED RETENTION PERIOD]` (×3) | Privacy | The code currently applies: unused photos deleted after 7 days; unconfirmed accounts after 30 days; restricted under-18 accounts after 30 days. These are proposals, not approved decisions. |
+| (none left) | Privacy | All retention periods are now approved: videos 90 days, source photos 7 days, abandoned uploads 7 days, unverified accounts 30 days, restricted accounts 30 days, reset links 1 hour. |
 
 While payments are switched off, the payment-only placeholders don't block the other documents. A published billing page then says these points "will be set out here before buying credits opens".
 

@@ -79,6 +79,13 @@ export function dateText(sqlUtc) {
   return d.toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+/** "12 February 2027" from a server UTC timestamp. */
+export function dayText(sqlUtc) {
+  return new Date(`${String(sqlUtc).replace(" ", "T")}Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+
+export const RETENTION_NOTICE = "Generated videos are stored for 90 days. Download a copy before the expiry date.";
+
 export function bytesText(n) {
   return n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
 }

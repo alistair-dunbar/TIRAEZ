@@ -162,56 +162,12 @@ export function eraseAccount(userId: number): DeletionResult {
 export function deleteAccount(u: User, password: unknown, confirm: unknown): DeletionResult {
   checkPassword(u.id, password);
   if (confirm !== "delete") throw new UserError("bad_request");
+  // Videos not yet sent to the model are cancelled (credits returned). A video already with the model
+  // can't be recalled and would come back after deletion, so deletion waits for it to finish.
+  cancelQueuedJobs(u.id, "cancelled");
   const active = db.prepare(`SELECT COUNT(*) AS n FROM jobs WHERE user_id = ? AND status IN (${ACTIVE.map(() => "?").join(",")})`).get(u.id, ...ACTIVE) as Row;
-  // A video still being made would come back after deletion; wait for it to finish.
   if (active.n > 0) throw new UserError("jobs_active", 409);
   return eraseAccount(u.id);
 }
 
-// ---------------------------------------------------------------------------------------------
-// Retention: runs at start-up and every hour
-
-export function runRetention(now = Date.now()): { photos: number; sessions: number; strays: number; tokens: number; unverified: number } {
-  // Photos uploaded but never used in a video.
-  const old = db.prepare(`SELECT id, file FROM photos p WHERE created_at < datetime('now', ?)
-      AND NOT EXISTS (SELECT 1 FROM jobs j WHERE j.photo_id = p.id)`).all(`-${retention.unusedPhotosDays} days`) as Row[];
-  for (const p of old) { db.prepare("DELETE FROM photos WHERE id = ?").run(p.id); removeFiles([p.file]); }
-  const sessions = Number(db.prepare("DELETE FROM sessions WHERE expires_at <= datetime('now')").run().changes);
-  // Email links a week after they expired or were used.
-  const tokens = Number(db.prepare("DELETE FROM email_tokens WHERE expires_at <= datetime('now', '-7 days')").run().changes);
-  // Sign-ups whose email was never confirmed, with nothing bought: closed and deleted.
-  const abandoned = db.prepare(`SELECT id FROM users u WHERE email_verified_at IS NULL AND deleted_at IS NULL
-      AND created_at < datetime('now', ?) AND NOT EXISTS (SELECT 1 FROM purchases p WHERE p.user_id = u.id)`)
-    .all(`-${retention.unverifiedAccountsDays} days`) as Row[];
-  for (const a of abandoned) eraseAccount(a.id);
-  // Accounts restricted for declaring an age under 18, not corrected within the period. Videos still
-  // with the model are left to finish first, so nothing comes back after deletion.
-  const restricted = db.prepare(`SELECT id FROM users u WHERE age_restricted_at < datetime('now', ?) AND deleted_at IS NULL
-      AND NOT EXISTS (SELECT 1 FROM jobs j WHERE j.user_id = u.id AND j.status IN (${ACTIVE.map(() => "?").join(",")}))`)
-    .all(`-${retention.ageRestrictedDays} days`, ...ACTIVE) as Row[];
-  for (const a of restricted) eraseAccount(a.id);
-  // Half-written uploads left by a crash.
-  let strays = 0;
-  const dir = `${DATA_DIR}/photos`;
-  if (existsSync(dir)) {
-    for (const f of readdirSync(dir)) {
-      if (!f.endsWith(".upload")) continue;
-      const path = `${dir}/${f}`;
-      if (now - statSync(path).mtimeMs > 3600_000) { rmSync(path, { force: true }); strays++; }
-    }
-  }
-  return { photos: old.length, sessions, strays, tokens, unverified: abandoned.length + restricted.length };
-}
-
-let timer: ReturnType<typeof setInterval> | null = null;
-export function startRetention(): void {
-  const run = () => {
-    try {
-      const r = runRetention();
-      if (r.photos || r.sessions || r.strays || r.tokens || r.unverified) console.log(`retention: removed ${r.photos} unused photo(s), ${r.sessions} expired session(s), ${r.strays} partial upload(s), ${r.tokens} old email link(s), ${r.unverified} unconfirmed account(s)`);
-    } catch (e) { console.error("retention run failed", e); }
-  };
-  run();
-  timer ??= setInterval(run, 3600_000);
-  timer.unref();
-}
+// Retention (time-based deletion) lives in app/retention.ts.

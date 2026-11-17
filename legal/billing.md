@@ -14,6 +14,7 @@ This policy is part of our [Terms of Service](/legal/terms). It explains how cre
   - if the video is made, they're **used**;
   - if it fails (for example, the video model refuses the request or doesn't finish), they're **returned** to your balance automatically, and the video's page says so.
 - Your account page shows how many credits are available, set aside, used, returned, and removed by refunds.
+- When a video expires after 90 days, or you delete it, only the file goes. The credits it used and your remaining balance don't change.
 
 ## Prices and payment
 

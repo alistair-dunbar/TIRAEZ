@@ -184,6 +184,27 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS photos_user ON photos(user_id);
 `);
 
+// Retention bookkeeping on jobs and photos (app/retention.ts). Server-side timestamps only.
+const jobCols = new Set((db.prepare("PRAGMA table_info(jobs)").all() as any[]).map((c) => c.name));
+for (const [col, type] of Object.entries({
+  expires_at: "TEXT",               // completed videos: finished_at + videoDays (set by the server, never by a client)
+  expiry_grace: "INTEGER",          // 1 if the date was pushed back when retention was introduced
+  media_deleted_at: "TEXT",         // the video and thumbnail files were deleted (expiry); details cleared
+  source_deleted_at: "TEXT",        // the cropped source copy for this job was deleted
+  expiry_notice_status: "TEXT",     // null | sending | sent | failed
+  expiry_notice_attempts: "INTEGER NOT NULL DEFAULT 0",
+  expiry_notice_sent_at: "TEXT",
+})) if (!jobCols.has(col)) db.exec(`ALTER TABLE jobs ADD COLUMN ${col} ${type}`);
+const photoCols = new Set((db.prepare("PRAGMA table_info(photos)").all() as any[]).map((c) => c.name));
+if (!photoCols.has("deleted_at")) db.exec("ALTER TABLE photos ADD COLUMN deleted_at TEXT"); // file deleted; row kept while jobs refer to it
+db.exec(`CREATE TABLE IF NOT EXISTS retention_runs (
+  id INTEGER PRIMARY KEY,
+  started_at TEXT NOT NULL DEFAULT (datetime('now')),
+  mode TEXT NOT NULL,              -- enforce | dry-run
+  results TEXT NOT NULL,           -- JSON counts per category; never personal content
+  failures INTEGER NOT NULL DEFAULT 0
+)`);
+
 // Purchases gain refund fields; the ledger gets a guard so no balance change can be recorded twice.
 const purchaseCols = new Set((db.prepare("PRAGMA table_info(purchases)").all() as any[]).map((c) => c.name));
 for (const [col, type] of Object.entries({ refunded_at: "TEXT", refunded_credits: "INTEGER", refund_note: "TEXT", refund_provider_ref: "TEXT" })) {

@@ -4,7 +4,8 @@
 import { createReadStream, existsSync, readFileSync, statSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { extname, join, normalize } from "node:path";
-import { accountSummary, deleteAccount, deleteVideo, exportData, restrictForAge, startRetention } from "./account.ts";
+import { accountSummary, deleteAccount, deleteVideo, exportData, restrictForAge } from "./account.ts";
+import { startRetention } from "./retention.ts";
 import {
   SESSION_MAX_AGE, UserError, ValidationError, changePassword, completeOnboarding, createSession, endOtherSessions, endSession,
   login, onboardingNeeds, requireEligible, signup, updateProfile, userById, userFromSession, type User,
@@ -16,7 +17,7 @@ import { cancelEmailChange, checkReset, confirmEmail, notifyExistingAccount, not
 import { clientIp, limitBy, redact } from "./guard.ts";
 import { mailName, mailReady } from "./mail.ts";
 import { createJob, jobFor, listJobs, publicJob, recoverJobs } from "./jobs.ts";
-import { accountsOpen, generationAllowed, legalEnforced, legalPage, legalStatus, paymentTermsMissing, privacyVersion, retention, termsVersion } from "./legal.ts";
+import { accountsOpen, docPublished, generationAllowed, legalEnforced, legalPage, legalStatus, paymentTermsMissing, privacyVersion, retention, termsVersion } from "./legal.ts";
 import { photoFor, savePhoto } from "./photos.ts";
 import { REPORT_KINDS, createReport } from "./reports.ts";
 import { engineName } from "./providers/index.ts";
@@ -117,7 +118,7 @@ function siteInfo(user: User | null) {
     // Accounts only open when there are published terms to agree to and email can confirm the address.
     signupsOpen: accountsOpen() && mailReady(),
     mailOn: mailReady(),
-    legal: { termsVersion: termsVersion(), privacyVersion: privacyVersion(), draft: !legalStatus().published },
+    legal: { termsVersion: termsVersion(), privacyVersion: privacyVersion(), draft: !legalStatus().published, live: legalStatus().live },
     upload: { maxBytes: generation.upload.maxBytes, minShortSide: generation.upload.minShortSide },
     ageRestrictedDays: retention.ageRestrictedDays,
     reportKinds: REPORT_KINDS,
@@ -360,7 +361,7 @@ export const server = createServer(async (req, res) => {
       const doc = legalPage(legalMatch[1]);
       if (doc) {
         res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache",
-          ...(legalStatus().published ? {} : { "X-Robots-Tag": "noindex" }) });
+          ...(docPublished(legalMatch[1]) ? {} : { "X-Robots-Tag": "noindex" }) });
         res.end(req.method === "HEAD" ? undefined : staticPage(path, doc.title, doc.html));
         return;
       }

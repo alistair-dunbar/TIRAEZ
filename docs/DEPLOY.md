@@ -100,12 +100,16 @@ and sign-ups stay closed until then. The adapter is written for **Resend** (plai
 4. In **Railway → the service → Variables**, add the following. Don't paste the key anywhere else: not into chat, code or a committed file.
    - `MAIL=resend`
    - `RESEND_API_KEY=` the key
-   - `MAIL_FROM=Tiraez <account@mail.tiraez.com>` (an address on the verified domain)
+   - `MAIL_FROM=Tiraez <support@tiraez.com>` (an address on the domain verified in Resend; tiraez.com's Resend DKIM, SPF and MX records are already published, region ap-northeast-1)
    - `APP_URL=https://www.tiraez.com` (links in emails are built from this, never from the request)
-   - optionally `MAIL_REPLY_TO=` your support address
+   - `MAIL_REPLY_TO=support@tiraez.com` (replies reach the Zoho mailbox, if it exists)
 5. Redeploy. The start-up log line should end with `email: resend`.
 6. Before opening sign-ups, send yourself a real confirmation and reset email on a non-public preview
    deployment (`LEGAL_PREVIEW=1`), and check that the links open www.tiraez.com and work once.
 
 Without these, `/api/site` reports `mailOn: false`. The forgot-password page then says reset by email
 isn't switched on, and existing accounts can't confirm their email (so they can't upload or generate).
+
+## Retention
+
+`app/retention.ts` runs hourly. Video and source-photo expiry stays in report-only mode until `RETENTION_MEDIA=enforce` is set. Follow `docs/RETENTION.md` (inventory, dry-run, then enforce) before setting it.

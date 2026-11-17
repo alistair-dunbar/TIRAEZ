@@ -40,5 +40,5 @@ export async function savePhoto(userId: number, buf: Buffer): Promise<Photo> {
 
 export function photoFor(userId: number, id: string): { file: string; width: number; height: number } | null {
   if (!/^[a-f0-9]{24}$/.test(id)) return null;
-  return (db.prepare("SELECT file, width, height FROM photos WHERE id = ? AND user_id = ?").get(id, userId) as any) ?? null;
+  return (db.prepare("SELECT file, width, height FROM photos WHERE id = ? AND user_id = ? AND deleted_at IS NULL").get(id, userId) as any) ?? null;
 }

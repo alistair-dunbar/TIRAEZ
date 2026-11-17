@@ -1,7 +1,7 @@
 // My videos: the logged-in customer's real jobs only, newest first.
 import { api, ApiError } from "../api.js";
 import { h } from "../dom.js";
-import { credits, dateText, errorText } from "../copy.js";
+import { credits, dateText, dayText, errorText } from "../copy.js";
 import { setUser } from "../main.js";
 import { store } from "../state.js";
 import { loading, notice, setBusy, spinner } from "./parts.js";
@@ -36,7 +36,11 @@ export async function videosView(ctx) {
         h("a", { class: "btn btn--primary", href: "/templates" }, "Explore templates")));
       return;
     }
-    body.replaceChildren(h("ul", { class: "video-grid" }, data.jobs.map(card)));
+    const soon = data.jobs.filter((j) => j.expiringSoon);
+    body.replaceChildren(
+      soon.length ? notice(soon.length === 1 ? "One of your videos will be deleted soon" : `${soon.length} of your videos will be deleted soon`,
+        "We keep generated videos for 90 days. Download a copy before the date shown on each video; downloading doesn't change it.") : "",
+      h("ul", { class: "video-grid" }, data.jobs.map(card)));
     if (data.jobs.some((j) => j.stage === "queued" || j.stage === "generating")) timer = setTimeout(load, 5000);
   }
 
@@ -78,10 +82,13 @@ function card(job) {
   return h("li", { class: "video-card" },
     h("a", { class: "video-card__thumb", href, tabindex: "-1", "aria-hidden": "true" }, img),
     h("div", { class: "video-card__body" },
-      h("span", { class: `tag ${tagClass}` }, active ? spinner() : null, statusText[job.stage],
-        job.stage === "completed" && !job.output?.available ? " · file unavailable" : ""),
+      h("span", { class: `tag ${tagClass}` }, active ? spinner() : null, job.expired ? "Expired" : statusText[job.stage],
+        job.stage === "completed" && !job.expired && !job.output?.available ? " · file unavailable" : ""),
       h("h2", { class: "entry__name" }, h("a", { href, "aria-label": `${job.template.name}, ${statusText[job.stage]}` }, job.template.name)),
       h("p", { class: "small muted" }, dateText(job.createdAt)),
+      ready && job.expiresAt ? h("p", { class: "small expiry", "data-soon": job.expiringSoon ? "true" : null },
+        `Available to download until ${dayText(job.expiresAt)}.`) : null,
+      job.expired ? h("p", { class: "small muted" }, `File deleted on ${dayText(job.expiredAt)}.`) : null,
     ),
     h("div", { class: "video-card__actions" },
       h("a", { class: "link", href }, ready ? "Watch" : "See status"),

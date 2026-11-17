@@ -1,7 +1,7 @@
 // What still stands between the live site and each operation. Run it with the production settings:
 //   NODE_ENV=production MAIL=resend APP_URL=... npm run launch-check    (or on Railway: node app/launch-check.ts)
 // It reads the config files and environment only; it changes nothing and sends nothing.
-import { business, compliance, legal, legalStatus, paymentTermsMissing, retention, transfersMissing } from "./legal.ts";
+import { compliance, legal, legalStatus, paymentTermsMissing, transfersMissing } from "./legal.ts";
 import { mailReady } from "./mail.ts";
 
 process.env.LEGAL_ENFORCE = "1";
@@ -9,13 +9,14 @@ const lines: string[] = [];
 const item = (ok: boolean, what: string, fix: string) => lines.push(`${ok ? "  ok  " : "  TODO"} ${what}${ok ? "" : `\n         -> ${fix}`}`);
 
 const status = legalStatus();
-const facts = Object.entries(business).filter(([k, v]) => !k.startsWith("_") && v === null).map(([k]) => k);
-lines.push("Accounts (sign-up, login, email confirmation, password reset)");
-item(facts.length === 0, "operator details", `fill in config/business.json: ${facts.join(", ")}`);
-item(retention.confirmed, "retention periods confirmed", "check config/retention.json, then set \"confirmed\": true");
-const policyGaps = status.unresolved.filter((u) => !u.startsWith("business.") && !u.startsWith("retention."));
-item(policyGaps.length === 0, "policy text complete", `still unresolved: ${policyGaps.join(", ")} (config/legal.json)`);
+const facts = [...new Set(status.unresolved.filter((u) => u.startsWith("business.")).map((u) => u.slice(9)))];
+lines.push("Policy pages", `  live: ${status.live.join(", ") || "none"}`);
+item(facts.length === 0, "operator details used by the pages (E-Commerce Law Art 6)", `fill in config/business.json: ${facts.join(", ")}`);
+const policyGaps = status.unresolved.filter((u) => !u.startsWith("business."));
+item(policyGaps.length === 0, "every other value the pages use", `still unresolved: ${policyGaps.join(", ")} (config/legal.json; doc.effective = each page's effective date)`);
 item(legal.status === "published", "policies marked published", "set \"status\": \"published\" in config/legal.json once reviewed");
+lines.push("", "Accounts (sign-up, login, email confirmation, password reset)");
+item(status.published, "all policy pages live", "see above");
 const t = transfersMissing("accounts");
 item(t.length === 0, "safeguards for transfers outside Saudi Arabia (account data)", `record mechanism and riskAssessment for: ${t.join(", ")} in config/compliance.json (docs/compliance/transfers.md)`);
 item(mailReady(), "account email can be sent", "set MAIL=resend, RESEND_API_KEY, MAIL_FROM and APP_URL in Railway Variables (docs/DEPLOY.md)");

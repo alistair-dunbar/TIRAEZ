@@ -708,3 +708,6 @@ mark.todo { background: #F4E4DC; color: var(--clay); padding: 0 3px; border-bott
 .prose ol { list-style: decimal; padding-left: 1.4em; display: grid; gap: var(--s-2); }
 .prose ol li::marker { color: var(--accent); }
 .prose li > ul { margin-top: var(--s-2); }
+.expiry { color: var(--text-2); }
+.expiry[data-soon="true"] { color: var(--accent); font-weight: 500; }
+.notice + .video-grid { margin-top: var(--s-5); }

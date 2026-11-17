@@ -2,7 +2,7 @@
 // explanation when it fails. Only reports what the server has confirmed.
 import { api, ApiError } from "../api.js";
 import { h } from "../dom.js";
-import { bytesText, credits, dateText, errorText, failureText, formatName } from "../copy.js";
+import { bytesText, credits, dateText, dayText, errorText, failureText, formatName } from "../copy.js";
 import { announce, navigate, setUser } from "../main.js";
 import { store } from "../state.js";
 import { loading, notice, progress, setBusy, spinner } from "./parts.js";
@@ -69,6 +69,8 @@ export async function jobView(ctx) {
           h("div", { class: `player${changed ? " is-in" : ""}`, "data-cursor": "play" }, video),
           h("div", { class: "stack" },
             rail("completed"),
+            job.expiresAt ? h("p", { class: "expiry", "data-soon": job.expiringSoon ? "true" : null }, `Available to download until ${dayText(job.expiresAt)}.`) : null,
+            job.expiringSoon ? notice("This video will be deleted soon", `Download a copy before ${dayText(job.expiresAt)}. After that it can't be recovered. Downloading doesn't change the date.`) : null,
             h("div", { class: "btn-row" }, download.button, again),
             download.status,
             h("p", { class: "notice-text" }, "Made by an AI model, so check the details before you post. Some platforms, including TikTok, require AI-generated ads to be labelled."),
@@ -79,6 +81,13 @@ export async function jobView(ctx) {
         ),
       );
       document.title = `Your video is ready · ${store.site.brandName}`;
+      return;
+    }
+    if (job.stage === "completed" && job.expired) {
+      swap(heading("This video has expired", job.template.name),
+        h("div", { class: "stack" },
+          notice(`The video file was deleted on ${dayText(job.expiredAt)}`, "We keep generated videos for 90 days. An expired video can't be recovered, but you can make a new one.", { error: true }),
+          h("div", { class: "btn-row" }, again, choose), removeControl(job)));
       return;
     }
     if (job.stage === "completed") {

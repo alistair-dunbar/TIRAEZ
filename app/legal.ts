@@ -15,7 +15,11 @@ export interface LegalDocMeta { title: string; version: string; effective: strin
 export interface LegalConfig { status: "draft" | "published"; documents: Record<string, LegalDocMeta>; unresolved: Record<string, string | null>; paymentsOnly: string[] }
 export interface TransferRecord { recipient: string; purposes: string[]; data: string; location: string; role: string; mechanism: string | null; riskAssessment: string | null }
 export interface ComplianceConfig { transfers: Record<string, TransferRecord> }
-export interface RetentionConfig { confirmed: boolean; unusedPhotosDays: number; expiredSessions: boolean; providerFilesHours: number; unverifiedAccountsDays: number; ageRestrictedDays: number }
+export interface RetentionConfig {
+  confirmed: boolean; videoDays: number; expiryNoticeDays: number; sourcePhotoDays: number; abandonedUploadDays: number;
+  unverifiedAccountDays: number; ageRestrictedDays: number; resetLinkHours: number; verifyLinkHours: number; emailLinkRecordDays: number;
+  staleJobHours: number; migrationGraceDays: number; providerFilesHours: number;
+}
 
 export const business: Record<string, string | null> = read("config/business.json");
 export const legal: LegalConfig = read("config/legal.json");
@@ -222,10 +226,17 @@ export function generationAllowed(): boolean {
   return !legalEnforced() || transfersMissing("generation").length === 0;
 }
 
-export function legalStatus(): { published: boolean; unresolved: string[] } {
+/** A policy goes live on its own once every value it uses is filled in (and status is "published"). */
+export function docPublished(slug: string): boolean {
+  const doc = renderDoc(slug);
+  return Boolean(doc) && legal.status === "published" && doc!.unresolved.length === 0;
+}
+
+/** All policies live (what opening accounts needs), and everything still missing across them. */
+export function legalStatus(): { published: boolean; unresolved: string[]; live: string[] } {
   const all = new Set<string>();
   for (const slug of LEGAL_DOCS) for (const u of renderDoc(slug)!.unresolved) all.add(u);
-  return { published: legal.status === "published" && all.size === 0, unresolved: [...all].sort() };
+  return { published: legal.status === "published" && all.size === 0, unresolved: [...all].sort(), live: LEGAL_DOCS.filter(docPublished) };
 }
 
 /** Whether people can be asked to agree to the terms (and so whether accounts can open). */
@@ -239,14 +250,14 @@ export function legalPage(slug: string): { title: string; html: string } | null 
   if (!doc) return null;
   const nav = `<nav class="legal__nav" aria-label="Policies"><ul>${LEGAL_DOCS.map((s) =>
     `<li><a href="/legal/${s}"${s === slug ? ' aria-current="page"' : ""}>${esc(legal.documents[s].title)}</a></li>`).join("")}</ul></nav>`;
-  if (legalEnforced() && !legalStatus().published) {
+  if (legalEnforced() && !docPublished(slug)) {
     return {
       title: doc.title,
       html: `<div class="wrap page legal"><article class="prose"><h1 class="h1">${esc(doc.title)}</h1>` +
-        `<p class="lead">This policy is being prepared. It will be published here before ${esc(site.brandName)} opens accounts.</p></article>${nav}</div>`,
+        `<p class="lead">This policy is being prepared. It will be published here before ${esc(site.brandName)} opens accounts. Questions: <a class="link" href="mailto:support@tiraez.com">support@tiraez.com</a>.</p></article>${nav}</div>`,
     };
   }
-  const draft = legal.status !== "published" || doc.unresolved.length
+  const draft = legal.status !== "published" || doc.unresolved.length || doc.html.includes('<mark class="todo"')
     ? `<p class="legal__draft" role="note"><strong>Draft for review, not in force.</strong> Highlighted items still need to be confirmed.</p>` : "";
   const body = draft ? doc.html.replace("</h1>", `</h1>${draft}`) : doc.html;
   return { title: doc.title, html: `<div class="wrap page legal"><article class="prose">${body}</article>${nav}</div>` };

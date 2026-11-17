@@ -12,7 +12,7 @@ It describes how the service actually works today. The short notices on our sign
 
 ## Who is responsible for your data
 
-{{business.operatorName}} operates {{brand}} and is responsible for (the "controller" of) the personal data described here. Address: {{business.address}}. For privacy questions or requests, contact {{business.contactEmail}}. {{legal.unresolved.controllerRegistration}}
+{{business.operatorName}} operates {{brand}} and is responsible for (the "controller" of) the personal data described here. Address: {{business.address}}. For privacy questions or requests, contact {{business.contactEmail}}.
 
 ## What we collect
 
@@ -103,17 +103,39 @@ We share your data only with the providers below, and only what each one needs. 
 - **Moyasar**, once card payments are switched on: it processes the payment.
 - **Authorities**, when the law requires us to share data.
 
-**Transfers outside Saudi Arabia.** {{legal.unresolved.transferSafeguards}}
+**Transfers outside Saudi Arabia.** Each of these providers processes data for us under its own data processing agreement. We send them only the data described above.
 
 ## How long we keep it
 
-- **Your account, photos and videos:** until you delete them or your account.
-- **Photos uploaded but never used in a video:** deleted automatically after {{retention.unusedPhotosDays}}.
-- **Accounts whose email was never confirmed:** deleted, with everything in them, after {{retention.unverifiedAccountsDays}}, unless something was bought.
-- **Sessions:** deleted when they expire (30 days after you log in) or when you log out.
-- **Email links:** confirmation links expire after 24 hours, and password reset links after 1 hour. Their records are deleted a week after expiry.
-- **When you delete your account:** your name, email, photos, videos, credit history and agreement records are deleted straight away. Records of purchases are kept, with your name, email and password removed. {{legal.unresolved.paymentRecordRetention}}
-- **Our providers' copies:** Railway's backups and logs, Resend's email data, and anything fal holds last until those providers' own retention periods end, as described above.
+These are the longest we keep each kind of data. You can delete your videos, or your whole account, sooner at any time.
+
+| Data | How long we keep it |
+|---|---|
+| **Generated videos and their thumbnails** | {{retention.videoDays}} after the video was successfully made. Then they're deleted and can't be recovered. We show the date on each video, and remind you {{retention.expiryNoticeDays}} before. |
+| **The details you entered for a video** (description, options, framing) and the instructions we built from them | Kept with the video, and deleted when the video is deleted or expires. For a video that failed: deleted together with its source photo. |
+| **Photos used to make a video**, including the framed copy we send to the video model | {{retention.sourcePhotoDays}} after the last video using that photo has finished or failed. Never while a video using it is still being made. |
+| **Photos uploaded but never used in a video** | {{retention.abandonedUploadDays}} after upload. |
+| **A minimal record of each video** (template, format, dates, credits used) | While your account is open, so your credit history makes sense. It doesn't include the photo, the video or what you typed. |
+| **Your account** (once your email is confirmed) | While your account is open. |
+| **Accounts whose email is never confirmed** | Deleted {{retention.unverifiedAccountDays}} after they were created, unless something was bought. Sending a new confirmation link doesn't extend this. |
+| **Accounts restricted because the holder said they're under 18** | Deleted {{retention.ageRestrictedDays}} after the restriction, unless a review finds a genuine mistake. Only what's needed to settle a refund is kept, and nothing else. |
+| **Sessions** | Until you log out, or 30 days after you log in. |
+| **Email links** | Confirmation links stop working after {{retention.verifyLinkHours}}, and password reset links after {{retention.resetLinkHours}} or once used. Their records are deleted {{retention.emailLinkRecordDays}} after that. |
+| **Payment, refund and credit records** | Kept separately from your videos and photos, for as long as tax and accounting law requires. They aren't deleted when a video expires. {{legal.unresolved.paymentRecordRetention}} |
+
+**When you delete a video**, you lose access to it at once. We delete its files and its details, and its photo too unless another of your videos uses it.
+
+**When you delete your account:**
+- we log you out everywhere;
+- we cancel videos not yet sent to the video model and return their credits;
+- we delete your name, email, photos, videos, credit history and agreement records straight away;
+- we keep records of purchases, with your name, email and password removed;
+- if a video is still with the video model, you'll be asked to wait until it has finished.
+
+**Our providers' copies:**
+- **fal:** we set the copies it holds to expire after {{retention.providerFilesHours}}, as described above. We can't check its deletion from our side.
+- **Railway:** its backups and logs are kept for its own periods. If a backup were ever restored, our daily deletion run removes anything already past its date again.
+- **Resend:** its email records are kept for its own periods.
 
 When we delete data, we remove it from our database and delete its files from our storage.
 

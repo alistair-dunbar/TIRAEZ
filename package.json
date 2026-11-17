@@ -18,7 +18,8 @@
     "reports": "tsx app/reports.ts",
     "suspend": "tsx app/reports.ts suspend",
     "refunds": "tsx app/refunds.ts",
-    "launch-check": "tsx app/launch-check.ts"
+    "launch-check": "tsx app/launch-check.ts",
+    "retention": "tsx app/retention.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
