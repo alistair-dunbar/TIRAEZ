@@ -4,7 +4,7 @@ Version {{doc.version}}. Effective {{doc.effective}}.
 
 These terms are an agreement between you and **{{business.operatorName}}**, who operates {{brand}} ("we", "us", "our"). Our address is {{business.address}}, and you can contact us at {{business.contactEmail}}.
 
-Please read these terms before you create an account. They include our [Acceptable Use and AI Content Policy](/legal/acceptable-use) and our [Billing, Credits and Refunds](/legal/billing) policy. Our [Privacy Policy](/legal/privacy) explains how we handle personal data.
+Please read these terms before you create an account. They include our [Acceptable Use and AI Content Policy](/legal/acceptable-use) and our [Billing, Cancellation and Refunds](/legal/billing) policy. Our [Privacy Policy](/legal/privacy) explains how we handle personal data.
 
 ## 1. What {{brand}} does
 
@@ -56,11 +56,11 @@ Follow our [Acceptable Use and AI Content Policy](/legal/acceptable-use). In sho
 - **Credits.** Videos are paid for with prepaid credits. The credits a video uses are shown, with your balance, before you create it.
 - **Generating.** When you press "Generate video", the credits are set aside for that video. They're used when the video is ready. If the video fails, they're returned to your balance automatically.
 - **No subscriptions.** There are no subscriptions or automatic renewals.
-- **Details.** Prices, taxes, how long credits last, and cancellation and refunds are set out in [Billing, Credits and Refunds](/legal/billing). Buying credits isn't switched on yet. Before it is, that page will set out everything you need to know before you pay.
+- **Details.** Prices, taxes, how long credits last, and cancellation and refunds are set out in [Billing, Cancellation and Refunds](/legal/billing). Buying credits isn't switched on yet. Before it is, that page will set out everything you need to know before you pay.
 
 ## 8. Suspending or closing accounts
 
-- **You can leave at any time.** Delete your account from your account page. Before you do, ask for any refund you're entitled to (see [Billing, Credits and Refunds](/legal/billing)).
+- **You can leave at any time.** Delete your account from your account page. Before you do, ask for any refund you're entitled to (see [Billing, Cancellation and Refunds](/legal/billing)).
 - **We can suspend or close an account, or remove content,** if we reasonably believe it breaks these terms or the law, puts other people at risk, or if the law requires us to. Where it's lawful and safe, we'll tell you why, and how to ask a person to review the decision.
 - **If we close your account without a good reason** under these terms, we'll refund the credits you paid for and haven't used.
 
