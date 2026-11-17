@@ -3,6 +3,7 @@ import { api, ApiError } from "../api.js";
 import { h, id } from "../dom.js";
 import { errorText } from "../copy.js";
 import { navigate, setUser } from "../main.js";
+import { setBusy } from "./parts.js";
 
 export function authView(ctx, mode) {
   const next = safeNext(ctx.query.get("next"));
@@ -13,7 +14,7 @@ export function authView(ctx, mode) {
   const emailError = h("p", { class: "field__error", id: emailErr });
   const passError = h("p", { class: "field__error", id: passErr });
   const status = h("p", { class: "form-status", role: "status" });
-  const submit = h("button", { class: "btn btn--primary btn--lg", type: "submit" }, signup ? "Create account" : "Sign in");
+  const submit = h("button", { class: "btn btn--primary btn--lg btn--block", type: "submit" }, signup ? "Create account" : "Sign in");
 
   function setError(input, el, text) {
     el.textContent = text ?? "";
@@ -27,14 +28,14 @@ export function authView(ctx, mode) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) { setError(email, emailError, errorText.invalid_email); problems.push(email); }
     if (password.value.length < 8) { setError(password, passError, signup ? errorText.weak_password : "Write your password."); problems.push(password); }
     if (problems.length) { status.textContent = `${problems.length === 1 ? "One field needs" : "Two fields need"} attention.`; problems[0].focus(); return; }
-    submit.disabled = true;
+    setBusy(submit, true);
     status.textContent = signup ? "Creating your account" : "Signing in";
     try {
       const u = await api("POST", signup ? "/api/signup" : "/api/login", { email: email.value.trim(), password: password.value });
       setUser(u);
       navigate(next, { replace: true });
     } catch (err) {
-      submit.disabled = false;
+      setBusy(submit, false);
       const code = err instanceof ApiError ? err.code : "offline";
       if (code === "invalid_email" || code === "email_taken") { setError(email, emailError, errorText[code]); email.focus(); status.textContent = ""; }
       else if (code === "weak_password") { setError(password, passError, errorText[code]); password.focus(); status.textContent = ""; }
@@ -55,14 +56,15 @@ export function authView(ctx, mode) {
   return {
     title: signup ? "Create an account" : "Sign in",
     node: h("div", { class: "wrap page" },
-      h("div", { class: "page__head" },
-        h("h1", { class: "h1" }, signup ? "Create an account" : "Sign in"),
-        h("p", { class: "lead" }, signup
-          ? "An account keeps your videos together so you can watch and download them again."
-          : "Sign in to create videos and see the ones you've made."),
+      h("div", { class: "auth" },
+        h("div", { class: "page__head" },
+          h("h1", { class: "h1" }, signup ? "Create an account" : "Sign in"),
+          h("p", { class: "lead" }, signup
+            ? "An account keeps your videos together so you can watch and download them again."
+            : "Sign in to create videos and see the ones you've made."),
+        ),
+        h("div", { class: "auth__panel" }, form, h("div", { class: "page__foot" }, switchTo)),
       ),
-      form,
-      h("div", { class: "page__foot" }, switchTo),
     ),
   };
 }

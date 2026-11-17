@@ -34,9 +34,10 @@ export function framingFromPixels(photo, aspect, crop) {
 export function cropper({ photo, src, aspect, framing, onChange }) {
   let f = { cx: 0.5, cy: 0.5, zoom: 1, ...(framing ?? {}) };
   const zoomId = id("zoom"), helpId = id("crop-help");
-  const img = h("img", { class: "crop__img", src, alt: "Your photo", draggable: "false" });
+  const img = h("img", { class: "crop__img", src, alt: "Your photo", draggable: "false", decoding: "async" });
   const frame = h("div", { class: "crop__frame", tabindex: "0", role: "group",
-    "aria-label": "Video framing. Use the arrow keys to move it.", "aria-describedby": helpId });
+    "aria-label": "Video framing. Use the arrow keys to move it.", "aria-describedby": helpId },
+    ["tl", "tr", "bl", "br"].map((c) => h("span", { class: `crop__corner crop__corner--${c}`, "aria-hidden": "true" })));
   const stage = h("div", { class: "crop__stage" }, img, frame);
   stage.style.setProperty("aspect-ratio", `${photo.width} / ${photo.height}`);
   stage.style.setProperty("width", `min(100%, calc(70vh * ${photo.width / photo.height}))`);
@@ -56,6 +57,7 @@ export function cropper({ photo, src, aspect, framing, onChange }) {
   frame.addEventListener("pointerdown", (e) => {
     frame.setPointerCapture(e.pointerId);
     drag = { x: e.clientX, y: e.clientY, cx: f.cx, cy: f.cy };
+    frame.dataset.dragging = "";
   });
   frame.addEventListener("pointermove", (e) => {
     if (!drag) return;
@@ -64,7 +66,7 @@ export function cropper({ photo, src, aspect, framing, onChange }) {
     f.cy = drag.cy + (e.clientY - drag.y) / r.height;
     draw();
   });
-  const end = () => { drag = null; };
+  const end = () => { drag = null; delete frame.dataset.dragging; };
   frame.addEventListener("pointerup", end);
   frame.addEventListener("pointercancel", end);
   frame.addEventListener("keydown", (e) => {
@@ -86,7 +88,9 @@ export function cropper({ photo, src, aspect, framing, onChange }) {
       centre,
     ),
   );
-  img.addEventListener("load", draw, { once: true });
+  // The photo eases in once it has actually loaded (instantly if it was cached).
+  const shown = () => { img.classList.add("is-loaded"); draw(); };
+  if (img.complete && img.naturalWidth) queueMicrotask(shown); else img.addEventListener("load", shown, { once: true });
   queueMicrotask(draw);
   return { node, fractions: () => frameFractions(photo, aspect, f), framing: () => ({ ...f }) };
 }

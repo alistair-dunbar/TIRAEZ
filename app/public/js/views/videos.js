@@ -4,7 +4,7 @@ import { h } from "../dom.js";
 import { credits, dateText, errorText } from "../copy.js";
 import { setUser } from "../main.js";
 import { store } from "../state.js";
-import { loading, notice } from "./parts.js";
+import { loading, notice, setBusy, spinner } from "./parts.js";
 
 const statusText = { queued: "Queued", generating: "Being made", completed: "Ready", failed: "Didn't work" };
 
@@ -32,7 +32,7 @@ export async function videosView(ctx) {
     drawBuy(data.credits);
     if (!data.jobs.length) {
       body.replaceChildren(h("div", { class: "empty" },
-        h("h2", { class: "h3" }, "Your videos will appear here."),
+        h("h2", { class: "title" }, "Your videos will appear here."),
         h("a", { class: "btn btn--primary", href: "/templates" }, "Explore templates")));
       return;
     }
@@ -49,13 +49,13 @@ export async function videosView(ctx) {
     }
     const status = h("p", { class: "form-status", role: "status" });
     const btn = h("button", { type: "button", class: have > 0 ? "btn btn--secondary" : "btn btn--primary", onclick: async () => {
-      btn.disabled = true; status.textContent = "Opening the payment page";
+      setBusy(btn, true); status.textContent = "Opening the payment page";
       try {
         const r = await api("POST", "/api/purchases", { packId: p.pack.id });
         if (r.status === "redirect") { location.assign(r.url); return; }
         setUser({ ...store.site.user, credits: r.credits });
         load();
-      } catch (e) { status.textContent = errorText[e instanceof ApiError ? e.code : "offline"] ?? errorText.server_error; btn.disabled = false; }
+      } catch (e) { status.textContent = errorText[e instanceof ApiError ? e.code : "offline"] ?? errorText.server_error; setBusy(btn, false); }
     } }, `Buy ${p.pack.credits} credits for ${p.currency} ${p.pack.priceSar}`);
     buy.replaceChildren(h("div", { class: "btn-row" }, btn), status);
   }
@@ -71,12 +71,15 @@ function card(job) {
   const img = thumb ? h("img", { src: thumb, alt: "", loading: "lazy", decoding: "async" }) : null;
   if (img && !job.poster) img.addEventListener("error", () => { img.src = `/api/photos/${job.photo.id}.jpg`; }, { once: true });
   const ready = job.stage === "completed" && job.output?.available;
+  const tagClass = { completed: "tag--ready", queued: "", generating: "tag--active", failed: "tag--failed" }[job.stage];
+  const active = job.stage === "queued" || job.stage === "generating";
   return h("li", { class: "video-card" },
-    h("a", { class: "video-card__thumb", href, "aria-label": `${job.template.name}, ${statusText[job.stage]}` }, img),
-    h("div", {},
-      h("h2", { class: "h3" }, h("a", { href, class: "entry__name" }, job.template.name)),
+    h("a", { class: "video-card__thumb", href, tabindex: "-1", "aria-hidden": "true" }, img),
+    h("div", { class: "video-card__body" },
+      h("span", { class: `tag ${tagClass}` }, active ? spinner() : null, statusText[job.stage],
+        job.stage === "completed" && !job.output?.available ? " · file unavailable" : ""),
+      h("h2", { class: "entry__name" }, h("a", { href, "aria-label": `${job.template.name}, ${statusText[job.stage]}` }, job.template.name)),
       h("p", { class: "small muted" }, dateText(job.createdAt)),
-      h("p", { class: "small" }, h("strong", {}, statusText[job.stage]), job.stage === "completed" && !job.output?.available ? ". File no longer available" : ""),
     ),
     h("div", { class: "video-card__actions" },
       h("a", { class: "link", href }, ready ? "Watch" : "See status"),

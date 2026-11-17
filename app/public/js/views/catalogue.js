@@ -1,6 +1,6 @@
 // Catalogue: search, niche and format filters, kept in the URL so Back returns to the same view.
 import { ApiError } from "../api.js";
-import { h, id } from "../dom.js";
+import { h, id, svg } from "../dom.js";
 import { errorText, formatName } from "../copy.js";
 import { getDraft, loadCatalogue, rememberCatalogue, store } from "../state.js";
 import { entry, loading, notice } from "./parts.js";
@@ -38,10 +38,21 @@ export async function catalogueView(ctx) {
   };
   const searchId = id("search"), formatId = id("format");
   const search = h("input", { class: "input", id: searchId, type: "search", value: state.q, autocomplete: "off", spellcheck: "false" });
-  const format = h("select", { class: "select", id: formatId },
-    h("option", { value: "any" }, "Any format"),
-    Object.entries(formatName).map(([v, l]) => h("option", { value: v }, l)));
-  format.value = state.format;
+  // Format: a segmented control whose indicator slides to the chosen option.
+  const indicator = h("span", { class: "segmented__ind", "aria-hidden": "true" });
+  const formatButtons = [["any", "Any", null], ...Object.entries(formatName).map(([v, l]) => [v, l.split(" ")[1], v])].map(([v, label, r]) =>
+    h("button", { type: "button", "aria-pressed": String(state.format === v), dataset: { v }, title: v === "any" ? "Any format" : formatName[v],
+      "aria-label": v === "any" ? "Any format" : formatName[v], onclick: () => { state.format = v; update(true); } },
+      r ? h("span", { class: "ratio", dataset: { r }, "aria-hidden": "true" }) : null, label));
+  const format = h("div", { class: "segmented", role: "group", "aria-labelledby": formatId }, indicator, formatButtons);
+  function placeIndicator(instant) {
+    const on = formatButtons.find((b) => b.dataset.v === state.format);
+    if (!on) return;
+    if (instant) indicator.style.setProperty("transition", "none");
+    indicator.style.setProperty("width", `${on.offsetWidth}px`);
+    indicator.style.setProperty("transform", `translateX(${on.offsetLeft}px)`);
+    if (instant) requestAnimationFrame(() => indicator.style.removeProperty("transition"));
+  }
   const chips = h("div", { class: "chips", role: "group", "aria-label": "Filter by business" });
   const reset = h("button", { type: "button", class: "btn btn--quiet" }, "Reset filters");
   const count = h("p", { class: "result-count", role: "status", "aria-live": "polite" });
@@ -67,38 +78,44 @@ export async function catalogueView(ctx) {
     rememberCatalogue(url);
   }
 
-  function draw() {
+  function draw(animate = false) {
     const shown = cat.templates.filter(matches);
     const filtered = state.q.trim() || state.niche !== "all" || state.format !== "any";
+    const focused = document.activeElement?.dataset?.id;
     chips.replaceChildren(...[{ id: "all", label: "All" }, ...cat.niches].map((n) =>
-      h("button", { type: "button", class: "chip", "aria-pressed": String(state.niche === n.id), onclick: () => { state.niche = n.id; update(); } }, n.label)));
+      h("button", { type: "button", class: "chip", "aria-pressed": String(state.niche === n.id), dataset: { id: n.id },
+        onclick: () => { if (state.niche !== n.id) { state.niche = n.id; update(true); } } },
+        n.label, h("span", { class: "count" }, String(n.id === "all" ? cat.templates.length : cat.templates.filter((t) => t.niche === n.id).length)))));
+    if (focused) chips.querySelector(`[data-id="${focused}"]`)?.focus();
+    for (const b of formatButtons) b.setAttribute("aria-pressed", String(b.dataset.v === state.format));
+    placeIndicator(!animate);
     reset.hidden = !filtered;
     count.textContent = filtered ? `Showing ${shown.length} of ${cat.templates.length} templates` : `${cat.templates.length} templates`;
-    list.replaceChildren(...shown.map((t) => entry(t, { headingLevel: "h2" })));
+    list.replaceChildren(...shown.map((t) => entry(t, { headingLevel: "h2", animate })));
     list.hidden = shown.length === 0;
     empty.hidden = shown.length !== 0;
     if (!shown.length) {
       const niche = cat.niches.find((n) => n.id === state.niche)?.label;
       empty.replaceChildren(
-        h("h2", { class: "h3" }, "No templates match"),
+        h("h2", { class: "title" }, "No templates match"),
         h("p", { class: "muted" }, [state.q.trim() ? `Nothing matches "${state.q.trim()}"` : "Nothing matches these filters",
           niche ? ` in ${niche}` : "", state.format !== "any" ? ` in ${formatName[state.format]}` : "", "."].join("")),
         h("button", { type: "button", class: "btn btn--secondary", onclick: resetAll }, "Reset filters"),
       );
     }
   }
-  function update() { sync(); draw(); }
-  function resetAll() { state.q = ""; state.niche = "all"; state.format = "any"; search.value = ""; format.value = "any"; update(); search.focus(); }
+  function update(animate = false) { sync(); draw(animate); }
+  function resetAll() { state.q = ""; state.niche = "all"; state.format = "any"; search.value = ""; update(true); search.focus(); }
 
-  search.addEventListener("input", () => { state.q = search.value; update(); });
-  format.addEventListener("change", () => { state.format = format.value; update(); });
+  search.addEventListener("input", () => { state.q = search.value; update(false); });
   reset.addEventListener("click", resetAll);
 
   body.replaceChildren(
     h("div", { class: "filters" },
       h("div", { class: "filters__row" },
-        h("div", { class: "field" }, h("label", { class: "field__label", for: searchId }, "Search templates"), search),
-        h("div", { class: "field" }, h("label", { class: "field__label", for: formatId }, "Format"), format),
+        h("div", { class: "field" }, h("label", { class: "field__label", for: searchId }, "Search templates"),
+          h("div", { class: "search" }, svg('<svg viewBox="0 0 17 17" aria-hidden="true"><circle cx="7" cy="7" r="5.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l4.5 4.5" stroke="currentColor" stroke-width="1.5"/></svg>'), search)),
+        h("div", { class: "field" }, h("p", { class: "field__label", id: formatId }, "Format"), format),
         reset,
       ),
       chips,
@@ -107,5 +124,11 @@ export async function catalogueView(ctx) {
   );
   sync();
   draw();
+  // Measure the segmented control once it is on the page and its font has loaded.
+  requestAnimationFrame(() => placeIndicator(true));
+  document.fonts?.ready.then(() => placeIndicator(true));
+  const onResize = () => placeIndicator(true);
+  window.addEventListener("resize", onResize);
+  ctx.onCleanup(() => window.removeEventListener("resize", onResize));
   return { title: "Templates", node };
 }

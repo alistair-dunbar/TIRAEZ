@@ -5,7 +5,7 @@ import { h, id } from "../dom.js";
 import { credits, errorText, formatName, tooLarge, tooSmall } from "../copy.js";
 import { navigate, setUser } from "../main.js";
 import { getDraft, loadCatalogue, newKey, nicheLabel, setDraft, store } from "../state.js";
-import { notice, spinner } from "./parts.js";
+import { notice, progress, setBusy, spinner } from "./parts.js";
 
 const ACCEPT = "image/jpeg,image/png,image/webp";
 
@@ -78,12 +78,11 @@ export async function createView(ctx) {
 
   // ---- Summary (right column) ----
   const sumFormat = h("dd"), sumLength = h("dd"), sumRes = h("dd"), sumCost = h("dd");
-  const summary = h("section", { class: "panel summary", "aria-labelledby": "summary-title" },
-    h("p", { class: "label" }, nicheLabel(t.niche)),
+  const summary = h("section", { class: "sheet summary", "aria-labelledby": "summary-title" },
+    h("div", { class: "panel__head" }, h("p", { class: "label" }, nicheLabel(t.niche)), h("a", { class: "link small", href: "/templates?change=1" }, "Change template")),
     h("h2", { class: "title", id: "summary-title" }, t.name),
-    h("p", {}, t.summary),
-    h("dl", {}, h("dt", {}, "Format"), sumFormat, h("dt", {}, "Length"), sumLength, h("dt", {}, "Resolution"), sumRes, h("dt", {}, "Cost"), sumCost),
-    h("a", { class: "link", href: "/templates?change=1" }, "Change template"),
+    h("p", { class: "muted" }, t.summary),
+    h("dl", { class: "rows" }, h("dt", {}, "Format"), sumFormat, h("dt", {}, "Length"), sumLength, h("dt", {}, "Resolution"), sumRes, h("dt", {}, "Cost"), sumCost),
   );
   const photoPanel = h("section", { class: "panel", "aria-labelledby": "photo-title", hidden: true },
     h("div", { class: "panel__head" }, h("h2", { class: "h3", id: "photo-title" }, "Your photo"), h("span", { class: "small muted", "data-format": "" })),
@@ -114,28 +113,38 @@ export async function createView(ctx) {
 
   function drawUpload(progress = null) {
     if (uploading) {
-      uploadArea.replaceChildren(h("div", { class: "file-row", role: "status" },
-        h("span", { class: "status-line" }, spinner(), h("span", {}, progress === null ? "Uploading your photo" : `Uploading your photo, ${progress}%`))));
+      const pct = progress ?? 0;
+      uploadArea.replaceChildren(h("div", { class: "file-row upload-progress", role: "status" },
+        h("span", { class: "status-line" }, spinner(), h("span", {}, progress === null ? "Uploading your photo" : `Uploading your photo, ${pct}%`)),
+        h("span", { class: "upbar", "aria-hidden": "true" }, h("span", { style: { transform: `scaleX(${pct / 100})` } }))));
       return;
     }
     if (draft.photo) {
       uploadArea.replaceChildren(h("div", { class: "file-row" },
         h("div", {}, h("p", { class: "file-row__name" }, draft.photo.name), h("p", { class: "small muted" }, `${draft.photo.width} × ${draft.photo.height} px`)),
         h("div", { class: "btn-row" },
-          h("button", { type: "button", class: "btn btn--secondary", onclick: () => fileInput.click() }, "Replace"),
-          h("button", { type: "button", class: "btn btn--quiet", onclick: () => { draft.photo = null; draft.framings = {}; save(); drawUpload(); drawCrop(); refresh(); uploadArea.querySelector("label")?.focus(); } }, "Remove"),
+          h("button", { type: "button", class: "btn btn--secondary btn--sm", onclick: () => fileInput.click() }, "Replace"),
+          h("button", { type: "button", class: "btn btn--quiet btn--danger", onclick: () => { draft.photo = null; draft.framings = {}; save(); drawUpload(); drawCrop(); refresh(); uploadArea.querySelector("label")?.focus(); } }, "Remove"),
         ),
       ));
       return;
     }
     const zone = h("div", { class: "dropzone", "aria-invalid": uploadError.textContent ? "true" : null },
-      h("label", { class: "btn btn--secondary", for: fileId, tabindex: "0", role: "button",
-        onkeydown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); } } }, "Choose a photo"),
-      h("p", { class: "small muted" }, "or drag it here"),
+      h("div", { class: "dropzone__idle stack" },
+        h("p", { class: "dropzone__title" }, "Drop a photo here"),
+        h("div", { class: "btn-row" },
+          h("label", { class: "btn btn--secondary", for: fileId, tabindex: "0", role: "button",
+            onkeydown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); } } }, "Choose a photo"),
+          h("span", { class: "small muted" }, `JPG, PNG or WebP, up to ${maxMb} MB`)),
+      ),
+      h("p", { class: "dropzone__title dropzone__drop", "aria-hidden": "true" }, "Release to upload your photo"),
     );
-    zone.addEventListener("dragover", (e) => { e.preventDefault(); zone.dataset.over = "true"; });
-    zone.addEventListener("dragleave", () => { zone.dataset.over = "false"; });
-    zone.addEventListener("drop", (e) => { e.preventDefault(); zone.dataset.over = "false"; const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); });
+    // Count enter/leave so moving over the zone's own children doesn't flicker the state.
+    let depth = 0;
+    zone.addEventListener("dragenter", (e) => { e.preventDefault(); depth++; zone.dataset.over = "true"; });
+    zone.addEventListener("dragover", (e) => { e.preventDefault(); });
+    zone.addEventListener("dragleave", () => { depth = Math.max(0, depth - 1); if (!depth) zone.dataset.over = "false"; });
+    zone.addEventListener("drop", (e) => { e.preventDefault(); depth = 0; zone.dataset.over = "false"; const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); });
     uploadArea.replaceChildren(zone);
   }
 
@@ -163,9 +172,9 @@ export async function createView(ctx) {
   fileInput.addEventListener("change", () => { const f = fileInput.files?.[0]; if (f) handleFile(f); });
 
   const uploadSection = h("section", { class: "form-section", "aria-labelledby": "upload-title" },
-    h("h2", { id: "upload-title" }, "Upload your photo"),
+    h("div", { class: "form-section__head" }, h("h2", { id: "upload-title" }, "Upload your photo")),
     h("ul", { class: "plain-list small" }, t.photoGuidance.map((g) => h("li", {}, g))),
-    h("p", { class: "small muted" }, `JPG, PNG or WebP, up to ${maxMb} MB, at least ${store.site.upload.minShortSide} pixels on the shortest side.`),
+    h("p", { class: "small muted" }, `At least ${store.site.upload.minShortSide} pixels on the shortest side.`),
     fileInput, uploadArea, uploadError,
   );
 
@@ -191,18 +200,18 @@ export async function createView(ctx) {
     const input = h("input", { class: "input", id: fid, type: "text", maxlength: String(i.maxLength), value: draft.inputs[i.id] ?? "",
       autocomplete: "off", "aria-describedby": `${i.help ? helpId : ""} ${errId}`.trim(), "aria-required": i.required ? "true" : null });
     const counter = h("span", { class: "counter", "aria-hidden": "true" });
-    const count = () => { counter.textContent = `${input.value.length} / ${i.maxLength}`; };
+    const count = () => { counter.textContent = `${input.value.length} / ${i.maxLength}`; counter.dataset.near = String(input.value.length > i.maxLength * 0.85); };
     input.addEventListener("input", () => { draft.inputs[i.id] = input.value; save(); count(); if (input.value.trim()) clearFieldError(i.id); });
     count();
     fieldEls[i.id] = input;
     return h("div", { class: "field" },
       h("label", { class: "field__label", for: fid }, label),
       i.help ? h("p", { class: "field__help", id: helpId }, i.help) : null,
-      input, counter, err);
+      input, h("div", { class: "field__meta" }, err, counter));
   });
   function clearFieldError(k) { fieldErrors[k].textContent = ""; fieldEls[k]?.removeAttribute("aria-invalid"); }
   const detailsSection = h("section", { class: "form-section", "aria-labelledby": "details-title" },
-    h("h2", { id: "details-title" }, "Tell us about your product"), fields);
+    h("div", { class: "form-section__head" }, h("h2", { id: "details-title" }, "Tell us about your product")), fields);
 
   // ---- Output settings: only what this template and the model support ----
   const settingsError = h("p", { class: "field__error", id: id("settings-error") });
@@ -214,7 +223,7 @@ export async function createView(ctx) {
         h("span", {}, render(v)))));
   }
   const settingsSection = h("section", { class: "form-section", "aria-labelledby": "settings-title" },
-    h("h2", { id: "settings-title" }, "Video settings"),
+    h("div", { class: "form-section__head" }, h("h2", { id: "settings-title" }, "Video settings")),
     radios(id("ar"), "Format", t.output.aspectRatios, settings.aspectRatio,
       (r) => [h("span", { class: "ratio", dataset: { r }, "aria-hidden": "true" }), formatName[r]],
       (r) => { settings.aspectRatio = r; save(); drawCrop(); refresh(); }),
@@ -229,9 +238,10 @@ export async function createView(ctx) {
   const creditNote = h("div");
   const status = h("p", { class: "form-status", role: "status", "aria-live": "polite" });
   const generate = h("button", { type: "button", class: "btn btn--primary btn--lg" }, "Generate video");
+  const setGenerating = (on) => { setBusy(generate, on); if (!on) refresh(); };
   let submitting = false;
   const reviewSection = h("section", { class: "form-section review", "aria-labelledby": "review-title" },
-    h("h2", { id: "review-title" }, "Check and generate"),
+    h("div", { class: "form-section__head" }, h("h2", { id: "review-title" }, "Check and generate")),
     h("dl", { class: "details" },
       h("dt", {}, "Template"), h("dd", {}, t.name),
       h("dt", {}, "Photo"), revPhoto,
@@ -254,7 +264,7 @@ export async function createView(ctx) {
     revCost.textContent = `${credits(c)}. You have ${credits(have)}.`;
     creditNote.replaceChildren(have < c ? notice(errorText.no_credits,
       store.site.paymentsOn ? `This video needs ${credits(c)}. Buy credits from My videos.` : `This video needs ${credits(c)}. ${errorText.payments_not_configured}`) : "");
-    generate.disabled = submitting || uploading || have < c;
+    if (!submitting) generate.disabled = uploading || have < c;
     if (have < c) generate.setAttribute("aria-describedby", "credit-note"); else generate.removeAttribute("aria-describedby");
     creditNote.id = "credit-note";
   }
@@ -278,8 +288,9 @@ export async function createView(ctx) {
       problems[0]?.focus();
       return;
     }
-    submitting = true; refresh();
-    generate.replaceChildren(spinner(), h("span", {}, "Sending your request"));
+    submitting = true;
+    setGenerating(true);
+    status.textContent = "Sending your request";
     try {
       const r = await api("POST", "/api/jobs", {
         templateId: t.id, clientKey: draft.clientKey, photoId: draft.photo.id,
@@ -309,18 +320,14 @@ export async function createView(ctx) {
       if (code === "no_credits") api("GET", "/api/site").then((s) => setUser(s.user)).catch(() => {});
     } finally {
       submitting = false;
-      generate.replaceChildren("Generate video");
-      refresh();
+      setGenerating(false);
     }
   });
 
   drawUpload(); drawCrop(); refresh();
 
   const node = h("div", { class: "wrap page" },
-    h("ol", { class: "steps-bar", "aria-label": "Progress" },
-      h("li", {}, h("a", { class: "link", href: `/templates/${t.slug}` }, "Template")),
-      h("li", { "aria-current": "step" }, "Your details"),
-      h("li", {}, "Generate")),
+    progress(1, { templateHref: `/templates/${t.slug}` }),
     h("div", { class: "page__head" },
       h("h1", { class: "h1" }, draft.fromJob ? "Create another version" : "Create a video"),
       notes,

@@ -98,7 +98,7 @@ function renderChrome(path) {
     ...navItems(path).map((i) => h("a", { href: i.href, "aria-current": i.current ? "page" : null }, i.label)),
     u ? h("span", { class: "nav__credits" }, credits(u.credits)) : null,
     u ? h("button", { type: "button", class: "btn btn--quiet", onclick: signOut }, "Sign out") : h("a", { href: `/signin` }, "Sign in"),
-    h("a", { class: "btn btn--primary", href: "/templates" }, "Create a video"),
+    h("a", { class: "btn btn--primary btn--sm", href: "/templates" }, "Create a video"),
   ].filter(Boolean));
   const mobile = $("[data-mobile-nav]");
   mobile.replaceChildren(h("ul", {},
@@ -122,23 +122,24 @@ export function setUser(user) {
 
 const toggle = $("[data-menu-toggle]");
 const panel = $("#mobile-nav");
+function setMenu(open) {
+  panel.classList.toggle("is-open", open);
+  panel.inert = !open; // closed: nothing in it can take focus
+  toggle.setAttribute("aria-expanded", String(open));
+}
 function closeMenu() {
-  if (panel.hidden) return;
-  panel.hidden = true;
-  toggle.setAttribute("aria-expanded", "false");
-  toggle.querySelector("[data-icon-open]").hidden = false;
-  toggle.querySelector("[data-icon-close]").hidden = true;
+  if (panel.classList.contains("is-open")) setMenu(false);
 }
 toggle.addEventListener("click", () => {
-  const open = panel.hidden;
-  panel.hidden = !open;
-  toggle.setAttribute("aria-expanded", String(open));
-  toggle.querySelector("[data-icon-open]").hidden = open;
-  toggle.querySelector("[data-icon-close]").hidden = !open;
+  const open = !panel.classList.contains("is-open");
+  setMenu(open);
   if (open) panel.querySelector("a, button")?.focus();
 });
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !panel.hidden) { closeMenu(); toggle.focus(); }
+  if (e.key === "Escape" && panel.classList.contains("is-open")) { setMenu(false); toggle.focus(); }
+});
+document.addEventListener("click", (e) => {
+  if (panel.classList.contains("is-open") && !e.target.closest?.(".site-header")) setMenu(false);
 });
 
 // Same-origin links go through the router.

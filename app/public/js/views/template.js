@@ -3,7 +3,7 @@ import { api, ApiError } from "../api.js";
 import { h } from "../dom.js";
 import { credits, errorText, formatName } from "../copy.js";
 import { catalogueUrl, loadCatalogue, nicheLabel, store } from "../state.js";
-import { notice, previewMedia } from "./parts.js";
+import { formatGlyphs, notice, previewMedia } from "./parts.js";
 
 export async function templateView(ctx) {
   const [slug] = ctx.params;
@@ -19,7 +19,7 @@ export async function templateView(ctx) {
   const cost = Object.entries(t.cost).map(([d, c]) => `${credits(c)} for a ${d}-second video`).join(", ");
 
   const action = t.ready
-    ? h("a", { class: "btn btn--primary btn--lg", href: `/create/${t.slug}` }, "Use this template")
+    ? h("a", { class: "btn btn--primary btn--lg btn--block", href: `/create/${t.slug}` }, "Use this template")
     : notice("Not available to use yet", errorText[t.unavailableReason] ?? errorText.template_unavailable);
 
   const node = h("div", { class: "wrap page" },
@@ -40,8 +40,8 @@ export async function templateView(ctx) {
         h("section", { class: "panel" }, h("h2", { class: "h3" }, "Good to know"),
           h("ul", { class: "plain-list" }, t.limitations.map((l) => h("li", {}, l)))),
       ),
-      h("aside", { class: "panel summary", "aria-label": "Settings and cost" },
-        h("h2", { class: "h3" }, "Settings"),
+      h("aside", { class: "sheet summary", "aria-label": "Settings and cost" },
+        h("div", { class: "panel__head" }, h("h2", { class: "h3" }, "Settings"), formatGlyphs(t)),
         h("dl", {},
           h("dt", {}, "Formats"), h("dd", {}, t.output.aspectRatios.map((r) => formatName[r]).join(", ")),
           h("dt", {}, "Length"), h("dd", {}, `${t.output.durations.join(" or ")} seconds`),
@@ -51,7 +51,6 @@ export async function templateView(ctx) {
         ),
         action,
         store.site.user ? null : t.ready ? h("p", { class: "small muted" }, "You'll be asked to sign in first.") : null,
-        h("a", { class: "link", href: back }, "Back to templates"),
       ),
     ),
   );
