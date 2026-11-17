@@ -699,8 +699,9 @@ mark.todo { background: #F4E4DC; color: var(--clay); padding: 0 3px; border-bott
 @media (max-width: 519px) { .progress { gap: 6px; font-size: .8125rem; } .progress li + li::before { width: 10px; margin-right: 2px; } .progress .dot { width: 20px; height: 20px; } }
 @media (max-width: 359px) { .progress li + li::before { display: none; } }
 .remove { margin-top: var(--s-2); }
-/* Sign-in: "Forgot password?" sits on the label row */
+/* Login: "Forgot password?" sits on the label row */
 .field--with-link { grid-template-columns: 1fr auto; }
 .field--with-link > :not(.field__label):not(.link) { grid-column: 1 / -1; }
 .field--with-link > .link { align-self: center; justify-self: end; min-height: 44px; display: inline-flex; align-items: center; }
 .flow { gap: var(--s-4); }
+.purchase-list { display: grid; gap: var(--s-4); } .purchase-list li { padding-top: var(--s-3); border-top: 1px solid var(--border); }

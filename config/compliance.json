@@ -1,0 +1,39 @@
+{
+  "_note": "Transfers of personal data outside Saudi Arabia (PDPL Art 29; Transfer Regulation Arts 4 and 7). In production, 'accounts' transfers must each have a mechanism and a risk assessment recorded before sign-ups open, and 'generation' transfers before photos go to the video model. Record only what has actually been done: a mechanism means a signed or accepted safeguard (e.g. SDAIA standard contractual clauses signed by both sides, or an SDAIA adequacy decision for the country); riskAssessment means a completed assessment kept on file (file name and date). See docs/compliance/transfers.md.",
+  "transfers": {
+    "railway": {
+      "recipient": "Railway Corporation (hosting)",
+      "purposes": [
+        "accounts",
+        "generation"
+      ],
+      "data": "everything the service stores: account details, eligibility and agreement records, photos, inputs, videos, credit and purchase records, reports; technical logs",
+      "location": "United States (US West, California); logs in US West",
+      "role": "processor (Railway DPA)",
+      "mechanism": null,
+      "riskAssessment": null
+    },
+    "resend": {
+      "recipient": "Resend, Inc. (account email)",
+      "purposes": [
+        "accounts"
+      ],
+      "data": "email address and the text of account emails (confirmation, reset and change links)",
+      "location": "United States (all account data, logs and metadata, whatever the sending region)",
+      "role": "processor (Resend DPA)",
+      "mechanism": null,
+      "riskAssessment": null
+    },
+    "fal": {
+      "recipient": "Features & Labels, Inc. (fal.ai) and its partner model provider",
+      "purposes": [
+        "generation"
+      ],
+      "data": "the framed copy of the photo and the generation instructions (template text plus the customer's short inputs); no name, email or account id",
+      "location": "United States and other countries (not named by fal); partner-model content goes to the model's provider",
+      "role": "processor (fal DPA)",
+      "mechanism": null,
+      "riskAssessment": null
+    }
+  }
+}

@@ -75,7 +75,7 @@ async function render() {
   }
   // Uploading and generating need a finished account (18+ confirmed, current terms agreed).
   const needs = store.site?.user?.needs;
-  if (opts.eligible && needs && (needs.name || needs.age || needs.terms)) {
+  if (opts.eligible && (store.site?.user?.ageRestricted || (needs && (needs.name || needs.age || needs.terms)))) {
     return navigate(`/welcome?next=${encodeURIComponent(url.pathname + url.search)}`, { replace: true });
   }
   if (opts.eligible && needs?.email) {
@@ -133,23 +133,23 @@ function renderChrome(path) {
   nav.replaceChildren(...[
     ...navItems(path).map((i) => h("a", { href: i.href, "aria-current": i.current ? "page" : null }, i.label)),
     u ? h("span", { class: "nav__credits" }, credits(u.credits)) : null,
-    u ? h("button", { type: "button", class: "btn btn--quiet", onclick: signOut }, "Sign out") : h("a", { href: `/signin` }, "Sign in"),
+    u ? h("button", { type: "button", class: "btn btn--quiet", onclick: signOut }, "Log out") : h("a", { href: `/signin` }, "Log in"),
     h("a", { class: "btn btn--primary btn--sm", href: "/templates" }, "Create a video"),
   ].filter(Boolean));
   const mobile = $("[data-mobile-nav]");
   mobile.replaceChildren(h("ul", {},
     navItems(path).map((i) => h("li", {}, h("a", { href: i.href, "aria-current": i.current ? "page" : null }, i.label))),
     u ? h("li", { class: "mobile-nav__credits" }, `${u.email} · ${credits(u.credits)}`) : null,
-    h("li", {}, u ? h("button", { type: "button", onclick: signOut }, "Sign out") : h("a", { href: "/signin" }, "Sign in")),
+    h("li", {}, u ? h("button", { type: "button", onclick: signOut }, "Log out") : h("a", { href: "/signin" }, "Log in")),
     h("li", {}, h("a", { class: "btn btn--primary", href: "/templates" }, "Create a video")),
   ));
   const foot = $("[data-footer-nav]");
-  foot.replaceChildren(...[...navItems(path), u ? null : { href: "/signin", label: "Sign in" }, { href: "/templates", label: "Create a video" }]
+  foot.replaceChildren(...[...navItems(path), u ? null : { href: "/signin", label: "Log in" }, { href: "/templates", label: "Create a video" }]
     .filter(Boolean).map((i) => h("li", {}, h("a", { href: i.href }, i.label))));
   $("[data-legal]").textContent = `© ${new Date().getFullYear()} ${store.site.brandName}`;
 }
 
-/** Called after anything that changes the balance or sign-in state. */
+/** Called after anything that changes the balance or login state. */
 export function setUser(user) {
   store.site.user = user;
   renderChrome(location.pathname);

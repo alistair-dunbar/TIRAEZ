@@ -50,7 +50,7 @@ export async function templateView(ctx) {
           h("dt", {}, "Cost"), h("dd", {}, cost),
         ),
         action,
-        store.site.user ? null : t.ready ? h("p", { class: "small muted" }, "You'll be asked to sign in first.") : null,
+        store.site.user ? null : t.ready ? h("p", { class: "small muted" }, "You'll be asked to log in first.") : null,
       ),
     ),
   );

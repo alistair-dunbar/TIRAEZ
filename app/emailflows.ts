@@ -139,6 +139,20 @@ export function resetPassword(token: unknown, password: unknown, confirm: unknow
   if (mailReady()) deliver(messages.passwordChanged(email, site.brandName), "password changed");
 }
 
+/**
+ * Someone tried to sign up with an email that already has an account. The owner is told how to log in
+ * or reset their password (with a fresh confirmation link if they never confirmed). At most three an
+ * hour per account; extra attempts are dropped silently, so the public reply never changes.
+ */
+export function notifyExistingAccount(userId: number): void {
+  if (!mailReady()) return;
+  const u = userById(userId);
+  if (!u) return;
+  try { limit(`existing-notice:${userId}`, 3, 3600_000); } catch { return; }
+  const confirm = u.emailVerified ? null : link("/verify-email", issue(u.id, "verify", u.email));
+  deliver(messages.existingAccount(u.email, site.brandName, `${appUrl()}/signin`, `${appUrl()}/forgot-password`, confirm), "existing account");
+}
+
 export function notifyPasswordChanged(u: User): void {
   if (mailReady()) deliver(messages.passwordChanged(u.email, site.brandName), "password changed");
 }

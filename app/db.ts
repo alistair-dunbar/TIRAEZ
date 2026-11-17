@@ -117,6 +117,8 @@ const ADDED_USER_COLUMNS: Record<string, string> = {
   suspended_reason: "TEXT",
   deleted_at: "TEXT",              // set when an account is deleted; personal fields are cleared at the same time
   email_verified_at: "TEXT",       // when the person proved they control the email address
+  age_restricted_at: "TEXT",       // an existing account declared an age under 18: uploads and generation stop
+  age_restriction_lifted_at: "TEXT", // a reviewed correction (see reports.ts), with the note in consent_events
   pending_email: "TEXT",           // a requested new email, until its confirmation link is used
 };
 const have = new Set((db.prepare("PRAGMA table_info(users)").all() as any[]).map((c) => c.name));
@@ -163,10 +165,36 @@ db.exec(`
   );
   CREATE INDEX IF NOT EXISTS email_tokens_user ON email_tokens(user_id);
 
+  -- Requests to refund a purchase, reviewed by the founders (npm run refunds).
+  CREATE TABLE IF NOT EXISTS refund_requests (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    purchase_id INTEGER NOT NULL REFERENCES purchases(id),
+    reason TEXT NOT NULL,          -- customer | age_restriction
+    details TEXT,
+    status TEXT NOT NULL DEFAULT 'open',   -- open | approved | declined
+    decision_note TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    decided_at TEXT
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS refund_requests_one_open ON refund_requests(purchase_id) WHERE status = 'open';
+
   CREATE INDEX IF NOT EXISTS sessions_user ON sessions(user_id);
   CREATE INDEX IF NOT EXISTS jobs_user ON jobs(user_id);
   CREATE INDEX IF NOT EXISTS photos_user ON photos(user_id);
 `);
+
+// Purchases gain refund fields; the ledger gets a guard so no balance change can be recorded twice.
+const purchaseCols = new Set((db.prepare("PRAGMA table_info(purchases)").all() as any[]).map((c) => c.name));
+for (const [col, type] of Object.entries({ refunded_at: "TEXT", refunded_credits: "INTEGER", refund_note: "TEXT", refund_provider_ref: "TEXT" })) {
+  if (!purchaseCols.has(col)) db.exec(`ALTER TABLE purchases ADD COLUMN ${col} ${type}`);
+}
+try {
+  db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS credit_events_once ON credit_events(reason, ref)
+    WHERE reason IN ('purchase', 'video', 'refund', 'consume', 'purchase_refund')`);
+} catch (e) {
+  console.error(`credit_events_once index not created (existing duplicate rows?): ${(e as Error).message}`);
+}
 
 /** Runs fn inside a transaction; rolls back if it throws. */
 export function tx<T>(fn: () => T): T {

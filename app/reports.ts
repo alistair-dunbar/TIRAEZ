@@ -3,14 +3,17 @@
 //   npm run reports -- --close 4 --outcome "Removed the video, warned the account"
 //   npm run suspend -- --email a@example.com --reason "Impersonation (report 4)"
 //   npm run suspend -- --email a@example.com --lift
+//   npm run suspend -- --email a@example.com --lift-age --note "Report 7: typo, reviewed"   (then they confirm their age again)
 import { ValidationError, type User } from "./auth.ts";
 import { db } from "./db.ts";
+import { liftAgeRestriction } from "./account.ts";
 
 export const REPORT_KINDS: Record<string, string> = {
   rights: "Uses my photo, likeness, brand or work without permission",
   harmful: "Harmful, abusive or illegal content",
   deceptive: "Misleading or deceptive content",
   child_safety: "Content involving a child",
+  age_correction: "I entered my age by mistake and my account was restricted",
   privacy: "A request about my personal data (access, correction, deletion or objection)",
   security: "A security or privacy problem with the site",
   other: "Something else",
@@ -54,7 +57,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (args[0] === "suspend") {
     const email = arg("email");
     if (!email) { console.log("Usage: npm run suspend -- --email <address> (--reason <text> | --lift)"); process.exit(1); }
-    if (args.includes("--lift")) console.log(lift(email) ? `Lifted the suspension on ${email}.` : "No such account.");
+    if (args.includes("--lift-age")) {
+      const note = arg("note");
+      if (!note) { console.log("Give a --note saying what was reviewed (for example the report number)."); process.exit(1); }
+      const u = db.prepare("SELECT id FROM users WHERE email = ? AND deleted_at IS NULL").get(email.toLowerCase()) as any;
+      console.log(u && liftAgeRestriction(u.id, note) ? `Lifted the age restriction on ${email}. They must confirm their age again before using the service.` : "No restricted account with that email.");
+    } else if (args.includes("--lift")) console.log(lift(email) ? `Lifted the suspension on ${email}.` : "No such account.");
     else {
       const reason = arg("reason");
       if (!reason) { console.log("Give a --reason, so the decision can be explained later."); process.exit(1); }

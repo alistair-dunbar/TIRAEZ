@@ -4,5 +4,6 @@
   "unusedPhotosDays": 7,
   "expiredSessions": true,
   "providerFilesHours": 24,
-  "unverifiedAccountsDays": 30
+  "unverifiedAccountsDays": 30,
+  "ageRestrictedDays": 30
 }

@@ -25,8 +25,18 @@ Zero dependencies (node:http, node:sqlite, node:crypto, system ffmpeg). Plain JS
 
 - Journey: landing -> catalogue (`/templates`) -> template (`/templates/<slug>`) -> workspace
   (`/create/<slug>`: upload, framing, schema-built form, settings, review) -> job (`/videos/<id>`) -> My videos.
-- `npm start`, `npm test` (55 end-to-end tests, test-only mock provider and mail outbox, free), `npm run credits`,
-  `npm run reports`, `npm run suspend`.
+- `npm start`, `npm test` (62 end-to-end tests, test-only mock provider and mail outbox, free), `npm run credits`,
+  `npm run reports`, `npm run suspend`, `npm run refunds`, `npm run launch-check` (what each production gate waits for).
+- Operator (17 Nov 2026): an individual with a Saudi freelance document (not a commercial registration; an
+  e-commerce "practitioner"). Facts go in `config/business.json`, never invented. Gates are scoped: policies,
+  accounts (also needs the Railway and Resend transfer safeguards in `config/compliance.json`), generation
+  (Railway and fal safeguards) and payments (billing decisions). See `docs/LEGAL-REVIEW.md` and `docs/compliance/transfers.md`.
+- Wording: "Log in" and "Log out" in everything users see; routes such as `/signin` keep their names.
+- Credits ledger (`app/credits.ts`): video (reserve), consume, refund (returned), purchase, grant, purchase_refund.
+  A unique (reason, ref) index means nothing is recorded twice. Job ids are never reused.
+- Sign-up gives one neutral reply. Nobody is logged in until they log in. An existing account's owner is emailed instead.
+- Under 18: refused at sign-up. An existing account declaring under 18 is restricted, not deleted, and is lifted only
+  by a reviewed correction (`npm run suspend -- --email … --lift-age --note …`). Otherwise it's deleted after 30 days.
 - Brand: **Tiraez** (17 Nov 2026). The name comes from `config/site.json`. Logo files are in `app/public/brand/`
   (`scripts/build-logo.py`). Don't rename database tables, environment variables, domains or storage keys for the brand.
 - Legal (17 Nov 2026): the policy drafts in `legal/*.md` replace the earlier "no Terms/Privacy pages"

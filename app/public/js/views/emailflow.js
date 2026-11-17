@@ -38,7 +38,7 @@ const linkProblem = {
 };
 
 // ---------------------------------------------------------------------------------------------
-// /verify-email: uses a link, or (signed in, unconfirmed) explains what to do next.
+// /verify-email: uses a link, or (logged in, unconfirmed) explains what to do next.
 
 export async function verifyEmailView(ctx) {
   const token = takeToken(ctx);
@@ -50,20 +50,20 @@ export async function verifyEmailView(ctx) {
       const r = await api("POST", "/api/email/verify", { token });
       if (r.user) setUser(r.user);
       return page(r.changed ? "Your new email is confirmed" : "Your email is confirmed",
-        r.changed ? `You now sign in with ${r.email}.` : `Thank you. ${r.email} is confirmed.`,
-        h("div", { class: "btn-row" }, h("a", { class: "btn btn--primary", href: store.site.user ? next : "/signin" }, store.site.user ? "Continue" : "Sign in")));
+        r.changed ? `You now log in with ${r.email}.` : store.site.user ? `Thank you. ${r.email} is confirmed.` : `Thank you. ${r.email} is confirmed. Log in to continue.`,
+        h("div", { class: "btn-row" }, h("a", { class: "btn btn--primary", href: store.site.user ? next : `/signin?next=${encodeURIComponent(next)}` }, store.site.user ? "Continue" : "Log in")));
     } catch (e) {
       const code = e instanceof ApiError ? e.code : "offline";
       return page("We couldn't confirm your email", null,
         notice(linkProblem[code] ?? errorText[code] ?? errorText.server_error, u && !u.emailVerified ? "You can send yourself a new link below." : null, { error: true }),
-        u && !u.emailVerified ? resend(u) : h("p", {}, "Sign in to send yourself a new link."));
+        u && !u.emailVerified ? resend(u) : h("p", {}, "Log in to send yourself a new link."));
     }
   }
 
   if (!u) { navigate(`/signin?next=${encodeURIComponent("/verify-email")}`, { replace: true }); return null; }
   if (u.emailVerified && !u.pendingEmail) { navigate(next, { replace: true }); return null; }
   if (u.emailVerified && u.pendingEmail) {
-    return page("Confirm your new email", `We've sent a link to ${u.pendingEmail}. Until you use it, you keep signing in with ${u.email}.`,
+    return page("Confirm your new email", `We've sent a link to ${u.pendingEmail}. Until you use it, you keep logging in with ${u.email}.`,
       h("a", { class: "btn btn--secondary", href: "/account" }, "Back to your account"));
   }
   return page("Confirm your email", `We've sent a link to ${u.email}. Open it to confirm the address, then you can upload photos and create videos.`,
@@ -109,7 +109,7 @@ export function forgotView(ctx) {
       panelBody.replaceChildren(
         h("p", { class: "title", role: "status", tabindex: "-1" }, NEUTRAL),
         h("p", {}, "The link works once and expires in 1 hour. Check your spam folder if it doesn't arrive in a few minutes."),
-        h("p", {}, h("a", { class: "link", href: "/signin" }, "Back to sign in")));
+        h("p", {}, h("a", { class: "link", href: "/signin" }, "Back to log in")));
       panelBody.querySelector("[tabindex]").focus();
     } catch (err) {
       setBusy(submit, false);
@@ -118,8 +118,8 @@ export function forgotView(ctx) {
       status.textContent = errorText[code] ?? errorText.server_error;
     }
   } }, email.el, h("div", { class: "field" }, submit, status));
-  panelBody.append(form, h("p", { class: "page__foot" }, "Remembered it? ", h("a", { class: "link", href: "/signin" }, "Sign in")));
-  return page("Reset your password", "Tell us the email you sign in with, and we'll send you a link to choose a new password.", panelBody);
+  panelBody.append(form, h("p", { class: "page__foot" }, "Remembered it? ", h("a", { class: "link", href: "/signin" }, "Log in")));
+  return page("Reset your password", "Tell us the email you log in with, and we'll send you a link to choose a new password.", panelBody);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -154,8 +154,8 @@ export async function resetView(ctx) {
       setUser(null);
       body.replaceChildren(
         h("p", { class: "title", role: "status", tabindex: "-1" }, "Your password has been changed."),
-        h("p", {}, "You've been signed out everywhere. Sign in again with your new password."),
-        h("a", { class: "btn btn--primary", href: "/signin" }, "Sign in"));
+        h("p", {}, "You've been logged out everywhere. Log in again with your new password."),
+        h("a", { class: "btn btn--primary", href: "/signin" }, "Log in"));
       body.querySelector("[tabindex]").focus();
     } catch (err) {
       setBusy(submit, false);

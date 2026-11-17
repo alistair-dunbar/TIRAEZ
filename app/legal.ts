@@ -12,12 +12,15 @@ import { pricing, site } from "./config.ts";
 const read = (path: string) => JSON.parse(readFileSync(new URL(`../${path}`, import.meta.url), "utf8"));
 
 export interface LegalDocMeta { title: string; version: string; effective: string | null }
-export interface LegalConfig { status: "draft" | "published"; documents: Record<string, LegalDocMeta>; unresolved: Record<string, string | null> }
-export interface RetentionConfig { confirmed: boolean; unusedPhotosDays: number; expiredSessions: boolean; providerFilesHours: number; unverifiedAccountsDays: number }
+export interface LegalConfig { status: "draft" | "published"; documents: Record<string, LegalDocMeta>; unresolved: Record<string, string | null>; paymentsOnly: string[] }
+export interface TransferRecord { recipient: string; purposes: string[]; data: string; location: string; role: string; mechanism: string | null; riskAssessment: string | null }
+export interface ComplianceConfig { transfers: Record<string, TransferRecord> }
+export interface RetentionConfig { confirmed: boolean; unusedPhotosDays: number; expiredSessions: boolean; providerFilesHours: number; unverifiedAccountsDays: number; ageRestrictedDays: number }
 
 export const business: Record<string, string | null> = read("config/business.json");
 export const legal: LegalConfig = read("config/legal.json");
 export const retention: RetentionConfig = read("config/retention.json");
+export const compliance: ComplianceConfig = read("config/compliance.json");
 const packs: { id: string; credits: number; priceSar: number }[] = read("config/packs.json");
 
 export const LEGAL_DOCS = ["terms", "privacy", "acceptable-use", "billing", "cookies", "contact"] as const;
@@ -51,7 +54,13 @@ function tokenValue(name: string, slug: string): Token {
   if (name === "brand") return { value: site.brandName };
   if (scope === "doc") return { value: key === "version" ? doc.version : key === "effective" ? doc.effective : null };
   if (scope === "business") return { value: business[key] ?? null, email: key.endsWith("Email") };
-  if (scope === "legal" && rest[0] === "unresolved") return { value: legal.unresolved[rest[1]] ?? null };
+  if (scope === "legal" && rest[0] === "unresolved") {
+    const v = legal.unresolved[rest[1]] ?? null;
+    // Decisions that only matter once people can pay don't hold up the rest of the service: while
+    // buying is switched off, the policy says so instead of guessing.
+    if (v === null && legal.paymentsOnly.includes(rest[1]) && !paymentsSwitchedOn()) return { value: "This will be set out here before buying credits opens." };
+    return { value: v };
+  }
   if (scope === "retention") {
     const v = (retention as any)[key];
     // The numbers describe what the code does; they still need the founders' sign-off as policy.
@@ -151,6 +160,34 @@ export function renderDoc(slug: string): RenderedDoc | null {
 }
 
 /** Everything still unconfirmed across all documents, plus the overall status. */
+const paymentsSwitchedOn = () => process.env.PAYMENTS === "moyasar";
+
+/** Payment-only decisions still missing; payments stay off in production until this is empty. */
+export function paymentTermsMissing(): string[] {
+  return legal.paymentsOnly.filter((k) => legal.unresolved[k] === null);
+}
+
+/**
+ * Transfers outside Saudi Arabia that a purpose depends on, still without a recorded mechanism and risk
+ * assessment (PDPL Art 29; Transfer Regulation Arts 4 and 7). "accounts" covers hosting and account
+ * email; "generation" covers sending photos and prompts to the video model.
+ */
+export function transfersMissing(purpose: "accounts" | "generation"): string[] {
+  return Object.entries(compliance.transfers)
+    .filter(([, t]) => t.purposes.includes(purpose) && (!t.mechanism || !t.riskAssessment))
+    .map(([k]) => k);
+}
+
+/** Whether new accounts can be opened: published policies, and safeguards for where account data goes. */
+export function accountsOpen(): boolean {
+  return !legalEnforced() || (legalStatus().published && transfersMissing("accounts").length === 0);
+}
+
+/** Whether photos and prompts may be sent to the video model. */
+export function generationAllowed(): boolean {
+  return !legalEnforced() || transfersMissing("generation").length === 0;
+}
+
 export function legalStatus(): { published: boolean; unresolved: string[] } {
   const all = new Set<string>();
   for (const slug of LEGAL_DOCS) for (const u of renderDoc(slug)!.unresolved) all.add(u);

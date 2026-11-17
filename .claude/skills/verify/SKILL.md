@@ -12,7 +12,7 @@ didn't check; say which layer would catch it. All three layers are free.
 
 ```bash
 npm run typecheck
-npm test            # 55 end-to-end tests (service, accounts/legal/security, email flows), mock provider + mail outbox
+npm test            # 62 end-to-end tests (service, accounts/legal/security/credits, email flows), mock provider + mail outbox
 ```
 
 ## 2. Local journey in a real browser (after UI or flow changes)
@@ -31,9 +31,16 @@ for size in "1440 900" "768 1024" "390 844"; do node scripts/verify-journey.mjs 
 node scripts/verify-email-flows.mjs http://localhost:3202 .cache/e2e 390 844
 ```
 
-The email-flow script signs up through the form, opens the confirmation link from the sandbox
-outbox (`.cache/e2e/outbox`), uses "Forgot password?", opens the reset link, sets a new password,
-and checks the old password fails and both links refuse reuse. Nothing is really emailed.
+The email-flow script:
+1. Signs up through the form and checks the neutral reply. It repeats the sign-up with the same email,
+   and tries an age under 18.
+2. Logs in and checks that protected pages wait for email confirmation.
+3. Opens the confirmation link from the sandbox outbox (`.cache/e2e/outbox`).
+4. Logs out and back in.
+5. Uses "Forgot password?", opens the reset link, sets a new password, and checks the old password fails
+   and both links refuse reuse.
+
+Nothing is really emailed.
 
 The journey signs in, filters and searches the catalogue, checks the empty state and that filters
 survive Back, uploads a fake and a real photo, frames it with the keyboard, refreshes mid-draft,

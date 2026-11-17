@@ -1,4 +1,4 @@
-// Sign in and create an account. Errors appear under their field and are announced.
+// Log in and create an account. Errors appear under their field and are announced.
 // Sign-up asks for name, email, password and age, with two separate unticked boxes (the terms, and
 // being 18 or over). The privacy notice is shown as information, not bundled into either box.
 import { api, ApiError } from "../api.js";
@@ -16,7 +16,7 @@ export function authView(ctx, mode) {
   const panel = h("div", { class: "auth__panel" });
 
   const switchTo = signup
-    ? h("p", {}, "Already have an account? ", h("a", { class: "link", href: `/signin${next !== "/templates" ? `?next=${encodeURIComponent(next)}` : ""}` }, "Sign in"))
+    ? h("p", {}, "Already have an account? ", h("a", { class: "link", href: `/signin${next !== "/templates" ? `?next=${encodeURIComponent(next)}` : ""}` }, "Log in"))
     : h("p", {}, "New here? ", h("a", { class: "link", href: `/signup${next !== "/templates" ? `?next=${encodeURIComponent(next)}` : ""}` }, "Create an account"));
 
   if (signup && !store.site.signupsOpen) {
@@ -40,7 +40,19 @@ export function authView(ctx, mode) {
   }
   const all = { ...elig, email, password };
   const status = h("p", { class: "form-status", role: "status" });
-  const submit = h("button", { class: "btn btn--primary btn--lg btn--block", type: "submit" }, signup ? "Create account" : "Sign in");
+  const submit = h("button", { class: "btn btn--primary btn--lg btn--block", type: "submit" }, signup ? "Create account" : "Log in");
+
+  /** The same reply whether or not the email already had an account; nobody is logged in yet. */
+  function checkEmail(address) {
+    panel.replaceChildren(h("div", { class: "stack", role: "status" },
+      h("h2", { class: "title", tabindex: "-1" }, "Check your email for the next steps."),
+      h("p", {}, "If you already have an account, you can log in or reset your password."),
+      h("p", { class: "notice-text" }, `Any message will go to ${address}. If nothing arrives within a few minutes, check your spam folder, then try logging in or resetting your password.`),
+      h("div", { class: "btn-row" },
+        h("a", { class: "btn btn--primary", href: `/signin${next !== "/templates" ? `?next=${encodeURIComponent(next)}` : ""}` }, "Log in"),
+        h("a", { class: "link", href: `/forgot-password?email=${encodeURIComponent(address)}` }, "Reset your password"))));
+    panel.querySelector("h2").focus();
+  }
 
   /** Under 18: the form goes away and nothing else is suggested. */
   function ineligible() {
@@ -64,11 +76,12 @@ export function authView(ctx, mode) {
       return;
     }
     setBusy(submit, true);
-    status.textContent = signup ? "Creating your account" : "Signing in";
+    status.textContent = signup ? "Creating your account" : "Logging in";
     try {
       const body = { email: email.input.value.trim(), password: password.input.value,
         ...(signup ? { ...eligibilityBody(elig), termsVersion: store.site.legal.termsVersion, privacyVersion: store.site.legal.privacyVersion } : {}) };
       const u = await api("POST", signup ? "/api/signup" : "/api/login", body);
+      if (signup) { checkEmail(email.input.value.trim()); return; }
       setUser(u);
       const needs = u.needs && (u.needs.name || u.needs.age || u.needs.terms);
       navigate(needs ? `/welcome?next=${encodeURIComponent(next)}` : u.needs?.email ? `/verify-email?next=${encodeURIComponent(next)}` : next, { replace: true });
@@ -95,14 +108,14 @@ export function authView(ctx, mode) {
 
 function page(signup, panel) {
   return {
-    title: signup ? "Create an account" : "Sign in",
+    title: signup ? "Create an account" : "Log in",
     node: h("div", { class: "wrap page" },
       h("div", { class: "auth" },
         h("div", { class: "page__head" },
-          h("h1", { class: "h1" }, signup ? "Create an account" : "Sign in"),
+          h("h1", { class: "h1" }, signup ? "Create an account" : "Log in"),
           h("p", { class: "lead" }, signup
             ? "An account keeps your videos together so you can watch and download them again."
-            : "Sign in to create videos and see the ones you've made."),
+            : "Log in to create videos and see the ones you've made."),
         ),
         panel,
       ),

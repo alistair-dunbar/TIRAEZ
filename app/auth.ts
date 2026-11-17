@@ -4,7 +4,7 @@
 // we keep only that they confirmed they are 18 or over, when, and how.
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { db, tx } from "./db.ts";
-import { privacyVersion, termsAvailable, termsVersion } from "./legal.ts";
+import { accountsOpen, privacyVersion, termsAvailable, termsVersion } from "./legal.ts";
 
 export class UserError extends Error {
   code: string;
@@ -61,16 +61,17 @@ export interface User {
   suspended: boolean;
   emailVerified: boolean;
   pendingEmail: string | null;
+  ageRestricted: boolean;
 }
 
-const USER_COLUMNS = "u.id, u.email, u.name, u.credits, u.age_confirmed_at, u.terms_version, u.suspended_at, u.email_verified_at, u.pending_email";
+const USER_COLUMNS = "u.id, u.email, u.name, u.credits, u.age_confirmed_at, u.terms_version, u.suspended_at, u.email_verified_at, u.pending_email, u.age_restricted_at";
 const toUser = (r: any): User => ({
   id: r.id, email: r.email, name: r.name ?? null, credits: r.credits,
   ageConfirmed: Boolean(r.age_confirmed_at), termsVersion: r.terms_version ?? null, suspended: Boolean(r.suspended_at),
-  emailVerified: Boolean(r.email_verified_at), pendingEmail: r.pending_email ?? null,
+  emailVerified: Boolean(r.email_verified_at), pendingEmail: r.pending_email ?? null, ageRestricted: Boolean(r.age_restricted_at),
 });
 
-/** What a signed-in person still has to do before they can upload, generate or buy. */
+/** What a logged-in person still has to do before they can upload, generate or buy. */
 export function onboardingNeeds(u: User): { name: boolean; age: boolean; terms: boolean; email: boolean } {
   return { name: !u.name, age: !u.ageConfirmed, terms: u.termsVersion !== termsVersion(), email: !u.emailVerified };
 }
@@ -78,6 +79,7 @@ export function onboardingNeeds(u: User): { name: boolean; age: boolean; terms: 
 /** Throws unless this account may use the parts of the service that process photos or take payment. */
 export function requireEligible(u: User): void {
   if (u.suspended) throw new UserError("account_suspended", 403);
+  if (u.ageRestricted) throw new UserError("age_restricted", 403);
   const n = onboardingNeeds(u);
   if (n.name || n.age || n.terms) throw new UserError("onboarding_required", 403);
   if (n.email) throw new UserError("email_unverified", 403);
@@ -149,8 +151,13 @@ function recordEligibility(userId: number, ask: { name: boolean; age: boolean; t
 
 // ---------------------------------------------------------------------------------------------
 
-export function signup(body: any): User {
-  if (!termsAvailable()) throw new UserError("signups_closed", 503);
+/**
+ * Creates an account, or, when the email already has one, creates nothing and says so only to the
+ * caller (who emails the owner instead). The public reply is the same either way, and the same work
+ * (one password hash) is done either way, so neither the answer nor its timing reveals the account.
+ */
+export function signup(body: any): { created: User } | { existingId: number } {
+  if (!accountsOpen()) throw new UserError("signups_closed", 503);
   body = body && typeof body === "object" ? body : {};
   const errors: Record<string, string> = {};
   const all = { name: true, age: true, terms: true };
@@ -159,20 +166,24 @@ export function signup(body: any): User {
   if (!EMAIL.test(email) || email.length > 200) errors.email = fieldText.email;
   if (typeof body.password !== "string" || body.password.length < 8 || body.password.length > 200) errors.password = fieldText.password;
   if (Object.keys(errors).length) throw new ValidationError(errors);
-  if (db.prepare("SELECT 1 FROM users WHERE email = ?").get(email)) throw new UserError("email_taken", 409);
+  const hash = hashPassword(body.password);
+  const existing = db.prepare("SELECT id FROM users WHERE email = ?").get(email) as any;
+  if (existing) return { existingId: existing.id };
   const name = cleanName(body.name)!;
   return tx(() => {
-    const id = Number(db.prepare("INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)").run(email, hashPassword(body.password), name).lastInsertRowid);
+    const id = Number(db.prepare("INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)").run(email, hash, name).lastInsertRowid);
     recordEligibility(id, all, name, "signup");
-    return userById(id)!;
+    return { created: userById(id)! };
   });
 }
 
 /**
  * For accounts made before these checks existed, or when the terms change. Someone who now tells us
- * they are under 18 can't keep an account: the caller deletes it.
+ * they are under 18 is refused (age_ineligible) and the caller restricts the account. A restricted
+ * account can't re-enter its age here: only a reviewed correction lifts the restriction.
  */
 export function completeOnboarding(u: User, body: any): User {
+  if (u.ageRestricted) throw new UserError("age_restricted", 403);
   body = body && typeof body === "object" ? body : {};
   const ask = onboardingNeeds(u);
   if (ask.terms && !termsAvailable()) throw new UserError("terms_unavailable", 503);
@@ -212,7 +223,7 @@ export function login(emailRaw: unknown, password: unknown): User {
   return userById(row.id)!;
 }
 
-/** Checks the password of a signed-in person before a sensitive change. */
+/** Checks the password of a logged-in person before a sensitive change. */
 export function checkPassword(userId: number, password: unknown): void {
   const row = db.prepare("SELECT password_hash FROM users WHERE id = ?").get(userId) as any;
   if (!row || typeof password !== "string" || !verifyPassword(password, row.password_hash)) throw new ValidationError({ password: "That password isn't right." });
@@ -231,7 +242,7 @@ export function updateProfile(u: User, body: any): { user: User; newEmail: strin
   if (!EMAIL.test(email) || email.length > 200) errors.email = fieldText.email;
   if (Object.keys(errors).length) throw new ValidationError(errors);
   if (email !== u.email) {
-    checkPassword(u.id, body.password); // changing the sign-in email needs the password
+    checkPassword(u.id, body.password); // changing the login email needs the password
     if (db.prepare("SELECT 1 FROM users WHERE email = ? AND id != ?").get(email, u.id)) throw new UserError("email_taken", 409);
   }
   db.prepare("UPDATE users SET name = ? WHERE id = ?").run(name, u.id);
@@ -243,7 +254,7 @@ export function changePassword(u: User, current: unknown, next: unknown, keepTok
   if (typeof next !== "string" || next.length < 8 || next.length > 200) throw new ValidationError({ newPassword: fieldText.password });
   tx(() => {
     db.prepare("UPDATE users SET password_hash = ? WHERE id = ?").run(hashPassword(next), u.id);
-    endOtherSessions(u.id, keepToken); // anyone else signed in with the old password is signed out
+    endOtherSessions(u.id, keepToken); // anyone else logged in with the old password is logged out
   });
 }
 

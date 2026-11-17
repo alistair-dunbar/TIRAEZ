@@ -1,4 +1,4 @@
-// My videos: the signed-in customer's real jobs only, newest first.
+// My videos: the logged-in customer's real jobs only, newest first.
 import { api, ApiError } from "../api.js";
 import { h } from "../dom.js";
 import { credits, dateText, errorText } from "../copy.js";
@@ -56,9 +56,9 @@ export async function videosView(ctx) {
         setUser({ ...store.site.user, credits: r.credits });
         load();
       } catch (e) { status.textContent = errorText[e instanceof ApiError ? e.code : "offline"] ?? errorText.server_error; setBusy(btn, false); }
-    } }, `Buy ${p.pack.credits} credits for ${p.currency} ${p.pack.priceSar}`);
+    } }, `Pay ${p.currency} ${p.pack.priceSar} for ${p.pack.credits} credits`);
     buy.replaceChildren(h("div", { class: "btn-row" }, btn), status,
-      h("p", { class: "notice-text" }, "A one-off payment, with no subscription. Card payments are taken on Moyasar's payment page. See ",
+      h("p", { class: "notice-text" }, `Pressing "Pay" takes you to Moyasar's secure page to pay ${p.currency} ${p.pack.priceSar}, the total price. It's a one-off payment with no subscription. Within 7 days, you can cancel a pack you haven't used any credits from. See `,
         h("a", { class: "link", href: "/legal/billing" }, "Billing, credits and refunds"), "."));
   }
 

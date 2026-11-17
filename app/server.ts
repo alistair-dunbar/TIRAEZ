@@ -4,19 +4,19 @@
 import { createReadStream, existsSync, readFileSync, statSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { extname, join, normalize } from "node:path";
-import { accountSummary, deleteAccount, deleteVideo, eraseAccount, exportData, startRetention } from "./account.ts";
+import { accountSummary, deleteAccount, deleteVideo, exportData, restrictForAge, startRetention } from "./account.ts";
 import {
   SESSION_MAX_AGE, UserError, ValidationError, changePassword, completeOnboarding, createSession, endOtherSessions, endSession,
-  login, onboardingNeeds, requireEligible, signup, updateProfile, userFromSession, type User,
+  login, onboardingNeeds, requireEligible, signup, updateProfile, userById, userFromSession, type User,
 } from "./auth.ts";
 import { niches, publicTemplate, servablePreviewFiles, templateBySlug, templates } from "./catalog.ts";
 import { generation, pricing, site } from "./config.ts";
-import { balance, buy, confirmPurchase, packs, paymentProvider, purchaseByRef, purchaseOwner } from "./credits.ts";
-import { cancelEmailChange, checkReset, confirmEmail, notifyPasswordChanged, requestEmailChange, requestReset, resetPassword, sendVerification } from "./emailflows.ts";
+import { balance, buy, confirmPurchase, packs, paymentProvider, purchaseByRef, purchaseOwner, requestRefund } from "./credits.ts";
+import { cancelEmailChange, checkReset, confirmEmail, notifyExistingAccount, notifyPasswordChanged, requestEmailChange, requestReset, resetPassword, sendVerification } from "./emailflows.ts";
 import { clientIp, limitBy, redact } from "./guard.ts";
 import { mailName, mailReady } from "./mail.ts";
 import { createJob, jobFor, listJobs, publicJob, recoverJobs } from "./jobs.ts";
-import { legalPage, legalStatus, privacyVersion, termsAvailable, termsVersion } from "./legal.ts";
+import { accountsOpen, generationAllowed, legalEnforced, legalPage, legalStatus, paymentTermsMissing, privacyVersion, retention, termsVersion } from "./legal.ts";
 import { photoFor, savePhoto } from "./photos.ts";
 import { REPORT_KINDS, createReport } from "./reports.ts";
 import { engineName } from "./providers/index.ts";
@@ -98,9 +98,9 @@ function sendFile(req: IncomingMessage, res: ServerResponse, file: string, extra
   createReadStream(file).pipe(res);
 }
 
-/** What the front end may know about the signed-in person. */
+/** What the front end may know about the logged-in person. */
 function userPayload(u: User) {
-  return { name: u.name, email: u.email, credits: balance(u.id), needs: onboardingNeeds(u), emailVerified: u.emailVerified, pendingEmail: u.pendingEmail };
+  return { name: u.name, email: u.email, credits: balance(u.id), needs: onboardingNeeds(u), emailVerified: u.emailVerified, pendingEmail: u.pendingEmail, ageRestricted: u.ageRestricted };
 }
 
 /** Public facts the front end needs: brand, pricing, which services are switched on. */
@@ -113,12 +113,13 @@ function siteInfo(user: User | null) {
     contactEmail: site.contactEmail,
     pricing: site.showPricing && pack ? { currency: pricing.currency, creditsByDuration: pricing.creditsByDuration, pack } : null,
     paymentsOn,
-    generationOn: engineName() !== "none",
+    generationOn: engineName() !== "none" && generationAllowed(),
     // Accounts only open when there are published terms to agree to and email can confirm the address.
-    signupsOpen: termsAvailable() && mailReady(),
+    signupsOpen: accountsOpen() && mailReady(),
     mailOn: mailReady(),
     legal: { termsVersion: termsVersion(), privacyVersion: privacyVersion(), draft: !legalStatus().published },
     upload: { maxBytes: generation.upload.maxBytes, minShortSide: generation.upload.minShortSide },
+    ageRestrictedDays: retention.ageRestrictedDays,
     reportKinds: REPORT_KINDS,
     user: user ? userPayload(user) : null,
   };
@@ -146,17 +147,19 @@ async function api(req: IncomingMessage, res: ServerResponse, path: string): Pro
   const token = cookie(req, "sid");
   const user = userFromSession(token);
   const need = (): User => { if (!user) throw new UserError("login_required", 401); return user; };
-  /** Signed in, 18 or over, current terms accepted, not suspended. */
+  /** Logged in, 18 or over, current terms accepted, not suspended. */
   const eligible = (): User => { const u = need(); requireEligible(u); return u; };
   let m: RegExpExecArray | null;
 
   if (method === "POST" && path === "/api/signup") {
     limitBy("signup", ip);
     if (!mailReady()) throw new UserError("signups_closed", 503);
-    const u = signup(await json(req));
-    let verificationSent = true;
-    try { sendVerification(u); } catch { verificationSent = false; }
-    send(res, 200, { ...userPayload(u), verificationSent }, { "Set-Cookie": sessionCookie(createSession(u.id), SESSION_MAX_AGE) });
+    // One reply for a new account and for an email that already has one. Nobody is logged in here:
+    // a new account logs in after confirming its email; an existing owner gets an email instead.
+    const r = signup(await json(req));
+    if ("created" in r) { try { sendVerification(r.created); } catch (e) { console.error(`signup: verification not queued: ${redact((e as Error).message)}`); } }
+    else notifyExistingAccount(r.existingId);
+    send(res, 200, { ok: true });
   } else if (method === "POST" && path === "/api/email/verify") {
     limitBy("token", ip);
     const { token } = await json(req);
@@ -196,8 +199,8 @@ async function api(req: IncomingMessage, res: ServerResponse, path: string): Pro
     try {
       send(res, 200, userPayload(completeOnboarding(u, await json(req))));
     } catch (e) {
-      // Someone who tells us they are under 18 can't keep an account, so it is deleted now.
-      if (e instanceof UserError && e.code === "age_ineligible") { eraseAccount(u.id); send(res, 403, { error: e.code }, clearCookie()); return; }
+      // An existing account that declares an age under 18 is restricted at once, not deleted on the spot.
+      if (e instanceof UserError && e.code === "age_ineligible") { restrictForAge(u.id); send(res, 403, { error: "age_restricted", user: userPayload(userById(u.id)!) }); return; }
       throw e;
     }
   } else if (method === "GET" && path === "/api/templates") {
@@ -211,7 +214,7 @@ async function api(req: IncomingMessage, res: ServerResponse, path: string): Pro
     const id = createReport(user, await json(req));
     send(res, 200, { id });
 
-  // ---- Account controls (work for every signed-in account, eligible or not)
+  // ---- Account controls (work for every logged-in account, eligible or not)
   } else if (method === "GET" && path === "/api/account") {
     const u = need();
     send(res, 200, { ...accountSummary(u), user: userPayload(u) });
@@ -240,6 +243,11 @@ async function api(req: IncomingMessage, res: ServerResponse, path: string): Pro
     limitBy("export", u.id);
     const date = new Date().toISOString().slice(0, 10);
     send(res, 200, exportData(u), { "Content-Disposition": `attachment; filename="${site.brandName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-data-${date}.json"` });
+  } else if (method === "POST" && path === "/api/account/refund-requests") {
+    const u = need();
+    limitBy("sensitive", u.id);
+    const { purchaseId, details } = await json(req);
+    send(res, 200, { id: requestRefund(u.id, purchaseId, details) });
   } else if (method === "POST" && path === "/api/account/delete") {
     const u = need();
     limitBy("sensitive", u.id);
@@ -272,6 +280,7 @@ async function api(req: IncomingMessage, res: ServerResponse, path: string): Pro
     sendFile(req, res, p.file, { "Cache-Control": "private, max-age=3600" });
   } else if (method === "POST" && path === "/api/jobs") {
     const u = eligible();
+    if (!generationAllowed()) throw new UserError("generation_not_configured", 503);
     const id = createJob(u.id, await json(req));
     send(res, 200, { job: publicJob(jobFor(u.id, id)!), credits: balance(u.id) });
   } else if (method === "GET" && path === "/api/jobs") {

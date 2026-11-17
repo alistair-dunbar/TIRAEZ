@@ -1,52 +1,52 @@
 {
-  "_note": "status 'draft' keeps every legal document, and therefore signup, out of production until the founders publish. Bump a document's version whenever its text changes; a new terms version asks signed-in users to accept again.",
+  "_note": "status 'draft' keeps the policies, and therefore sign-ups, out of production until the founders publish. 'unresolved' values are full sentences that go into the policies as written; keys in 'paymentsOnly' only block payments, not accounts. Bump a document's version whenever its text changes; a new terms version asks signed-in users to accept again.",
   "status": "draft",
   "documents": {
     "terms": {
       "title": "Terms of Service",
-      "version": "2026-11-17-draft.2",
+      "version": "2026-11-17-draft.3",
       "effective": null
     },
     "privacy": {
       "title": "Privacy Policy",
-      "version": "2026-11-17-draft.2",
+      "version": "2026-11-17-draft.3",
       "effective": null
     },
     "acceptable-use": {
       "title": "Acceptable Use and AI Content Policy",
-      "version": "2026-11-17-draft",
+      "version": "2026-11-17-draft.3",
       "effective": null
     },
     "billing": {
       "title": "Billing, Credits and Refunds",
-      "version": "2026-11-17-draft",
+      "version": "2026-11-17-draft.3",
       "effective": null
     },
     "cookies": {
       "title": "Cookies and Browser Storage",
-      "version": "2026-11-17-draft",
+      "version": "2026-11-17-draft.3",
       "effective": null
     },
     "contact": {
       "title": "Contact and Business Information",
-      "version": "2026-11-17-draft",
+      "version": "2026-11-17-draft.3",
       "effective": null
     }
   },
   "unresolved": {
+    "transferSafeguards": null,
+    "controllerRegistration": null,
+    "vatTreatment": null,
     "creditExpiry": null,
     "unusedCreditRefunds": null,
-    "vatTreatment": null,
-    "paymentRecordRetention": null,
-    "deletedAccountRetention": null,
-    "backupRetention": null,
-    "providerAgreement": null,
-    "transferSafeguards": null,
-    "outputLicence": null,
-    "liabilityCap": null,
-    "supervisoryAuthority": null,
-    "rightsResponseTime": null,
     "invoices": null,
-    "emailProvider": null
-  }
+    "paymentRecordRetention": null
+  },
+  "paymentsOnly": [
+    "vatTreatment",
+    "creditExpiry",
+    "unusedCreditRefunds",
+    "invoices",
+    "paymentRecordRetention"
+  ]
 }

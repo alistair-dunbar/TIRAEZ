@@ -7,6 +7,8 @@ import { UserError, checkPassword, type User } from "./auth.ts";
 import { db, tx } from "./db.ts";
 import { retention } from "./legal.ts";
 import { DATA_DIR } from "./photos.ts";
+import { requestRefund, creditSummary, purchasesFor } from "./credits.ts";
+import { cancelQueuedJobs } from "./jobs.ts";
 
 const ACTIVE = ["queued", "uploading", "submitting", "in_queue", "in_progress", "saving"];
 type Row = Record<string, any>;
@@ -30,6 +32,9 @@ export function accountSummary(u: User) {
     videos: count("SELECT COUNT(*) AS n FROM jobs WHERE user_id = ?"),
     activeVideos: count(`SELECT COUNT(*) AS n FROM jobs WHERE user_id = ? AND status IN (${ACTIVE.map(() => "?").join(",")})`, ...ACTIVE),
     purchases: count("SELECT COUNT(*) AS n FROM purchases WHERE user_id = ? AND status = 'paid'"),
+    ageRestrictedAt: (db.prepare("SELECT age_restricted_at FROM users WHERE id = ?").get(u.id) as Row).age_restricted_at,
+    credits: creditSummary(u.id),
+    purchaseList: purchasesFor(u.id),
   };
 }
 
@@ -43,7 +48,7 @@ export function exportData(u: User) {
   return {
     exportedAt: new Date().toISOString(),
     notes: [
-      "This file holds the personal data your account has with us. Your photos and videos are listed with links; open the links while signed in to download them.",
+      "This file holds the personal data your account has with us. Your photos and videos are listed with links; open the links while logged in to download them.",
       "Your age is not included because we never stored it: we only keep that you confirmed you are 18 or over, and when.",
       "The full instructions we build for the video model are not included; your own inputs to them are.",
     ],
@@ -65,6 +70,8 @@ export function exportData(u: User) {
       link: j.output_file && existsSync(j.output_file) ? `/api/jobs/${j.id}/video.mp4` : null,
     })),
     reports: db.prepare("SELECT kind, target, details, status, created_at AS at FROM reports WHERE user_id = ? ORDER BY id").all(u.id),
+    creditSummary: creditSummary(u.id),
+    refundRequests: db.prepare("SELECT purchase_id AS purchase, reason, details, status, decision_note AS decision, created_at AS at, decided_at AS decidedAt FROM refund_requests WHERE user_id = ? ORDER BY id").all(u.id),
   };
 }
 
@@ -90,6 +97,33 @@ export function deleteVideo(u: User, jobId: number): void {
 // ---------------------------------------------------------------------------------------------
 // Delete the account
 
+/**
+ * An existing account declared an age under 18. Nothing is deleted on the spot (a typing mistake
+ * shouldn't destroy someone's work): uploads, generation and purchases stop at once, videos not yet
+ * sent to the model are cancelled with their credits returned, any paid purchase gets a refund request
+ * for review, and the account is deleted after the retention period unless a reviewed correction lifts
+ * the restriction first.
+ */
+export function restrictForAge(userId: number): void {
+  tx(() => {
+    db.prepare("UPDATE users SET age_restricted_at = datetime('now'), age_confirmed_at = NULL, age_method = NULL WHERE id = ? AND age_restricted_at IS NULL").run(userId);
+    db.prepare("INSERT INTO consent_events (user_id, kind, source) VALUES (?, 'declared_under_18', 'onboarding')").run(userId);
+    const paid = db.prepare("SELECT id FROM purchases WHERE user_id = ? AND status = 'paid'").all(userId) as Row[];
+    for (const p of paid) requestRefund(userId, p.id, "Account restricted: declared under 18.", "age_restriction");
+  });
+  cancelQueuedJobs(userId, "cancelled");
+}
+
+/** Lifts an age restriction after review. The person must then confirm their age again. */
+export function liftAgeRestriction(userId: number, note: string): boolean {
+  return tx(() => {
+    const r = db.prepare("UPDATE users SET age_restricted_at = NULL, age_restriction_lifted_at = datetime('now') WHERE id = ? AND age_restricted_at IS NOT NULL").run(userId);
+    if (!r.changes) return false;
+    db.prepare("INSERT INTO consent_events (user_id, kind, version, source) VALUES (?, 'age_restriction_lifted', ?, 'review')").run(userId, note.slice(0, 200));
+    return true;
+  });
+}
+
 export interface DeletionResult { purchaseRecordsKept: number }
 
 /**
@@ -105,16 +139,18 @@ export function eraseAccount(userId: number): DeletionResult {
     db.prepare("DELETE FROM photos WHERE user_id = ?").run(userId);
     db.prepare("DELETE FROM consent_events WHERE user_id = ?").run(userId);
     db.prepare("DELETE FROM email_tokens WHERE user_id = ?").run(userId);
+    db.prepare("UPDATE refund_requests SET details = NULL WHERE user_id = ?").run(userId);
     db.prepare("DELETE FROM credit_events WHERE user_id = ? AND reason != 'purchase'").run(userId);
     db.prepare("UPDATE reports SET user_id = NULL, contact_email = NULL WHERE user_id = ?").run(userId);
     db.prepare(`UPDATE users SET email = ?, password_hash = '', name = NULL, credits = 0, age_confirmed_at = NULL,
         age_method = NULL, terms_version = NULL, terms_accepted_at = NULL, privacy_version_seen = NULL,
-        suspended_at = NULL, suspended_reason = NULL, email_verified_at = NULL, pending_email = NULL,
+        suspended_at = NULL, suspended_reason = NULL, email_verified_at = NULL, pending_email = NULL, age_restricted_at = NULL,
         deleted_at = datetime('now') WHERE id = ?`)
       .run(`deleted-${userId}@deleted.invalid`, userId);
     const purchases = (db.prepare("SELECT COUNT(*) AS n FROM purchases WHERE user_id = ?").get(userId) as Row).n as number;
     if (purchases === 0) {
       db.prepare("DELETE FROM credit_events WHERE user_id = ?").run(userId);
+      db.prepare("DELETE FROM refund_requests WHERE user_id = ?").run(userId);
       db.prepare("DELETE FROM users WHERE id = ?").run(userId);
     }
     return purchases;
@@ -148,6 +184,12 @@ export function runRetention(now = Date.now()): { photos: number; sessions: numb
       AND created_at < datetime('now', ?) AND NOT EXISTS (SELECT 1 FROM purchases p WHERE p.user_id = u.id)`)
     .all(`-${retention.unverifiedAccountsDays} days`) as Row[];
   for (const a of abandoned) eraseAccount(a.id);
+  // Accounts restricted for declaring an age under 18, not corrected within the period. Videos still
+  // with the model are left to finish first, so nothing comes back after deletion.
+  const restricted = db.prepare(`SELECT id FROM users u WHERE age_restricted_at < datetime('now', ?) AND deleted_at IS NULL
+      AND NOT EXISTS (SELECT 1 FROM jobs j WHERE j.user_id = u.id AND j.status IN (${ACTIVE.map(() => "?").join(",")}))`)
+    .all(`-${retention.ageRestrictedDays} days`, ...ACTIVE) as Row[];
+  for (const a of restricted) eraseAccount(a.id);
   // Half-written uploads left by a crash.
   let strays = 0;
   const dir = `${DATA_DIR}/photos`;
@@ -158,7 +200,7 @@ export function runRetention(now = Date.now()): { photos: number; sessions: numb
       if (now - statSync(path).mtimeMs > 3600_000) { rmSync(path, { force: true }); strays++; }
     }
   }
-  return { photos: old.length, sessions, strays, tokens, unverified: abandoned.length };
+  return { photos: old.length, sessions, strays, tokens, unverified: abandoned.length + restricted.length };
 }
 
 let timer: ReturnType<typeof setInterval> | null = null;

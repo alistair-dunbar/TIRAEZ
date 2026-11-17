@@ -7,17 +7,17 @@ It is not a certification, and Tiraez does not claim one.
 
 | Area | What happens | Where |
 |---|---|---|
-| Passwords | scrypt from `node:crypto` (N=65536, r=8, p=1, 16-byte random salt), with the parameters stored in each hash. Older lighter hashes are upgraded at the next sign-in. The password itself is never stored or logged. | `app/auth.ts` |
-| Sessions | 32 random bytes in an `HttpOnly`, `SameSite=Lax` cookie, `Secure` in production, 30 days. Only a SHA-256 hash is stored. Sign out ends the session. Users can sign out other devices; changing the password signs out every other session. | `app/auth.ts`, `app/server.ts` |
+| Passwords | scrypt from `node:crypto` (N=65536, r=8, p=1, 16-byte random salt), with the parameters stored in each hash. Older lighter hashes are upgraded at the next login. The password itself is never stored or logged. | `app/auth.ts` |
+| Sessions | 32 random bytes in an `HttpOnly`, `SameSite=Lax` cookie, `Secure` in production, 30 days. Only a SHA-256 hash is stored. Log out ends the session. Users can log out other devices; changing the password signs out every other session. | `app/auth.ts`, `app/server.ts` |
 | Email links | Confirmation, reset and email-change links each carry 32 random bytes. Only a SHA-256 hash is stored. They expire (24 hours, or 1 hour for resets), work once, and a newer link voids older ones. Links are built from `APP_URL`, never the Host header. Tokens are removed from the address bar on arrival and never logged. | `app/emailflows.ts` |
 | Password reset | Always the same reply. At most 3 links an hour per address and 10 requests an hour per visitor. A reset signs out every session and emails the account. A changed password also emails the account. | `app/emailflows.ts`, `app/server.ts` |
 | Email change | Needs the current password. The new address must confirm through its own link, and the old address is told. | `app/emailflows.ts` |
 | Request forgery | Every state-changing API call must carry `X-Requested-With: app`, which a cross-site form can't send. Cookies are `SameSite=Lax`. | `app/server.ts` |
-| Authorisation | Every photo, video and job lookup filters by the signed-in user's id, so other people's ids return "not found". Uploads, generation and purchases also need an eligible account (18+ confirmed, current terms accepted, not suspended). | `app/server.ts`, `app/jobs.ts`, `app/photos.ts` |
+| Authorisation | Every photo, video and job lookup filters by the logged-in user's id, so other people's ids return "not found". Uploads, generation and purchases also need an eligible account (18+ confirmed, current terms accepted, not suspended). | `app/server.ts`, `app/jobs.ts`, `app/photos.ts` |
 | Uploads | Size limit before reading. The file type is checked by content, not by name. Each photo is decoded and re-encoded by ffmpeg, which removes metadata such as location. Files get random names outside the web root. | `app/photos.ts`, `app/media.ts` |
 | Private storage | Photos and videos are only served through authenticated API routes with `Cache-Control: private`/`no-store`. Static serving is confined to `app/public`. | `app/server.ts` |
 | Secrets | API keys come only from environment variables and are never sent to the browser. Logs pass through `redact()`, which removes keys, tokens, email addresses and signed URL queries. | `app/guard.ts` |
-| Rate limits | Per address: sign-up, sign-in, reports. Per account: photos, purchases, onboarding, password, email and deletion attempts, and exports. Each email also locks for 15 minutes after 8 wrong passwords. | `app/guard.ts`, `app/auth.ts` |
+| Rate limits | Per address: sign-up, login, reports. Per account: photos, purchases, onboarding, password, email and deletion attempts, and exports. Each email also locks for 15 minutes after 8 wrong passwords. | `app/guard.ts`, `app/auth.ts` |
 | Duplicate protection | A video request carries a client key, and the same key returns the first job instead of charging again. A provider submit whose outcome is unknown is never resent automatically. | `app/jobs.ts` |
 | Payments | The payment webhook's content isn't trusted: it only names an invoice, which the server then checks with Moyasar directly. Credits are granted exactly once. Payments are currently off. | `app/server.ts`, `app/credits.ts` |
 | Rendering | The front end builds the DOM with text nodes only (`app/public/js/dom.js`). Policy pages are rendered from Markdown with everything escaped first. | `app/legal.ts` |
@@ -38,7 +38,7 @@ It is not a certification, and Tiraez does not claim one.
 
 ## Founders' tasks (not code)
 
-1. Turn on two-factor sign-in for GitHub, Railway, fal, GoDaddy and Moyasar. Keep the list of who has access.
+1. Turn on two-factor login for GitHub, Railway, fal, GoDaddy and Moyasar. Keep the list of who has access.
 2. In the fal dashboard, set the account's default media expiry and access, as a backstop to the per-request headers. fal's default for CDN files is to keep them, readable by anyone with the link.
 3. Check Railway's volume backups and log retention, then record them in `config/legal.json`.
 4. Set up the email provider and its DNS records (`docs/DEPLOY.md`, "Account emails").

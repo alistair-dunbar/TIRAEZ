@@ -16,7 +16,9 @@
     "finish": "tsx render/finish.ts",
     "credits": "tsx app/grant-credits.ts",
     "reports": "tsx app/reports.ts",
-    "suspend": "tsx app/reports.ts suspend"
+    "suspend": "tsx app/reports.ts suspend",
+    "refunds": "tsx app/refunds.ts",
+    "launch-check": "tsx app/launch-check.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

@@ -9,7 +9,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { UserError, ValidationError } from "./auth.ts";
 import { ASPECT_RATIOS, availability, templateById, type Template } from "./catalog.ts";
 import { creditsFor, generation, models } from "./config.ts";
-import { balance, isRefunded, refundJob, spendForJob } from "./credits.ts";
+import { balance, consumeJob, isRefunded, refundJob, spendForJob } from "./credits.ts";
 import { db, tx } from "./db.ts";
 import { redact } from "./guard.ts";
 import { cropPhoto, posterFrame, probe } from "./media.ts";
@@ -98,9 +98,13 @@ export function createJob(userId: number, body: CreateRequest): number {
   if (cap > 0 && spentUsd() + models[t.model].usdPerSecond * settings.duration > cap) throw new UserError("generation_paused", 503);
 
   const id = tx(() => {
-    const jobId = Number(db.prepare(`INSERT INTO jobs (user_id, client_key, template_id, template_version, template_name,
+    // Ids are never reused, even after a video is deleted: the ledger and spend records refer to them.
+    const jobId = Number(db.prepare(`INSERT INTO jobs (id, user_id, client_key, template_id, template_version, template_name,
         photo_id, crop, inputs, settings, prompt, model, credits, status, provider)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?)`).run(
+      VALUES ((SELECT MAX(n) + 1 FROM (SELECT COALESCE(MAX(id), 0) AS n FROM jobs
+          UNION ALL SELECT COALESCE(MAX(CAST(ref AS INTEGER)), 0) FROM credit_events WHERE reason IN ('video', 'refund', 'consume')
+          UNION ALL SELECT COALESCE(MAX(job_id), 0) FROM provider_spend)),
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?)`).run(
       userId, clientKey, t.id, t.version, t.name, String(body.photoId), JSON.stringify(crop), JSON.stringify(inputs),
       JSON.stringify(settings), assemblePrompt(t, inputs, settings), t.model, credits, models[t.model].provider,
     ).lastInsertRowid);
@@ -131,6 +135,22 @@ function settle(): void {
 export function idle(): Promise<void> {
   if (timers.size === 0 && running.size === 0) return Promise.resolve();
   return new Promise((resolve) => { const w = () => { waiters.delete(w); resolve(); }; waiters.add(w); });
+}
+
+/**
+ * Stops a person's videos that haven't been sent to the video model yet, returning their credits.
+ * Videos already with the model carry on (they can't be recalled), and stay viewable.
+ */
+export function cancelQueuedJobs(userId: number, code = "cancelled"): number {
+  const queued = db.prepare("SELECT * FROM jobs WHERE user_id = ? AND status = 'queued'").all(userId) as Row[];
+  let n = 0;
+  for (const j of queued) {
+    if (set(j.id, { status: "failed", failure_code: code, failure_detail: "stopped before submission", finished_at: now() }, ["queued"])) {
+      refundJob(j.user_id, j.id, j.credits); n++;
+      const t = timers.get(j.id); if (t) { clearTimeout(t); timers.delete(j.id); settle(); }
+    }
+  }
+  return n;
 }
 
 function fail(job: Row, code: string, detail: string): void {
@@ -243,8 +263,8 @@ async function advance(id: number): Promise<void> {
       const meta = await probe(out);
       await posterFrame(out, poster);
       const bytes = readFileSync(out).length;
-      set(id, { status: "completed", output_file: out, poster_file: poster, finished_at: now(),
-        output_meta: JSON.stringify({ width: meta.width, height: meta.height, duration: meta.duration, bytes }) });
+      if (set(id, { status: "completed", output_file: out, poster_file: poster, finished_at: now(),
+        output_meta: JSON.stringify({ width: meta.width, height: meta.height, duration: meta.duration, bytes }) })) consumeJob(job.user_id, id);
     } catch (e) {
       rmSync(out, { force: true });
       const j = get(id)!;

@@ -42,14 +42,41 @@ await p.fill("input[name=age]", "34");
 await p.check("input[name=agreeTerms]");
 await p.check("input[name=confirmAdult]");
 await p.click("button:has-text('Create account')");
-await p.waitForSelector("h1:has-text('Confirm your email')");
-check(true, "sign-up leads to 'Confirm your email'");
-await shot("confirm-email");
+await p.waitForSelector("text=Check your email for the next steps.");
+check(await p.isVisible("text=If you already have an account, you can log in or reset your password."), "sign-up gives the neutral 'check your email' reply");
+await shot("check-email");
 
-// 2. Protected pages wait for confirmation
+// 1b. The same email again: the same reply, nothing more revealed
+await p.goto(base + "/signup");
+await p.fill("input[name=name]", "Someone Else");
+await p.fill("input[name=email]", email);
+await p.fill("input[name=password]", "another-password");
+await p.fill("input[name=age]", "40");
+await p.check("input[name=agreeTerms]");
+await p.check("input[name=confirmAdult]");
+await p.click("button:has-text('Create account')");
+await p.waitForSelector("text=Check your email for the next steps.");
+check(true, "an already-registered email gets the same reply");
+
+// 1c. Under 18 at sign-up
+await p.goto(base + "/signup");
+await p.fill("input[name=name]", "Young Person");
+await p.fill("input[name=email]", `young-${W}-${Date.now()}@example.com`);
+await p.fill("input[name=password]", "password123");
+await p.fill("input[name=age]", "17");
+await p.click("button:has-text('Create account')");
+await p.waitForSelector("text=Tiraez is available to people aged 18 and over.");
+check(true, "under 18 is refused with the eligibility message");
+
+// 2. Logged in but unconfirmed: protected pages wait for confirmation
+await p.goto(base + "/signin");
+await p.fill("input[name=email]", email); await p.fill("input[name=password]", "first-password");
+await p.click("button:has-text('Log in')");
+await p.waitForSelector("h1:has-text('Confirm your email')");
 await p.goto(base + "/create/coffee-morning-bar");
 await p.waitForSelector("h1");
 check((await p.textContent("h1")).includes("Confirm your email"), "workspace redirects until the email is confirmed");
+await shot("confirm-email");
 
 // 3. Open the link from the email
 await wait(100);
@@ -60,11 +87,24 @@ check(!p.url().includes("token="), "token removed from the address bar");
 await p.goto(base + "/create/coffee-morning-bar");
 await p.waitForSelector("h1");
 check(!(await p.textContent("h1")).includes("Confirm"), "workspace opens after confirming", await p.textContent("h1"));
+
+// 3b. Log out, and protected pages ask to log in
+await p.goto(base + "/templates");
+if (W < 960) await p.click("[data-menu-toggle]");
+await p.click(W < 960 ? "#mobile-nav >> text=Log out" : "[data-nav] >> text=Log out");
+await p.waitForTimeout(300);
+await p.goto(base + "/account");
+await p.waitForSelector("h1");
+check((await p.textContent("h1")).includes("Log in"), "after logging out, the account page asks to log in");
+await p.fill("input[name=email]", email); await p.fill("input[name=password]", "first-password");
+await p.click("button:has-text('Log in')");
+await p.waitForSelector("h1:has-text('Account')");
+check(true, "logging in returns to the protected page");
 await p.goto(base + verify);
 await p.waitForSelector("h1");
 check((await p.textContent("main")).includes("already been used"), "a used confirmation link says so");
 
-// 4. Forgot password from the sign-in page
+// 4. Forgot password from the login page
 await p.context().clearCookies();
 await p.goto(base + "/signin");
 await p.fill("input[name=email]", email);
@@ -95,13 +135,13 @@ check(true, "password changed");
 // 6. Old password refused, new one works, link can't be reused
 await p.goto(base + "/signin");
 await p.fill("input[name=email]", email); await p.fill("input[name=password]", "first-password");
-await p.click("button:has-text('Sign in')");
+await p.click("button:has-text('Log in')");
 const refused = await p.waitForSelector(".form-status:has-text(\"don't match\")", { timeout: 5000 }).then(() => true, () => false);
 check(refused, "old password refused", await p.textContent(".form-status"));
 await p.fill("input[name=password]", "second-password");
-await p.click("button:has-text('Sign in')");
+await p.click("button:has-text('Log in')");
 await p.waitForSelector("h1:has-text('Templates')");
-check(true, "new password signs in");
+check(true, "new password logs in");
 await p.goto(base + reset);
 await p.waitForSelector("text=This link has already been used.");
 check(await p.isVisible("a:has-text('Request a new link')"), "a used reset link offers a new one");

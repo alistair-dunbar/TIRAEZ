@@ -12,16 +12,16 @@ const shot = async (name) => { await p.evaluate(() => document.fonts.ready); awa
 const log = (...a) => console.log(`[${W}]`, ...a);
 const overflow = async (where) => { const o = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth); if (o > 0) errors.push(`${where}: overflow ${o}px`); };
 
-// Sign in via the header link
+// Log in via the header link
 await p.goto(base + "/");
 if (W < 960) await p.click("[data-menu-toggle]");
-await p.click(W < 960 ? "#mobile-nav >> text=Sign in" : "[data-nav] >> text=Sign in");
-await p.waitForSelector("h1:has-text('Sign in')");
-await p.click("button:has-text('Sign in')");
-log("empty sign-in errors:", await p.locator(".field__error:not(:empty)").count());
+await p.click(W < 960 ? "#mobile-nav >> text=Log in" : "[data-nav] >> text=Log in");
+await p.waitForSelector("h1:has-text('Log in')");
+await p.click("button:has-text('Log in')");
+log("empty login errors:", await p.locator(".field__error:not(:empty)").count());
 await p.fill("input[type=email]", "owner@example.com");
 await p.fill("input[type=password]", "password123");
-await p.click("button:has-text('Sign in')");
+await p.click("button:has-text('Log in')");
 await p.waitForSelector("h1:has-text('Templates')");
 
 // Catalogue: filter, search, empty state, reset

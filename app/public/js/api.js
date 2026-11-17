@@ -16,7 +16,7 @@ export async function api(method, path, body) {
     throw new ApiError("offline", 0);
   }
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new ApiError(data.error ?? "server_error", res.status, data.fields ?? null);
+  if (!res.ok) { const e = new ApiError(data.error ?? "server_error", res.status, data.fields ?? null); e.data = data; throw e; }
   return data;
 }
 

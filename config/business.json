@@ -1,14 +1,8 @@
 {
-  "_note": "Facts about the operator. null = not yet confirmed by the founders. Legal pages that need a null value are not published in production.",
-  "legalName": null,
-  "entityType": null,
-  "country": null,
-  "registrationNumber": null,
-  "vatNumber": null,
+  "_note": "Facts about the operator, shown on the legal pages. null = not yet confirmed. Fill in exactly as they appear on the freelance document and the National Address. Policies are not published in production while any value used by a page is null.",
+  "operatorName": null,
+  "freelanceDocumentNumber": null,
+  "freelanceActivity": null,
   "address": null,
-  "supportEmail": null,
-  "privacyEmail": null,
-  "abuseEmail": null,
-  "governingLaw": null,
-  "disputes": null
+  "contactEmail": null
 }

@@ -60,6 +60,7 @@ async function newUser(credits = 0) {
   const email = `user${++n}@example.com`;
   assert.equal((await c("POST", "/api/signup", signupBody(email))).status, 200);
   db.prepare("UPDATE users SET email_verified_at = datetime('now') WHERE email = ?").run(email); // email flows: email.test.ts
+  assert.equal((await c("POST", "/api/login", { email, password: "password123" })).status, 200);
   if (credits) grantCredits(email, credits, "test");
   return { c, email };
 }
@@ -83,7 +84,9 @@ async function jobNow(c: ReturnType<typeof client>, id: number) { return (await 
 test("accounts: signup, session, duplicate email, wrong password, logout", async () => {
   const { c, email } = await newUser();
   assert.equal((await c("GET", "/api/site")).data.user.email, email);
-  assert.equal((await client()("POST", "/api/signup", signupBody(email))).status, 409);
+  const dup = await client()("POST", "/api/signup", signupBody(email));
+  assert.equal(dup.status, 200, "an existing email gets the same reply as a new one");
+  assert.deepEqual(dup.data, { ok: true });
   assert.equal((await client()("POST", "/api/login", { email, password: "wrong-password" })).status, 401);
   const bad = await client()("POST", "/api/signup", signupBody("nope"));
   assert.equal(bad.status, 422);

@@ -1,4 +1,4 @@
-// Account: change details and password, sign out other devices, download your data, delete the account.
+// Account: change details and password, log out other devices, download your data, delete the account.
 // Every effect is described as it really happens; nothing says "deleted" unless it was deleted.
 import { api, ApiError } from "../api.js";
 import { h } from "../dom.js";
@@ -17,20 +17,21 @@ export async function accountView() {
   }
   setUser(data.user);
   const u = data.user;
-  const needs = u.needs.name || u.needs.age || u.needs.terms;
+  const needs = !u.ageRestricted && (u.needs.name || u.needs.age || u.needs.terms);
 
   return {
     title: "Account",
     node: h("div", { class: "wrap page" },
       h("div", { class: "page__head" },
         h("h1", { class: "h1" }, "Account"),
-        h("p", { class: "lead" }, `Signed in as ${u.email}. You have ${credits(u.credits)}.`)),
+        h("p", { class: "lead" }, `Logged in as ${u.email}. You have ${credits(u.credits)}.`)),
       needs ? notice(errorText.onboarding_required, "You'll need to do this before uploading a photo or creating a video.",
         { actions: [h("a", { class: "btn btn--secondary", href: "/welcome?next=/account" }, "Finish setting up")] }) : null,
       h("div", { class: "account" },
         detailsSection(u),
         passwordSection(),
         sessionsSection(data),
+        creditsSection(data),
         dataSection(data),
         deleteSection(data),
       ),
@@ -44,7 +45,7 @@ function deleted(page, r) {
   page.replaceChildren(
     h("div", { class: "page__head" },
       h("h1", { class: "h1", tabindex: "-1" }, "Your account has been deleted"),
-      h("p", { class: "lead" }, "Your name, email, photos, videos and agreement records have been removed from our servers, and you've been signed out.")),
+      h("p", { class: "lead" }, "Your name, email, photos, videos and agreement records have been removed from our servers, and you've been logged out.")),
     h("ul", { class: "plain-list measure" },
       h("li", {}, "Copies sent to the video model are set to expire within about a day."),
       r.purchaseRecordsKept ? h("li", {}, `Records of ${r.purchaseRecordsKept} purchase${r.purchaseRecordsKept === 1 ? "" : "s"} are kept for accounting, without your name or email.`) : null),
@@ -62,7 +63,7 @@ function detailsSection(u) {
   const name = field("Name", { name: "name", autocomplete: "name", maxlength: 100, dir: "auto", value: u.name ?? "" });
   const email = field("Email", { name: "email", type: "email", autocomplete: "email", dir: "ltr", value: u.email });
   const password = field("Current password", { name: "password", type: "password", autocomplete: "current-password", dir: "ltr",
-    help: "Needed to change the email you sign in with." });
+    help: "Needed to change the email you log in with." });
   password.el.hidden = true;
   email.input.addEventListener("input", () => { password.el.hidden = email.input.value.trim().toLowerCase() === u.email; });
   const status = h("p", { class: "form-status", role: "status" });
@@ -84,7 +85,7 @@ function detailsSection(u) {
     } catch (err) {
       const code = err instanceof ApiError ? err.code : "offline";
       if (code === "invalid_request" && showFieldErrors(err.fields, all)) status.textContent = "Some fields need attention.";
-      else if (code === "email_taken") { email.setError(errorText.email_taken.replace(" Sign in instead.", "")); email.input.focus(); }
+      else if (code === "email_taken") { email.setError(errorText.email_taken.replace(" Log in instead.", "")); email.input.focus(); }
       else status.textContent = errorText[code] ?? errorText.server_error;
     } finally { setBusy(save, false); }
   } }, name.el, email.el, password.el, h("div", { class: "btn-row" }, save), status);
@@ -96,7 +97,7 @@ function detailsSection(u) {
       try { const r = await api("POST", "/api/account/email/cancel"); setUser({ ...store.site.user, ...r.user }); drawPending(null); status.textContent = "The email change was cancelled."; }
       catch (e) { setBusy(cancel, false); status.textContent = errorText[e instanceof ApiError ? e.code : "offline"] ?? errorText.server_error; }
     } }, "Cancel the change");
-    pending.replaceChildren(notice(`Waiting for ${addr} to be confirmed`, `You still sign in with ${u.email} until the link we sent to ${addr} is opened.`, { actions: [cancel] }));
+    pending.replaceChildren(notice(`Waiting for ${addr} to be confirmed`, `You still log in with ${u.email} until the link we sent to ${addr} is opened.`, { actions: [cancel] }));
   }
   drawPending(u.pendingEmail);
   const verify = u.emailVerified ? null : notice("Your email isn't confirmed yet", "Confirm it to upload photos, create videos and buy credits.",
@@ -118,7 +119,7 @@ function passwordSection() {
     try {
       await api("POST", "/api/account/password", { currentPassword: current.input.value, newPassword: next.input.value });
       current.input.value = ""; next.input.value = "";
-      status.textContent = "Your password is changed. Other browsers and devices have been signed out.";
+      status.textContent = "Your password is changed. Other browsers and devices have been logged out.";
     } catch (err) {
       const code = err instanceof ApiError ? err.code : "offline";
       if (code === "invalid_request" && showFieldErrors(err.fields, all)) status.textContent = "";
@@ -130,18 +131,49 @@ function passwordSection() {
 
 function sessionsSection(data) {
   const others = Math.max(0, data.sessions - 1);
-  const text = h("p", {}, others === 0 ? "You're only signed in here." : `You're signed in here and on ${others} other browser${others === 1 ? "" : "s"} or device${others === 1 ? "" : "s"}.`);
+  const text = h("p", {}, others === 0 ? "You're only logged in here." : `You're logged in here and on ${others} other browser${others === 1 ? "" : "s"} or device${others === 1 ? "" : "s"}.`);
   const status = h("p", { class: "form-status", role: "status" });
   const btn = h("button", { type: "button", class: "btn btn--secondary", disabled: others === 0, onclick: async () => {
     setBusy(btn, true);
     try {
       const r = await api("POST", "/api/account/sessions/revoke");
-      text.textContent = "You're only signed in here.";
-      status.textContent = r.ended ? `Signed out of ${r.ended} other session${r.ended === 1 ? "" : "s"}.` : "There were no other sessions.";
+      text.textContent = "You're only logged in here.";
+      status.textContent = r.ended ? `Logged out of ${r.ended} other session${r.ended === 1 ? "" : "s"}.` : "There were no other sessions.";
       setBusy(btn, false); btn.disabled = true;
     } catch (err) { setBusy(btn, false); status.textContent = errorText[err instanceof ApiError ? err.code : "offline"] ?? errorText.server_error; }
-  } }, "Sign out of other devices");
-  return section("sessions-title", "Where you're signed in", text, h("div", { class: "btn-row" }, btn), status);
+  } }, "Log out of other devices");
+  return section("sessions-title", "Where you're logged in", text, h("div", { class: "btn-row" }, btn), status);
+}
+
+function creditsSection(data) {
+  const c = data.credits;
+  const row = (term, value) => [h("dt", {}, term), h("dd", {}, value)];
+  const list = h("ul", { class: "purchase-list" }, (data.purchaseList ?? []).map((p) => {
+    const status = h("p", { class: "form-status", role: "status" });
+    const state = p.status === "refunded" ? `Refunded on ${dateText(p.refundedAt)} (${credits(p.refundedCredits ?? 0)} removed)`
+      : p.refundRequest === "open" ? "Refund requested: being reviewed" : p.refundRequest === "declined" ? "Refund request declined" : null;
+    const ask = p.status === "paid" && p.refundRequest !== "open" ? h("button", { type: "button", class: "btn btn--quiet", onclick: async () => {
+      const details = h("textarea", { class: "input", rows: 3, maxlength: 2000, "aria-label": "Why you'd like a refund (optional)" });
+      const send = h("button", { type: "button", class: "btn btn--secondary btn--sm", onclick: async () => {
+        setBusy(send, true);
+        try { await api("POST", "/api/account/refund-requests", { purchaseId: p.id, details: details.value }); box.replaceChildren(h("p", {}, "Refund requested. We'll review it and reply by email.")); }
+        catch (e) { setBusy(send, false); status.textContent = errorText[e instanceof ApiError ? e.code : "offline"] ?? errorText.server_error; }
+      } }, "Send refund request");
+      box.replaceChildren(h("label", { class: "field__label" }, "Why you'd like a refund (optional)"), details, h("div", { class: "btn-row" }, send), status);
+      details.focus();
+    } }, "Request a refund") : null;
+    const box = h("div", { class: "stack" }, ask, status);
+    return h("li", {}, h("p", {}, `${credits(p.credits)} for SAR ${p.priceSar}, ${dateText(p.createdAt)}`), state ? h("p", { class: "notice-text" }, state) : null, box);
+  }));
+  return section("credits-title", "Credits",
+    h("dl", { class: "details" },
+      row("Available to use", credits(c.available)),
+      row("Reserved for videos being made", credits(c.reserved)),
+      row("Used on finished videos", credits(c.used)),
+      row("Returned after failed videos", credits(c.returned)),
+      c.refundedPurchases ? row("Removed by refunds", credits(c.refundedPurchases)) : null),
+    (data.purchaseList ?? []).length ? list : h("p", { class: "notice-text" }, "You haven't bought any credits."),
+    h("p", { class: "notice-text" }, "How refunds work: ", h("a", { class: "link", href: "/legal/billing" }, "Billing, credits and refunds"), "."));
 }
 
 function dataSection(data) {

@@ -68,16 +68,18 @@ async function signUp(email = nextEmail()) {
   const c = client();
   const r = await c("POST", "/api/signup", { name: "Layla", email, password: "password123", age: "29", agreeTerms: true, confirmAdult: true, termsVersion: termsVersion() });
   assert.equal(r.status, 200, JSON.stringify(r.data));
-  return { c, email, r };
+  const login = await c("POST", "/api/login", { email, password: "password123" });
+  assert.equal(login.status, 200);
+  return { c, email, r, login };
 }
 
 // ---------------------------------------------------------------------------------------------
 
 test("signup sends a confirmation link; unconfirmed accounts can sign in but not upload, generate or buy", async () => {
-  const { c, email, r } = await signUp();
-  assert.equal(r.data.verificationSent, true);
-  assert.equal(r.data.emailVerified, false);
-  assert.equal(r.data.needs.email, true);
+  const { c, email, r, login } = await signUp();
+  assert.deepEqual(r.data, { ok: true });
+  assert.equal(login.data.emailVerified, false);
+  assert.equal(login.data.needs.email, true);
   const { m } = await lastMail(email, "/verify-email");
   assert.match(m.subject, /Confirm your email/);
   assert.doesNotMatch(m.html, /<img|<script/i, "no tracking pixels or scripts");
@@ -257,4 +259,22 @@ test("pages for the email flows are served", async () => {
   for (const p of ["/verify-email", "/forgot-password", "/reset-password"]) assert.equal((await fetch(base + p)).status, 200, p);
   const site = await (await fetch(base + "/api/site")).json();
   assert.equal(site.mailOn, true);
+});
+
+test("signing up with an email that already has an account: same reply, nothing created, the owner is emailed", async () => {
+  const { email } = await signUp();
+  await settle();
+  const before = sentTo(email);
+  const users = (db.prepare("SELECT COUNT(*) AS n FROM users").get() as any).n;
+  const fresh = await client()("POST", "/api/signup", { name: "New", email: nextEmail(), password: "password123", age: "40", agreeTerms: true, confirmAdult: true, termsVersion: termsVersion() });
+  const dup = await client()("POST", "/api/signup", { name: "Someone", email: email.toUpperCase(), password: "different-pass", age: "40", agreeTerms: true, confirmAdult: true, termsVersion: termsVersion() });
+  assert.equal(dup.status, fresh.status);
+  assert.deepEqual(dup.data, fresh.data);
+  assert.equal(dup.headers.get("set-cookie"), fresh.headers.get("set-cookie"));
+  assert.equal((db.prepare("SELECT COUNT(*) AS n FROM users").get() as any).n, users + 1, "only the new address created an account");
+  await settle();
+  const notice = [...outbox].reverse().find((m) => m.to === email);
+  assert.ok(sentTo(email) === before + 1 && /already have/.test(notice!.subject), "the owner is told, with log-in and reset links");
+  assert.match(notice!.text, /\/forgot-password/);
+  assert.equal((await client()("POST", "/api/login", { email, password: "different-pass" })).status, 401, "the existing password is unchanged");
 });

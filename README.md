@@ -13,7 +13,7 @@ below is paused.
 ```bash
 npm install
 npm start                    # http://localhost:3000, generation and payments off
-npm test                     # 55 end-to-end tests with a test-only provider and mail outbox; no cost
+npm test                     # 62 end-to-end tests with a test-only provider and mail outbox; no cost
 npm run credits -- you@example.com 5 "note"   # give an account credits (operator tool)
 npm run reports              # open misuse reports (see docs/SECURITY.md)
 npm run suspend -- --email you@example.com --reason "why"   # suspend an account
@@ -35,7 +35,7 @@ credits automatically.
 - Going live: `docs/DEPLOY.md`.
 - Accounts: name, email, password and age (18+). The age is checked and not stored. There are separate
   unticked boxes for the terms and for being 18 or over. The account page has data download,
-  corrections, sign out of other devices, and real deletion (rows and files). Videos can be deleted one by one.
+  corrections, log out of other devices, and real deletion (rows and files). Videos can be deleted one by one.
 - Policies: `legal/*.md`, filled from `config/business.json`, `config/legal.json` and
   `config/retention.json`. In production they stay withheld, and sign-ups stay closed, until the
   facts are confirmed and `config/legal.json` says "published". See `docs/LEGAL-REVIEW.md`.

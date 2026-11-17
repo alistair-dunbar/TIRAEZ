@@ -12,6 +12,7 @@ import { ageValue, checkEligibilityFields, clearErrors, eligibilityBody, eligibi
 export function welcomeView(ctx) {
   const u = store.site.user;
   const next = safeNext(ctx.query.get("next"));
+  if (u.ageRestricted) return restrictedPage();
   const need = u.needs ?? { name: false, age: false, terms: false };
   if (!need.name && !need.age && !need.terms) return navigate(next, { replace: true }).then(() => null);
 
@@ -32,12 +33,9 @@ export function welcomeView(ctx) {
   const status = h("p", { class: "form-status", role: "status" });
   const submit = h("button", { class: "btn btn--primary btn--lg btn--block", type: "submit" }, onlyTerms ? "Agree and continue" : "Continue");
 
-  function closed() {
-    setUser(null);
-    panel.replaceChildren(h("div", { class: "stack", role: "alert" },
-      h("h2", { class: "title", tabindex: "-1" }, errorText.age_ineligible),
-      h("p", {}, "Your account has been closed, and its photos and videos have been deleted.")));
-    panel.querySelector("h2").focus();
+  function closed(user) {
+    if (user) setUser(user);
+    navigate("/welcome", { replace: true });
   }
 
   const form = h("form", { class: "form-narrow", novalidate: true, onsubmit: async (e) => {
@@ -54,7 +52,7 @@ export function welcomeView(ctx) {
     } catch (err) {
       setBusy(submit, false);
       const code = err instanceof ApiError ? err.code : "offline";
-      if (code === "age_ineligible") { closed(); return; }
+      if (code === "age_restricted" || code === "age_ineligible") { closed(err.data?.user); return; }
       if (code === "invalid_request" && showFieldErrors(err.fields, f)) { status.textContent = "Some fields need attention."; return; }
       if (code === "terms_changed") { status.textContent = errorText.terms_changed; setTimeout(() => location.reload(), 2500); return; }
       status.textContent = errorText[code] ?? errorText.server_error;
@@ -66,6 +64,30 @@ export function welcomeView(ctx) {
   );
   panel.append(form);
   return page(title, lead, panel);
+}
+
+/** An existing account that declared an age under 18: what has stopped, what happens next, and the
+ *  reviewed route for a genuine mistake. Re-entering an age here is deliberately not possible. */
+function restrictedPage() {
+  const days = store.site.ageRestrictedDays ?? 30;
+  return {
+    title: "Account restricted",
+    node: h("div", { class: "wrap page" },
+      h("div", { class: "auth" },
+        h("div", { class: "page__head" },
+          h("h1", { class: "h1", role: "alert" }, "Tiraez is available to people aged 18 and over."),
+          h("p", { class: "lead" }, "Uploads, video creation and buying credits are switched off for this account.")),
+        h("div", { class: "auth__panel" },
+          h("div", { class: "stack flow" },
+            h("ul", { class: "plain-list" },
+              h("li", {}, "Videos already with the video model will finish and stay in My videos. Videos that hadn't started were cancelled and their credits returned."),
+              h("li", {}, "If you bought credits, we've opened a refund request for them."),
+              h("li", {}, `Unless this is corrected, the account and its data will be deleted after ${days} days. You can download your data or delete the account sooner from your account page.`)),
+            h("div", { class: "btn-row" },
+              h("a", { class: "btn btn--secondary", href: "/account" }, "Your account"),
+              h("a", { class: "link", href: "/report?kind=age_correction" }, "I entered my age by mistake")),
+            h("p", { class: "notice-text" }, "A mistake is reviewed by a person before anything changes. We won't ask for identity documents unless it's genuinely needed."))))),
+  };
 }
 
 function page(title, lead, panel) {

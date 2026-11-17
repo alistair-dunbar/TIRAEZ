@@ -18,9 +18,10 @@ const { server } = await import("../server.ts");
 const { idle } = await import("../jobs.ts");
 const { db } = await import("../db.ts");
 const { grantCredits } = await import("../credits.ts");
-const { legal, business, retention, termsVersion, LEGAL_DOCS } = await import("../legal.ts");
+const { legal, business, retention, compliance, termsVersion, LEGAL_DOCS } = await import("../legal.ts");
 const { resetLimits, redact } = await import("../guard.ts");
-const { runRetention } = await import("../account.ts");
+const { runRetention, liftAgeRestriction } = await import("../account.ts");
+const { refundPurchase, creditSummary } = await import("../credits.ts");
 const { suspend } = await import("../reports.ts");
 
 let base = "";
@@ -64,6 +65,7 @@ async function eligibleUser(credits = 0) {
   const r = await c("POST", "/api/signup", b);
   assert.equal(r.status, 200, JSON.stringify(r.data));
   db.prepare("UPDATE users SET email_verified_at = datetime('now') WHERE email = ?").run(b.email); // email flows: email.test.ts
+  assert.equal((await c("POST", "/api/login", { email: b.email, password: "password123" })).status, 200);
   if (credits) grantCredits(b.email as string, credits, "test");
   return { c, email: b.email as string };
 }
@@ -74,6 +76,7 @@ async function legacyUser() {
   const e = email();
   const r = await c("POST", "/api/signup", body({ email: e }));
   assert.equal(r.status, 200);
+  assert.equal((await c("POST", "/api/login", { email: e, password: "password123" })).status, 200);
   db.prepare("UPDATE users SET name = NULL, age_confirmed_at = NULL, age_method = NULL, terms_version = NULL, terms_accepted_at = NULL, email_verified_at = datetime('now') WHERE email = ?").run(e);
   return { c, email: e };
 }
@@ -95,7 +98,10 @@ test("signup: age 18 is accepted; only the eligibility record is kept, never the
   const b = body({ age: "18" });
   const r = await c("POST", "/api/signup", b);
   assert.equal(r.status, 200);
-  assert.deepEqual(r.data.needs, { name: false, age: false, terms: false, email: true });
+  assert.deepEqual(r.data, { ok: true });
+  assert.equal(r.headers.get("set-cookie"), null, "nobody is logged in by signing up");
+  const login = await c("POST", "/api/login", { email: b.email, password: "password123" });
+  assert.deepEqual(login.data.needs, { name: false, age: false, terms: false, email: true });
   const row = db.prepare("SELECT * FROM users WHERE email = ?").get(b.email) as any;
   assert.ok(row.age_confirmed_at);
   assert.equal(row.age_method, "self_declared");
@@ -143,13 +149,15 @@ test("signup: missing or invalid age, unticked boxes and stale terms are refused
 });
 
 test("names from any language are accepted; control characters are removed", async () => {
+  const nameOf = (e: string) => (db.prepare("SELECT name FROM users WHERE email = ?").get(e) as any).name;
   for (const name of ["محمد العتيبي", "Zoë O'Brien-Núñez", "李小龍", "A"]) {
-    const r = await client()("POST", "/api/signup", body({ name }));
-    assert.equal(r.status, 200, name);
-    assert.equal(r.data.name, name);
+    const b = body({ name });
+    assert.equal((await client()("POST", "/api/signup", b)).status, 200, name);
+    assert.equal(nameOf(b.email as string), name);
   }
-  const r = await client()("POST", "/api/signup", body({ name: "Sara\u0000‮ Ali" }));
-  assert.equal(r.data.name, "Sara Ali");
+  const b = body({ name: "Sara\u0000‮ Ali" });
+  await client()("POST", "/api/signup", b);
+  assert.equal(nameOf(b.email as string), "Sara Ali");
 });
 
 // ---------------------------------------------------------------------------------------------
@@ -179,16 +187,45 @@ test("onboarding: completing it unlocks uploads; partial answers are refused", a
   assert.equal((await c("POST", "/api/photos", undefined, { raw: PHOTO })).status, 200);
 });
 
-test("onboarding: someone who says they are under 18 has the account closed and its data deleted", async () => {
+test("onboarding: an existing account declaring under 18 is restricted, not deleted; it can't re-declare; review lifts it", async () => {
   const { c, email: e } = await legacyUser();
   const id = (db.prepare("SELECT id FROM users WHERE email = ?").get(e) as any).id;
+  grantCredits(e, 2, "test");
+  db.prepare("UPDATE users SET name = 'Kid' WHERE id = ?").run(id);
+  // A paid purchase and a queued video, to check both are handled.
+  const pid = Number(db.prepare("INSERT INTO purchases (user_id, pack_id, credits, price_sar, provider, status) VALUES (?, 'launch', 15, 250, 'test', 'paid')").run(id).lastInsertRowid);
   const r = await c("POST", "/api/onboarding", { name: "Kid", age: "16", confirmAdult: true, agreeTerms: true, termsVersion: termsVersion() });
   assert.equal(r.status, 403);
-  assert.equal(r.data.error, "age_ineligible");
-  assert.equal(db.prepare("SELECT 1 FROM users WHERE id = ?").get(id), undefined, "no purchases, so the account row itself is gone");
-  assert.equal((db.prepare("SELECT COUNT(*) AS n FROM sessions WHERE user_id = ?").get(id) as any).n, 0);
-  assert.equal((await c("GET", "/api/site")).data.user, null);
-  assert.equal((await client()("POST", "/api/login", { email: e, password: "password123" })).status, 401);
+  assert.equal(r.data.error, "age_restricted");
+  assert.equal(r.data.user.ageRestricted, true);
+  const row = db.prepare("SELECT * FROM users WHERE id = ?").get(id) as any;
+  assert.ok(row.age_restricted_at && !row.deleted_at, "restricted, not deleted");
+  assert.ok((await c("GET", "/api/site")).data.user, "still logged in, to see what happened");
+  for (const [path, opts] of [["/api/photos", { raw: PHOTO }], ["/api/jobs", undefined], ["/api/purchases", undefined]] as const) {
+    const res = await c("POST", path, path === "/api/photos" ? undefined : path === "/api/jobs" ? order("0".repeat(24)) : { packId: "launch" }, opts ?? {});
+    assert.equal(res.data.error, "age_restricted", path);
+  }
+  const again = await c("POST", "/api/onboarding", { name: "Kid", age: "30", confirmAdult: true, agreeTerms: true, termsVersion: termsVersion() });
+  assert.equal(again.data.error, "age_restricted", "re-entering a different age is not a way round it");
+  assert.equal((await c("GET", "/api/account/export")).status, 200, "own data still downloadable");
+  const req = db.prepare("SELECT * FROM refund_requests WHERE purchase_id = ?").get(pid) as any;
+  assert.equal(req.status, "open"); assert.equal(req.reason, "age_restriction");
+  // A reviewed correction lifts it, and the age has to be confirmed again.
+  assert.ok(liftAgeRestriction(id, "report 1: typo"));
+  const site = (await c("GET", "/api/site")).data;
+  assert.equal(site.user.ageRestricted, false); assert.equal(site.user.needs.age, true);
+  assert.equal((await c("POST", "/api/onboarding", { age: "30", confirmAdult: true, agreeTerms: true, termsVersion: termsVersion() })).status, 200);
+});
+
+test("restricted accounts are deleted after the retention period unless corrected", async () => {
+  const { c, email: e } = await legacyUser();
+  const id = (db.prepare("SELECT id FROM users WHERE email = ?").get(e) as any).id;
+  await c("POST", "/api/onboarding", { name: "Kid", age: "15", confirmAdult: true, agreeTerms: true, termsVersion: termsVersion() });
+  runRetention();
+  assert.ok(db.prepare("SELECT 1 FROM users WHERE id = ?").get(id), "kept during the period");
+  db.prepare("UPDATE users SET age_restricted_at = datetime('now', ?) WHERE id = ?").run(`-${retention.ageRestrictedDays + 1} days`, id);
+  runRetention();
+  assert.equal(db.prepare("SELECT 1 FROM users WHERE id = ?").get(id), undefined);
 });
 
 test("new terms version: eligible accounts must accept it again before generating", async () => {
@@ -258,6 +295,10 @@ test("production: once every fact is confirmed and the status is published, poli
     retention.confirmed = true;
     assert.equal((await client()("POST", "/api/signup", body())).status, 503, "still draft until status is published");
     legal.status = "published";
+    const html0 = await (await fetch(`${base}/legal/billing`)).text();
+    assert.doesNotMatch(html0, /mark class="todo"|being prepared/, "policies publish once facts are confirmed");
+    assert.equal((await client()("POST", "/api/signup", body())).status, 503, "but accounts stay closed until transfers have safeguards");
+    for (const t of Object.values(compliance.transfers)) { t.mechanism = "SDAIA SCCs signed 2027-01-01"; t.riskAssessment = "transfers-ra.pdf, 2027-01-01"; }
     const html = await (await fetch(`${base}/legal/billing`)).text();
     assert.doesNotMatch(html, /mark class="todo"|being prepared|Draft for review/);
     assert.match(html, /mailto:help@example.com/);
@@ -267,6 +308,7 @@ test("production: once every fact is confirmed and the status is published, poli
     legal.status = saved.status; Object.assign(legal.unresolved, saved.unresolved); Object.assign(business, saved.business);
     retention.confirmed = saved.confirmed;
     for (const [k, v] of Object.entries(saved.effective)) legal.documents[k].effective = v;
+    for (const t of Object.values(compliance.transfers)) { t.mechanism = null; t.riskAssessment = null; }
   }
 });
 
@@ -421,7 +463,10 @@ test("security headers and cookie flags", async () => {
   assert.equal(r.headers.get("x-frame-options"), "DENY");
   assert.equal(r.headers.get("cross-origin-opener-policy"), "same-origin");
   assert.match(r.headers.get("permissions-policy") ?? "", /camera=\(\)/);
-  const s = await client()("POST", "/api/signup", body());
+  const b = body();
+  await client()("POST", "/api/signup", b);
+  db.prepare("UPDATE users SET email_verified_at = datetime('now') WHERE email = ?").run(b.email);
+  const s = await client()("POST", "/api/login", { email: b.email, password: "password123" });
   const cookie = s.headers.get("set-cookie") ?? "";
   assert.match(cookie, /HttpOnly/); assert.match(cookie, /SameSite=Lax/);
 });
@@ -429,4 +474,90 @@ test("security headers and cookie flags", async () => {
 test("logs: keys, emails and signed URLs are redacted", () => {
   const out = redact("Authorization: Key abcdef123456:secret9876 user a.b@example.com url https://v3.fal.media/files/x.mp4?token=abc&sig=1 sk_live_abc123");
   assert.doesNotMatch(out, /abcdef123456|a\.b@example\.com|token=abc|sk_live_abc123/);
+});
+
+// ---------------------------------------------------------------------------------------------
+// Credits ledger and refunds
+
+test("video ids are never reused after a deletion, so ledger entries can't collide", async () => {
+  const { c } = await eligibleUser(3);
+  const photo = (await c("POST", "/api/photos", undefined, { raw: PHOTO })).data;
+  const first = (await c("POST", "/api/jobs", order(photo.id))).data.job;
+  await idle();
+  assert.equal((await c("DELETE", `/api/jobs/${first.id}`)).status, 200);
+  const photo2 = (await c("POST", "/api/photos", undefined, { raw: PHOTO })).data;
+  const second = (await c("POST", "/api/jobs", order(photo2.id))).data.job;
+  assert.ok(second.id > first.id, `${second.id} > ${first.id}`);
+  await idle();
+});
+
+test("ledger: reserved while a video runs, used when it finishes, returned when it fails, never twice", async () => {
+  const { c, email: e } = await eligibleUser(3);
+  const id = (db.prepare("SELECT id FROM users WHERE email = ?").get(e) as any).id;
+  const photo = (await c("POST", "/api/photos", undefined, { raw: PHOTO })).data;
+  const job = (await c("POST", "/api/jobs", order(photo.id))).data.job;
+  let s = creditSummary(id);
+  assert.equal(s.available + s.reserved, 3);
+  await idle();
+  s = creditSummary(id);
+  assert.deepEqual([s.available, s.reserved, s.used], [2, 0, 1]);
+  const consumed = db.prepare("SELECT COUNT(*) AS n FROM credit_events WHERE reason = 'consume' AND ref = ?").get(String(job.id)) as any;
+  assert.equal(consumed.n, 1);
+  assert.throws(() => db.prepare("INSERT INTO credit_events (user_id, delta, reason, ref) VALUES (?, 1, 'refund', ?)").run(id, String(job.id) + "x") && db.prepare("INSERT INTO credit_events (user_id, delta, reason, ref) VALUES (?, 1, 'refund', ?)").run(id, String(job.id) + "x"),
+    "the same ledger entry can't be written twice");
+  const acc = (await c("GET", "/api/account")).data;
+  assert.equal(acc.credits.used, 1);
+});
+
+test("refunds: request route, unused credits removed so they can't be spent, idempotent, other accounts refused", async () => {
+  const { c, email: e } = await eligibleUser();
+  const id = (db.prepare("SELECT id FROM users WHERE email = ?").get(e) as any).id;
+  const buy = await c("POST", "/api/purchases", { packId: "launch" }); // test payments grant at once
+  const pid = buy.data.purchaseId;
+  assert.equal(creditSummary(id).available, 15);
+  const stranger = await eligibleUser();
+  assert.equal((await stranger.c("POST", "/api/account/refund-requests", { purchaseId: pid })).status, 404);
+  const r1 = await c("POST", "/api/account/refund-requests", { purchaseId: pid, details: "Changed my mind" });
+  const r2 = await c("POST", "/api/account/refund-requests", { purchaseId: pid });
+  assert.equal(r1.data.id, r2.data.id, "one open request per purchase");
+  assert.deepEqual(refundPurchase(pid, { note: "test" }), { removed: 15 });
+  assert.deepEqual(refundPurchase(pid, { note: "again" }), { removed: 0 }, "a second refund changes nothing");
+  assert.equal(creditSummary(id).available, 0);
+  assert.equal(creditSummary(id).refundedPurchases, 15);
+  const photo = (await c("POST", "/api/photos", undefined, { raw: PHOTO })).data;
+  assert.equal((await c("POST", "/api/jobs", order(photo.id))).data.error, "no_credits", "refunded credits can't be spent");
+  assert.equal((db.prepare("SELECT status FROM refund_requests WHERE id = ?").get(r1.data.id) as any).status, "approved");
+  assert.equal((await c("POST", "/api/account/refund-requests", { purchaseId: pid })).data.error, "not_refundable");
+});
+
+test("refunds: credits already spent or reserved can't be clawed back past zero", async () => {
+  const { c, email: e } = await eligibleUser();
+  const id = (db.prepare("SELECT id FROM users WHERE email = ?").get(e) as any).id;
+  const pid = (await c("POST", "/api/purchases", { packId: "launch" })).data.purchaseId;
+  const photo = (await c("POST", "/api/photos", undefined, { raw: PHOTO })).data;
+  await c("POST", "/api/jobs", order(photo.id));
+  await idle();
+  assert.throws(() => refundPurchase(pid, { note: "full" }), /credits_in_use/);
+  assert.deepEqual(refundPurchase(pid, { note: "unused only", credits: 14 }), { removed: 14 });
+  assert.equal(creditSummary(id).available, 0);
+});
+
+test("production gates are scoped: generation waits for the video-model transfer, payments for the billing terms", async () => {
+  const { c } = await eligibleUser(3);
+  const photo = (await c("POST", "/api/photos", undefined, { raw: PHOTO })).data;
+  process.env.LEGAL_ENFORCE = "1";
+  try {
+    assert.equal((await c("GET", "/api/site")).data.generationOn, false);
+    assert.equal((await c("POST", "/api/jobs", order(photo.id))).data.error, "generation_not_configured");
+    compliance.transfers.fal.mechanism = "SDAIA SCCs"; compliance.transfers.fal.riskAssessment = "ra.pdf";
+    compliance.transfers.railway.mechanism = "SDAIA SCCs"; compliance.transfers.railway.riskAssessment = "ra.pdf";
+    assert.equal((await c("POST", "/api/jobs", order(photo.id))).status, 200, "generation opens once its own transfers are covered");
+    process.env.PAYMENTS = "moyasar";
+    const r = await c("POST", "/api/purchases", { packId: "launch" });
+    assert.equal(r.data.error, "payments_not_configured", "no payments while VAT, expiry and refund terms are undecided");
+  } finally {
+    delete process.env.LEGAL_ENFORCE; process.env.PAYMENTS = "test";
+    for (const t of Object.values(compliance.transfers)) { t.mechanism = null; t.riskAssessment = null; }
+    await idle();
+  }
 });
