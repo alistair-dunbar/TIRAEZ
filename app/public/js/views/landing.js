@@ -33,7 +33,7 @@ export async function landingView(ctx) {
           h("h1", { class: "hero__title", id: "hero-title" }, "Your next video starts with ", h("em", {}, "a photo.")),
           h("p", { class: "hero__lead" }, "Choose a template for your business, add your photo and a few details, and create a video ready to share."),
           h("div", { class: "btn-row" },
-            h("a", { class: "btn btn--primary btn--lg", href: "/templates" }, "Explore templates"),
+            h("a", { class: "btn btn--primary btn--lg", href: "/templates", "data-magnetic": "" }, "Explore templates"),
             h("a", { class: "link", href: "#how-it-works" }, "See how it works"),
           ),
         ),
@@ -57,7 +57,7 @@ export async function landingView(ctx) {
   );
 
   // Template discovery, on its own surface
-  const list = h("div", { class: "entries" });
+  const list = h("div", { class: "entries", "data-stagger": "" });
   const chips = h("div", { class: "chips", role: "group", "aria-label": "Filter by business" });
   const more = h("a", { class: "link" });
   function draw(animate) {
@@ -76,7 +76,7 @@ export async function landingView(ctx) {
   draw(false);
   const discovery = h("section", { class: "band", id: "templates", "aria-labelledby": "templates-title" },
     h("div", { class: "wrap" },
-      h("div", { class: "section__head section__head--split" },
+      h("div", { class: "section__head section__head--split", "data-reveal": "" },
         h("h2", { class: "h2", id: "templates-title" }, "Find a look for your business."),
         h("div", { class: "stack" },
           h("p", { class: "lead" }, "Each template is a creative direction written for one kind of business. Pick one, and it guides the camera, the light and the movement."),
@@ -91,8 +91,8 @@ export async function landingView(ctx) {
 
   const how = h("section", { class: "section", id: "how-it-works", "aria-labelledby": "how-title" },
     h("div", { class: "wrap" },
-      h("div", { class: "section__head" }, h("h2", { class: "h2", id: "how-title" }, "How it works")),
-      h("ol", { class: "steps" },
+      h("div", { class: "section__head", "data-reveal": "" }, h("h2", { class: "h2", id: "how-title" }, "How it works")),
+      h("ol", { class: "steps", "data-stagger": "" },
         step(1, "Choose your look", "Pick your kind of business, then a template. Each one says what kind of photo it needs and what the video will show."),
         step(2, "Add your photo and details", "Upload one photo and frame it for vertical, square or landscape video. Describe your product in a few words and choose a couple of options."),
         step(3, "Generate and download", "We turn your choices into a detailed brief for the video model. When your video is ready, watch it and download the file."),
@@ -102,11 +102,11 @@ export async function landingView(ctx) {
 
   const value = h("section", { class: "section", "aria-labelledby": "value-title" },
     h("div", { class: "wrap split" },
-      h("div", { class: "stack" },
+      h("div", { class: "stack", "data-reveal": "" },
         h("h2", { class: "h2", id: "value-title" }, "Built around how businesses post"),
         h("p", { class: "lead" }, "Everything in a template is set up for short social video, so the choices you make are the ones that matter."),
       ),
-      h("dl", { class: "facts" },
+      h("dl", { class: "facts", "data-reveal": "" },
         fact("Templates by business type", "Coffee shops, fashion, real estate, restaurants, beauty and products, each with templates written for what that business needs to show."),
         fact("A short form for your details", "Describe your product in a few words and choose from a handful of options. The detailed instructions for the video model are written for you."),
         fact("Settings for social video", "Vertical, square or landscape, at 1080p or 720p. You frame your photo yourself before anything is generated."),
@@ -119,11 +119,11 @@ export async function landingView(ctx) {
   const [dur, cost] = p ? Object.entries(p.creditsByDuration)[0] ?? [] : [];
   const pricing = p ? h("section", { class: "section", id: "pricing", "aria-labelledby": "pricing-title" },
     h("div", { class: "wrap split" },
-      h("div", { class: "stack" },
+      h("div", { class: "stack", "data-reveal": "" },
         h("h2", { class: "h2", id: "pricing-title" }, "Pricing"),
         h("p", { class: "lead" }, "Videos are paid for with credits, bought in advance. There is no subscription."),
       ),
-      h("dl", { class: "facts" },
+      h("dl", { class: "facts", "data-reveal": "" },
         fact("Each video", `${credits(cost)} for a ${dur}-second video.`),
         fact("Credits", `A pack of ${p.pack.credits} credits costs ${p.currency} ${p.pack.priceSar}.`),
         site.paymentsOn ? null : fact("Buying credits", "Buying credits isn't available on the site yet."),
@@ -133,12 +133,12 @@ export async function landingView(ctx) {
 
   const closing = h("section", { class: "closing", "aria-labelledby": "closing-title" },
     h("div", { class: "wrap" },
-      h("div", { class: "closing__inner" },
+      h("div", { class: "closing__inner", "data-reveal": "" },
         h("div", { class: "stack" },
           h("h2", { class: "h2", id: "closing-title" }, "Start with a photo you already have."),
           h("p", {}, `Pick from ${cat.templates.length} templates and make a video for your business.`),
         ),
-        h("a", { class: "btn btn--inverse btn--lg", href: "/templates" }, "Explore templates"),
+        h("a", { class: "btn btn--inverse btn--lg", href: "/templates", "data-magnetic": "" }, "Explore templates"),
       ),
     ),
   );

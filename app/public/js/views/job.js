@@ -66,7 +66,7 @@ export async function jobView(ctx) {
       swap(
         heading("Your video is ready", job.template.name),
         h("div", { class: "result" },
-          h("div", { class: `player${changed ? " is-in" : ""}` }, video),
+          h("div", { class: `player${changed ? " is-in" : ""}`, "data-cursor": "play" }, video),
           h("div", { class: "stack" },
             rail("completed"),
             h("div", { class: "btn-row" }, download.button, again),
@@ -181,7 +181,7 @@ function rail(stage) {
 function downloadButton(job, src) {
   const name = `${job.template.slug ?? "video"}-${job.id}.mp4`;
   const status = h("p", { class: "form-status", role: "status" });
-  const button = h("a", { class: "btn btn--primary btn--lg", href: `${src}?download=1`, download: name });
+  const button = h("a", { class: "btn btn--primary btn--lg", href: `${src}?download=1`, download: name, "data-magnetic": "" });
   button.textContent = "Download video";
   button.addEventListener("click", async (e) => {
     if (!window.fetch || !URL.createObjectURL) return; // let the link do it

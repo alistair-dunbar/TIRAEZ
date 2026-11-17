@@ -240,7 +240,7 @@ export async function createView(ctx) {
   const revPhoto = h("dd"), revFormat = h("dd"), revCost = h("dd");
   const creditNote = h("div");
   const status = h("p", { class: "form-status", role: "status", "aria-live": "polite" });
-  const generate = h("button", { type: "button", class: "btn btn--primary btn--lg" }, "Generate video");
+  const generate = h("button", { type: "button", class: "btn btn--primary btn--lg", "data-magnetic": "" }, "Generate video");
   const setGenerating = (on) => { setBusy(generate, on); if (!on) refresh(); };
   let submitting = false;
   const reviewSection = h("section", { class: "form-section review", "aria-labelledby": "review-title" },

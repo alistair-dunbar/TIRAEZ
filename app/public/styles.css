@@ -94,6 +94,11 @@
   --ease: cubic-bezier(.2, .8, .2, 1);
   --ease-enter: cubic-bezier(.22, 1, .36, 1);
   --ease-io: cubic-bezier(.65, 0, .35, 1);
+  --motion-fast: 160ms;
+  --motion-ui: 240ms;
+  --motion-reveal: 600ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-ui: cubic-bezier(0.2, 0, 0, 1);
 
   /* 3. Components */
   --radius: 2px;
@@ -111,6 +116,7 @@ html, body { margin: 0; background: var(--bg); }
 html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--header) + 16px); }
 body { color: var(--text); font: 400 var(--t-body)/1.6 var(--font-ui); font-kerning: normal; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column; }
 main { flex: 1; }
+main:empty { min-height: 100vh; } /* keeps the footer below the fold until the page renders (no layout shift) */
 img, video, svg { display: block; max-width: 100%; }
 h1, h2, h3, p, ul, ol, dl, dd, figure { margin: 0; }
 p, li, dd { text-wrap: pretty; }
@@ -352,11 +358,16 @@ a { color: inherit; }
 .entry:focus-within { border-color: var(--forest); box-shadow: 0 0 0 1px var(--forest), var(--e-2); }
 .entry:has(.entry__name a:focus-visible) .entry__name a { text-decoration-color: currentColor; }
 @media (hover: hover) and (pointer: fine) {
-  .entry:hover { transform: translateY(-2px); border-color: var(--border-hover); box-shadow: var(--e-2); transition-duration: var(--d-med); }
+  .entry:hover { transform: translateY(-3px); border-color: var(--border-hover); box-shadow: var(--e-2); transition-duration: 220ms; transition-timing-function: var(--ease-ui); }
   .entry:hover .entry__name a { text-decoration-color: currentColor; }
   .entry:hover .entry__foot .btn--secondary { background: var(--ink); color: var(--ivory); }
 }
-.entry.is-in { animation: rise-in var(--d-slow) var(--ease-enter) both; }
+/* Filtering swaps the list with a short fade; the stagger only ever plays once. */
+.entry.is-in { animation: fade-in var(--motion-fast) var(--ease-ui) both; }
+@media (prefers-reduced-motion: no-preference) {
+  .entry:has(:focus-visible) { transform: translateY(-3px); transition-duration: 220ms; transition-timing-function: var(--ease-ui); }
+  .video-card:has(:focus-visible) { transform: translateY(-3px); }
+}
 .entry__preview { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
 
 .ratio { display: inline-block; flex: none; border: 1.5px solid currentColor; border-radius: 1px; }
@@ -433,7 +444,7 @@ a { color: inherit; }
 .field__error { font-size: var(--t-small); color: var(--danger); font-weight: 500; }
 .field__error:not(:empty) { animation: msg-in var(--d-med) var(--ease) both; }
 .input, .select { width: 100%; min-height: var(--field-h); padding: 0 var(--s-4); background: var(--surface); border: 1px solid var(--border-control); border-radius: var(--radius); font-size: 1rem; outline: none;
-  transition: border-color var(--d-out) var(--ease), box-shadow var(--d-out) var(--ease), background-color var(--d-out) var(--ease); }
+  transition: border-color var(--motion-fast) var(--ease-ui), box-shadow var(--motion-fast) var(--ease-ui), background-color var(--motion-fast) var(--ease-ui); }
 .input:focus, .select:focus { border-color: var(--action); box-shadow: 0 0 0 1px var(--action), 0 0 0 4px rgba(36, 70, 56, .12); background: #FFFFFF; }
 .input[aria-invalid="true"], .select[aria-invalid="true"] { border-color: var(--danger); }
 .input[aria-invalid="true"]:focus { box-shadow: 0 0 0 1px var(--danger), 0 0 0 4px rgba(154, 46, 33, .12); }
@@ -559,7 +570,7 @@ textarea.input { min-height: 132px; padding: var(--s-3) var(--s-4); resize: vert
 .video-card__actions a { min-height: 44px; display: inline-flex; align-items: center; position: relative; z-index: 1; }
 .video-card:focus-within { border-color: var(--forest); box-shadow: 0 0 0 1px var(--forest); }
 @media (hover: hover) and (pointer: fine) {
-  .video-card:hover { transform: translateY(-2px); border-color: var(--border-hover); box-shadow: var(--e-2); }
+  .video-card:hover { transform: translateY(-3px); border-color: var(--border-hover); box-shadow: var(--e-2); transition-duration: 220ms; transition-timing-function: var(--ease-ui); }
   .video-card:hover .video-card__thumb img { transform: scale(1.025); }
 }
 .tag { display: inline-flex; align-items: center; gap: 6px; justify-self: start; min-height: 24px; padding: 0 8px; border: 1px solid var(--border-control); border-radius: var(--radius); font-size: .75rem; font-weight: 600; letter-spacing: .01em; color: var(--text-2); background: var(--bg); }
@@ -626,6 +637,42 @@ mark.todo { background: #F4E4DC; color: var(--clay); padding: 0 3px; border-bott
 .video-card .entry__name a { text-decoration: none; }
 .video-card .entry__name a:hover { text-decoration: underline; }
 
+/* ------------------------------------------------------------------ Motion
+   First landing load only (boot.js adds .motion-enter; motion.js removes it after the hero plays).
+   Scroll reveals and the grid stagger hide content only once motion.js has added .motion-ready,
+   so nothing is hidden if a script fails. */
+@media (prefers-reduced-motion: no-preference) {
+  .motion-enter .site-header { --from-y: -10px; animation: enter-y 420ms var(--ease-out) both; }
+  .motion-enter .hero__fact, .motion-enter .hero__title { --from-y: -20px; animation: enter-y 650ms var(--ease-out) 80ms both; }
+  .motion-enter .hero__lead { --from-y: -14px; animation: enter-y 600ms var(--ease-out) 160ms both; }
+  .motion-enter .hero__copy > .btn-row { --from-y: -10px; animation: enter-y 520ms var(--ease-out) 240ms both; }
+  .motion-enter .hero__index { --from-y: -12px; animation: enter-y 650ms var(--ease-out) 180ms both; }
+
+  .motion-ready [data-reveal] { transition: opacity var(--motion-reveal) var(--ease-out), transform var(--motion-reveal) var(--ease-out); }
+  .motion-ready [data-reveal]:not(.is-revealed), .motion-ready [data-stagger]:not(.is-revealed) > * { opacity: 0; transform: translateY(18px); }
+  .motion-ready [data-stagger].is-staggering > * { transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out); transition-delay: var(--stagger-delay, 0ms); }
+}
+@keyframes enter-y { from { opacity: 0; transform: translateY(var(--from-y, -10px)); } to { opacity: 1; transform: none; } }
+
+/* Desktop cursor dot: a 10px square that becomes a 64px label only over media that will play. */
+.cursor-dot { position: fixed; left: 0; top: 0; z-index: 60; width: 64px; height: 64px; margin: -32px 0 0 -32px; display: grid; place-items: center;
+  pointer-events: none; opacity: 0; transition: opacity var(--motion-fast) var(--ease-ui); will-change: transform; }
+.cursor-dot::before { content: ""; position: absolute; inset: 0; border-radius: var(--radius); background: var(--ink); box-shadow: 0 0 0 1px rgba(243, 240, 232, .8);
+  transform: scale(.15625); transition: transform 180ms var(--ease-ui), background-color 180ms var(--ease-ui); }
+.cursor-dot span { position: relative; font: 600 .75rem/1 var(--font-ui); letter-spacing: .02em; color: var(--ivory); opacity: 0; transition: opacity 180ms var(--ease-ui); }
+.cursor-dot.is-on { opacity: .9; }
+.cursor-dot.is-on.is-hidden { opacity: 0; }
+.cursor-dot.is-media { opacity: 1; }
+.cursor-dot.is-media::before { transform: scale(1); background: var(--forest); }
+.cursor-dot.is-media span { opacity: 1; }
+
+/* Magnetic primary actions (data-magnetic): never on consent, payment, cancellation or deletion. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .btn[data-magnetic] { transition: background-color var(--d-out) var(--ease), border-color var(--d-out) var(--ease), color var(--d-out) var(--ease), box-shadow var(--d-out) var(--ease), transform var(--motion-ui) var(--ease-ui); }
+  .btn[data-magnetic]:hover:not(:disabled):not([data-busy]) { transform: translate(var(--mx, 0px), var(--my, 0px)) scale(1.015); transition-duration: var(--motion-fast); }
+  .btn[data-magnetic]:active:not(:disabled):not([data-busy]), .btn[data-magnetic]:hover:active:not(:disabled):not([data-busy]) { transform: translate(var(--mx, 0px), var(--my, 0px)) scale(.985); transition-duration: var(--motion-fast); }
+}
+
 /* ------------------------------------------------------------------ Keyframes */
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes msg-in { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
@@ -639,6 +686,7 @@ mark.todo { background: #F4E4DC; color: var(--clay); padding: 0 3px; border-bott
   .btn:active, .chip:active, .option input:active + span { transform: none !important; }
   .spinner, .btn[data-busy]::after { animation: none !important; border-color: var(--action); border-right-color: transparent; }
   .crop__img { opacity: 1; transform: none; }
+  .cursor-dot { display: none; }
 }
 
 /* Real upload progress (from the browser's own byte count) */

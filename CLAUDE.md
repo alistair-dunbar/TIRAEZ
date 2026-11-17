@@ -18,14 +18,27 @@ Plan: sell as a one-off pack on a ready-made checkout; nothing else decided yet.
 and `docs/PLAN.md` describe the earlier video product and are paused, not deleted. The sections below
 that describe the video product are kept for reference until the new plan is written.
 
-## The service (`app/`, rebuilt 16 Nov 2026)
+## The service (`app/`, rebuilt 16 Nov 2026; legal, accounts, brand and motion added 17 Nov 2026)
 
 The founder's priority is finishing the full self-serve service; video quality experiments are paused.
 Zero dependencies (node:http, node:sqlite, node:crypto, system ffmpeg). Plain JS front end in `app/public/js`.
 
 - Journey: landing -> catalogue (`/templates`) -> template (`/templates/<slug>`) -> workspace
   (`/create/<slug>`: upload, framing, schema-built form, settings, review) -> job (`/videos/<id>`) -> My videos.
-- `npm start`, `npm test` (20 end-to-end tests, test-only mock provider, free), `npm run credits`.
+- `npm start`, `npm test` (43 end-to-end tests, test-only mock provider, free), `npm run credits`,
+  `npm run reports`, `npm run suspend`.
+- Brand: **Tiraez** (17 Nov 2026). The name comes from `config/site.json`. Logo files are in `app/public/brand/`
+  (`scripts/build-logo.py`). Don't rename database tables, environment variables, domains or storage keys for the brand.
+- Legal (17 Nov 2026): the policy drafts in `legal/*.md` replace the earlier "no Terms/Privacy pages"
+  exclusion. Facts are in `config/business.json` and `config/legal.json` (`null` = not confirmed). Never invent
+  a legal entity, registration, address, contact, retention period, certification or provider commitment.
+  Production withholds the policies, and keeps sign-ups closed, until `status` is "published" and nothing is
+  unresolved. Open items and launch blockers: `docs/LEGAL-REVIEW.md`. Security notes: `docs/SECURITY.md`.
+- Eligibility: 18+, age asked in whole years and never stored. The terms version and acceptance time are
+  recorded. Uploads, generation and purchases need an eligible account (`requireEligible`).
+- Motion: tokens `--motion-*` and `--ease-out`/`--ease-ui` in `styles.css`. Behaviour is in `js/boot.js` and
+  `js/motion.js`. No magnetism or animation on consent, payment, cancellation or deletion controls, and no
+  animation on policy text.
 - Generation: `ENGINE=fal` + `FAL_KEY` (or `FAL_AUTH=proxy` in cloud sessions). Unset = switched off and
   the site says so. `ENGINE=mock` exists for tests only and is refused outside `NODE_ENV=test`: never
   show simulated or prerecorded output to customers. Never switch on `fal` without the user asking.
@@ -39,12 +52,14 @@ Zero dependencies (node:http, node:sqlite, node:crypto, system ffmpeg). Plain JS
 - Brief exclusions for the website (16 Nov 2026): no gradients, Lucide, em dashes, Inter/Geist/Space
   Grotesk, side stripes, fake proof, bento grids, terminal mock-ups, "not X but Y" slogans, checkmark
   bullets, three-tier pricing, pill or soft rounded shapes (0-4px radius), purple, skeleton loaders,
-  radial orbs, dot grids, sparkles, animated arrows, neon, pastel palettes, Terms/Privacy pages. UK English.
+  radial orbs, dot grids, sparkles, animated arrows, neon, pastel palettes. UK English. (Terms/Privacy pages
+  were on this list until the 17 Nov brief asked for them.)
 - Payments: `PAYMENTS=moyasar` written, tested against a stand-in; off by the founder's choice for now.
 - Hosting: `Dockerfile` + `railway.json`, steps in `docs/DEPLOY.md`. Production runs plain `node`, so keep
   the code to erasable TypeScript (`erasableSyntaxOnly`).
-- Not built yet: email verification, password reset, an admin view, Arabic interface (the UI copy is
-  English only in `app/public/js/copy.js` and the views).
+- Not built yet: email verification and password reset (no email provider yet), an admin view (reports and
+  suspensions are run from the command line), an Arabic interface (the UI copy is English only, in
+  `app/public/js/copy.js` and the views).
 
 ## Hard rules
 

@@ -19,7 +19,7 @@ export async function templateView(ctx) {
   const cost = Object.entries(t.cost).map(([d, c]) => `${credits(c)} for a ${d}-second video`).join(", ");
 
   const action = t.ready
-    ? h("a", { class: "btn btn--primary btn--lg btn--block", href: `/create/${t.slug}` }, "Use this template")
+    ? h("a", { class: "btn btn--primary btn--lg btn--block", href: `/create/${t.slug}`, "data-magnetic": "" }, "Use this template")
     : notice("Not available to use yet", errorText[t.unavailableReason] ?? errorText.template_unavailable);
 
   const node = h("div", { class: "wrap page" },

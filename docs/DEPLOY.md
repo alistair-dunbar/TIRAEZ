@@ -67,3 +67,21 @@ or with `PAYMENTS=moyasar` but no `APP_URL`.
   Check this against Saudi data-protection law (PDPL) before scaling.
 - **Untested:** the Docker image has not been built (no Docker daemon in the development
   environment), and no real Moyasar payment has been made.
+
+## Policies and sign-ups in production (17 Nov 2026)
+
+- Until `config/legal.json` has `"status": "published"` and every fact in `config/business.json` and
+  `config/legal.json` is filled in, production withholds the policy pages and keeps **sign-ups closed**.
+  New accounts would otherwise have to agree to terms that don't exist yet. Existing accounts can still
+  sign in, watch, download, export and delete. They can't upload or generate until they accept the
+  published terms.
+- `LEGAL_PREVIEW=1` shows the drafts with a "not in force" banner and opens sign-ups against the draft
+  terms. Use it only on a deployment that isn't public, never on www.tiraez.com.
+- Publishing:
+  1. Fill in the facts.
+  2. Set each document's `effective` date.
+  3. Set `config/retention.json` → `"confirmed": true`.
+  4. Set `"status": "published"`.
+  5. Push. The live check (`scripts/verify-live.mjs`) then expects sign-ups to be open.
+- An hourly job removes unused photos older than `unusedPhotosDays`, along with expired sessions. It runs inside the
+  web process; nothing else to schedule.

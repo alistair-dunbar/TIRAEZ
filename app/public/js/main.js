@@ -13,6 +13,8 @@ import { videosView } from "./views/videos.js";
 import { welcomeView } from "./views/welcome.js";
 import { accountView } from "./views/account.js";
 import { reportView } from "./views/report.js";
+// Motion is decoration: loaded separately, so if it fails the site works exactly the same without it.
+let motion = { scan: () => () => {}, parallax: () => () => {}, endEntrance: () => {} };
 
 const routes = [
   [/^\/$/, landingView],
@@ -29,6 +31,7 @@ const routes = [
 ];
 
 let cleanup = null;
+let motionCleanup = null;
 let first = true;
 const main = $("#main");
 // Pages the server renders in full (policies), so they read the same with or without JavaScript.
@@ -48,10 +51,12 @@ export function announce(text) {
 async function render() {
   cleanup?.();
   cleanup = null;
+  motionCleanup?.();
+  motionCleanup = null;
   closeMenu();
   const url = new URL(location.href);
   if (SERVER_PAGES.test(url.pathname)) {
-    if (main.dataset.static === url.pathname) { renderChrome(url.pathname); first = false; return; }
+    if (main.dataset.static === url.pathname) { renderChrome(url.pathname); motion.endEntrance(); first = false; return; }
     if (!first) { location.reload(); return; } // back or forward onto a server page: fetch it
     // First load of a /legal/ address the server didn't recognise: falls through to "not found".
   }
@@ -79,6 +84,11 @@ async function render() {
   }
   if (!result) return; // the view navigated elsewhere
   main.replaceChildren(result.node);
+  // Reveals and the stagger are set up before the first paint of the new page; the landing
+  // entrance plays once, on a fresh load, and is then switched off for good.
+  const stopReveals = motion.scan(main), stopParallax = motion.parallax(main);
+  motionCleanup = () => { stopReveals(); stopParallax(); };
+  motion.endEntrance(first && view === landingView ? 900 : 0);
   document.title = result.title ? `${result.title} · ${store.site.brandName}` : `${store.site.brandName}: video templates for small businesses`;
   renderChrome(url.pathname);
   if (!first) {
@@ -207,6 +217,7 @@ function errorView() {
 }
 
 (async function start() {
+  try { motion = await import("./motion.js"); motion.startMotion(); } catch { /* no motion */ }
   try {
     await loadSite();
   } catch {

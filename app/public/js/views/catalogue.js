@@ -56,7 +56,7 @@ export async function catalogueView(ctx) {
   const chips = h("div", { class: "chips", role: "group", "aria-label": "Filter by business" });
   const reset = h("button", { type: "button", class: "btn btn--quiet" }, "Reset filters");
   const count = h("p", { class: "result-count", role: "status", "aria-live": "polite" });
-  const list = h("div", { class: "entries" });
+  const list = h("div", { class: "entries", "data-stagger": "" });
   const empty = h("div", { class: "empty", hidden: true });
 
   function matches(t) {
