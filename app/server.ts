@@ -12,7 +12,9 @@ import {
 import { niches, publicTemplate, servablePreviewFiles, templateBySlug, templates } from "./catalog.ts";
 import { generation, pricing, site } from "./config.ts";
 import { balance, buy, confirmPurchase, packs, paymentProvider, purchaseByRef, purchaseOwner } from "./credits.ts";
+import { cancelEmailChange, checkReset, confirmEmail, notifyPasswordChanged, requestEmailChange, requestReset, resetPassword, sendVerification } from "./emailflows.ts";
 import { clientIp, limitBy, redact } from "./guard.ts";
+import { mailName, mailReady } from "./mail.ts";
 import { createJob, jobFor, listJobs, publicJob, recoverJobs } from "./jobs.ts";
 import { legalPage, legalStatus, privacyVersion, termsAvailable, termsVersion } from "./legal.ts";
 import { photoFor, savePhoto } from "./photos.ts";
@@ -27,7 +29,7 @@ const MIME: Record<string, string> = {
 };
 // Routes the single-page app renders; anything else gets the shell with a 404 status.
 const APP_ROUTES = [/^\/$/, /^\/templates$/, /^\/templates\/[a-z0-9-]+$/, /^\/create\/[a-z0-9-]+$/, /^\/videos$/, /^\/videos\/\d+$/,
-  /^\/signin$/, /^\/signup$/, /^\/welcome$/, /^\/account$/, /^\/report$/];
+  /^\/signin$/, /^\/signup$/, /^\/welcome$/, /^\/account$/, /^\/report$/, /^\/verify-email$/, /^\/forgot-password$/, /^\/reset-password$/];
 const CSP = "default-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; style-src 'self'; script-src 'self'; font-src 'self'; " +
   "connect-src 'self'; manifest-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'";
 const SECURITY_HEADERS: Record<string, string> = {
@@ -98,7 +100,7 @@ function sendFile(req: IncomingMessage, res: ServerResponse, file: string, extra
 
 /** What the front end may know about the signed-in person. */
 function userPayload(u: User) {
-  return { name: u.name, email: u.email, credits: balance(u.id), needs: onboardingNeeds(u) };
+  return { name: u.name, email: u.email, credits: balance(u.id), needs: onboardingNeeds(u), emailVerified: u.emailVerified, pendingEmail: u.pendingEmail };
 }
 
 /** Public facts the front end needs: brand, pricing, which services are switched on. */
@@ -112,7 +114,9 @@ function siteInfo(user: User | null) {
     pricing: site.showPricing && pack ? { currency: pricing.currency, creditsByDuration: pricing.creditsByDuration, pack } : null,
     paymentsOn,
     generationOn: engineName() !== "none",
-    signupsOpen: termsAvailable(),
+    // Accounts only open when there are published terms to agree to and email can confirm the address.
+    signupsOpen: termsAvailable() && mailReady(),
+    mailOn: mailReady(),
     legal: { termsVersion: termsVersion(), privacyVersion: privacyVersion(), draft: !legalStatus().published },
     upload: { maxBytes: generation.upload.maxBytes, minShortSide: generation.upload.minShortSide },
     reportKinds: REPORT_KINDS,
@@ -148,8 +152,34 @@ async function api(req: IncomingMessage, res: ServerResponse, path: string): Pro
 
   if (method === "POST" && path === "/api/signup") {
     limitBy("signup", ip);
+    if (!mailReady()) throw new UserError("signups_closed", 503);
     const u = signup(await json(req));
-    send(res, 200, userPayload(u), { "Set-Cookie": sessionCookie(createSession(u.id), SESSION_MAX_AGE) });
+    let verificationSent = true;
+    try { sendVerification(u); } catch { verificationSent = false; }
+    send(res, 200, { ...userPayload(u), verificationSent }, { "Set-Cookie": sessionCookie(createSession(u.id), SESSION_MAX_AGE) });
+  } else if (method === "POST" && path === "/api/email/verify") {
+    limitBy("token", ip);
+    const { token } = await json(req);
+    const r = confirmEmail(token);
+    const current = user && user.id === r.userId ? userPayload(userFromSession(cookie(req, "sid"))!) : null;
+    send(res, 200, { email: r.email, changed: r.changed, user: current });
+  } else if (method === "POST" && path === "/api/email/resend") {
+    const u = need();
+    sendVerification(u);
+    send(res, 200, { sentTo: u.email });
+  } else if (method === "POST" && path === "/api/password/forgot") {
+    limitBy("forgot", ip);
+    const { email } = await json(req);
+    requestReset(email);
+    send(res, 200, { ok: true });
+  } else if (method === "GET" && path === "/api/password/reset") {
+    limitBy("token", ip);
+    send(res, 200, checkReset(new URL(req.url ?? "/", "http://x").searchParams.get("token")));
+  } else if (method === "POST" && path === "/api/password/reset") {
+    limitBy("token", ip);
+    const { token, password, confirm } = await json(req);
+    resetPassword(token, password, confirm);
+    send(res, 200, { ok: true }, clearCookie());
   } else if (method === "POST" && path === "/api/login") {
     limitBy("login", ip);
     const { email, password } = await json(req);
@@ -188,12 +218,19 @@ async function api(req: IncomingMessage, res: ServerResponse, path: string): Pro
   } else if (method === "POST" && path === "/api/account/profile") {
     const u = need();
     limitBy("sensitive", u.id);
-    send(res, 200, { user: userPayload(updateProfile(u, await json(req))) });
+    const r = updateProfile(u, await json(req));
+    if (r.newEmail) requestEmailChange(r.user, r.newEmail);
+    send(res, 200, { user: userPayload(userFromSession(token)!), pendingEmail: r.newEmail });
+  } else if (method === "POST" && path === "/api/account/email/cancel") {
+    const u = need();
+    cancelEmailChange(u);
+    send(res, 200, { user: userPayload(userFromSession(token)!) });
   } else if (method === "POST" && path === "/api/account/password") {
     const u = need();
     limitBy("sensitive", u.id);
     const { currentPassword, newPassword } = await json(req);
     changePassword(u, currentPassword, newPassword, token);
+    notifyPasswordChanged(u);
     send(res, 200, {});
   } else if (method === "POST" && path === "/api/account/sessions/revoke") {
     const u = need();
@@ -343,11 +380,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     if (process.env.PAYMENTS === "test") throw new Error("PAYMENTS=test is not allowed in production");
     if (process.env.ENGINE === "mock") throw new Error("ENGINE=mock is not allowed in production");
     if (process.env.PAYMENTS === "moyasar" && !process.env.APP_URL) throw new Error("APP_URL must be set for Moyasar payments");
+    if (process.env.MAIL === "resend" && !process.env.APP_URL) throw new Error("APP_URL must be set for email links");
+    mailName(); // refuses MAIL=outbox in production
   }
   startRetention();
   const resumed = recoverJobs();
   if (resumed) console.log(`Resuming ${resumed} unfinished job(s)`);
   const port = Number(process.env.PORT ?? 3000);
   server.listen(port, () =>
-    console.log(`Listening on http://localhost:${port}  (generation: ${engineName()}, payments: ${process.env.PAYMENTS ?? "off"})`));
+    console.log(`Listening on http://localhost:${port}  (generation: ${engineName()}, payments: ${process.env.PAYMENTS ?? "off"}, email: ${mailReady() ? mailName() : "off"})`));
 }

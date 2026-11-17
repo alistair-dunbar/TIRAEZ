@@ -50,7 +50,7 @@ export function welcomeView(ctx) {
     try {
       const user = await api("POST", "/api/onboarding", { ...eligibilityBody(f), termsVersion: store.site.legal.termsVersion, privacyVersion: store.site.legal.privacyVersion });
       setUser(user);
-      navigate(next, { replace: true });
+      navigate(user.needs?.email ? `/verify-email?next=${encodeURIComponent(next)}` : next, { replace: true });
     } catch (err) {
       setBusy(submit, false);
       const code = err instanceof ApiError ? err.code : "offline";

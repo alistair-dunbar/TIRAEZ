@@ -11,6 +11,7 @@ export const REPORT_KINDS: Record<string, string> = {
   harmful: "Harmful, abusive or illegal content",
   deceptive: "Misleading or deceptive content",
   child_safety: "Content involving a child",
+  privacy: "A request about my personal data (access, correction, deletion or objection)",
   security: "A security or privacy problem with the site",
   other: "Something else",
 };

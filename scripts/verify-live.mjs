@@ -31,6 +31,7 @@ check(terms.status === 200, "terms page answers 200");
 check(!/mark class="todo"|Draft for review/.test(termsText), "no draft or unconfirmed policy text in production");
 if (!site.legal || site.legal.draft) check(site.signupsOpen === false && /being prepared/.test(termsText), "policies unpublished: pages withheld and sign-ups closed");
 else check(site.signupsOpen === true, "policies published: sign-ups open");
+check(site.mailOn || site.signupsOpen === false, "sign-ups closed while email can't be sent", `email ${site.mailOn ? "on" : "off"}`);
 for (const f of ["/favicon.svg", "/favicon.ico", "/apple-touch-icon.png", "/manifest.webmanifest", "/brand/tiraez-wordmark.svg"]) check((await fetch(base + f)).status === 200, `${f} served`);
 
 // Browser checks at three widths
@@ -40,7 +41,7 @@ for (const [w, h] of [[1440, 900], [768, 1024], [390, 844]]) {
   const errors = [];
   p.on("pageerror", (e) => errors.push(String(e)));
   p.on("console", (m) => m.type() === "error" && errors.push(m.text()));
-  for (const path of ["/", "/templates", `/templates/${cat.templates[0].slug}`, "/signin", "/legal/privacy", "/report"]) {
+  for (const path of ["/", "/templates", `/templates/${cat.templates[0].slug}`, "/signin", "/forgot-password", "/legal/privacy", "/report"]) {
     const r = await p.goto(base + path, { waitUntil: "networkidle" });
     const h1 = await p.locator("h1").first().textContent().catch(() => null);
     const overflow = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);

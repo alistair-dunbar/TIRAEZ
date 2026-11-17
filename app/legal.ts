@@ -13,7 +13,7 @@ const read = (path: string) => JSON.parse(readFileSync(new URL(`../${path}`, imp
 
 export interface LegalDocMeta { title: string; version: string; effective: string | null }
 export interface LegalConfig { status: "draft" | "published"; documents: Record<string, LegalDocMeta>; unresolved: Record<string, string | null> }
-export interface RetentionConfig { confirmed: boolean; unusedPhotosDays: number; expiredSessions: boolean; providerFilesHours: number }
+export interface RetentionConfig { confirmed: boolean; unusedPhotosDays: number; expiredSessions: boolean; providerFilesHours: number; unverifiedAccountsDays: number }
 
 export const business: Record<string, string | null> = read("config/business.json");
 export const legal: LegalConfig = read("config/legal.json");

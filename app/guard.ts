@@ -43,6 +43,8 @@ export const LIMITS = {
   export: [10, HOUR],          // per account
   sensitive: [10, HOUR],       // password, email and deletion attempts, per account
   purchase: [20, HOUR],        // per account
+  forgot: [10, HOUR],          // reset-email requests per address (each email also gets at most 3 links an hour)
+  token: [60, HOUR],           // verification and reset link checks per address
 } as const satisfies Record<string, readonly [number, number]>;
 
 export function limitBy(name: keyof typeof LIMITS, who: string | number): void {

@@ -29,6 +29,15 @@ export function authView(ctx, mode) {
   const email = field("Email", { name: "email", type: "email", autocomplete: "email", required: true, dir: "ltr" });
   const password = field("Password", { name: "password", type: "password", autocomplete: signup ? "new-password" : "current-password",
     required: true, minlength: 8, dir: "ltr", help: signup ? "At least 8 characters." : "" });
+  if (!signup) {
+    // Visible next to the password, and keeps any email already typed.
+    const forgot = h("a", { class: "link small", href: "/forgot-password", onclick: (e) => {
+      const v = email.input.value.trim();
+      if (v) { e.preventDefault(); navigate(`/forgot-password?email=${encodeURIComponent(v)}`); }
+    } }, "Forgot password?");
+    password.el.querySelector(".field__label").after(forgot);
+    password.el.classList.add("field--with-link");
+  }
   const all = { ...elig, email, password };
   const status = h("p", { class: "form-status", role: "status" });
   const submit = h("button", { class: "btn btn--primary btn--lg btn--block", type: "submit" }, signup ? "Create account" : "Sign in");
@@ -62,7 +71,7 @@ export function authView(ctx, mode) {
       const u = await api("POST", signup ? "/api/signup" : "/api/login", body);
       setUser(u);
       const needs = u.needs && (u.needs.name || u.needs.age || u.needs.terms);
-      navigate(needs ? `/welcome?next=${encodeURIComponent(next)}` : next, { replace: true });
+      navigate(needs ? `/welcome?next=${encodeURIComponent(next)}` : u.needs?.email ? `/verify-email?next=${encodeURIComponent(next)}` : next, { replace: true });
     } catch (err) {
       setBusy(submit, false);
       const code = err instanceof ApiError ? err.code : "offline";

@@ -22,16 +22,32 @@ export const MIN_AGE = 18;
 const SESSION_DAYS = 30;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function hashPassword(password: string, salt = randomBytes(16)): string {
-  return `${salt.toString("hex")}:${scryptSync(password, salt, 64).toString("hex")}`;
+// Passwords: scrypt from node:crypto (a standard memory-hard KDF), with a random 16-byte salt and the
+// parameters stored alongside, so they can be raised later. Hashes made with the older, lighter
+// parameters ("salt:hash") still verify and are upgraded the next time the person signs in.
+const SCRYPT = { N: 65536, r: 8, p: 1 };
+const scryptOpts = (N: number, r: number, p: number) => ({ N, r, p, maxmem: 256 * N * r });
+
+export function hashPassword(password: string, salt = randomBytes(16)): string {
+  const { N, r, p } = SCRYPT;
+  return ["scrypt", N, r, p, salt.toString("hex"), scryptSync(password, salt, 64, scryptOpts(N, r, p)).toString("hex")].join("$");
 }
 
 function verifyPassword(password: string, stored: string): boolean {
-  const [salt, hash] = stored.split(":");
+  let salt: string, hash: string, N = 16384, r = 8, p = 1;
+  if (stored.startsWith("scrypt$")) {
+    const parts = stored.split("$");
+    if (parts.length !== 6) return false;
+    [N, r, p] = parts.slice(1, 4).map(Number);
+    [salt, hash] = parts.slice(4);
+  } else [salt, hash] = stored.split(":");
   if (!salt || !hash) return false; // deleted accounts have no usable hash
-  const actual = scryptSync(password, Buffer.from(salt, "hex"), 64);
-  return timingSafeEqual(actual, Buffer.from(hash, "hex"));
+  const actual = scryptSync(password, Buffer.from(salt, "hex"), 64, scryptOpts(N, r, p));
+  const expected = Buffer.from(hash, "hex");
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
+
+const needsRehash = (stored: string) => !stored.startsWith(["scrypt", SCRYPT.N, SCRYPT.r, SCRYPT.p, ""].join("$"));
 
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
 
@@ -43,17 +59,20 @@ export interface User {
   ageConfirmed: boolean;
   termsVersion: string | null;
   suspended: boolean;
+  emailVerified: boolean;
+  pendingEmail: string | null;
 }
 
-const USER_COLUMNS = "u.id, u.email, u.name, u.credits, u.age_confirmed_at, u.terms_version, u.suspended_at";
+const USER_COLUMNS = "u.id, u.email, u.name, u.credits, u.age_confirmed_at, u.terms_version, u.suspended_at, u.email_verified_at, u.pending_email";
 const toUser = (r: any): User => ({
   id: r.id, email: r.email, name: r.name ?? null, credits: r.credits,
   ageConfirmed: Boolean(r.age_confirmed_at), termsVersion: r.terms_version ?? null, suspended: Boolean(r.suspended_at),
+  emailVerified: Boolean(r.email_verified_at), pendingEmail: r.pending_email ?? null,
 });
 
 /** What a signed-in person still has to do before they can upload, generate or buy. */
-export function onboardingNeeds(u: User): { name: boolean; age: boolean; terms: boolean } {
-  return { name: !u.name, age: !u.ageConfirmed, terms: u.termsVersion !== termsVersion() };
+export function onboardingNeeds(u: User): { name: boolean; age: boolean; terms: boolean; email: boolean } {
+  return { name: !u.name, age: !u.ageConfirmed, terms: u.termsVersion !== termsVersion(), email: !u.emailVerified };
 }
 
 /** Throws unless this account may use the parts of the service that process photos or take payment. */
@@ -61,6 +80,7 @@ export function requireEligible(u: User): void {
   if (u.suspended) throw new UserError("account_suspended", 403);
   const n = onboardingNeeds(u);
   if (n.name || n.age || n.terms) throw new UserError("onboarding_required", 403);
+  if (n.email) throw new UserError("email_unverified", 403);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -188,6 +208,7 @@ export function login(emailRaw: unknown, password: unknown): User {
   }
   fails.delete(email);
   if (row.suspended_at) throw new UserError("account_suspended", 403);
+  if (needsRehash(row.password_hash)) db.prepare("UPDATE users SET password_hash = ? WHERE id = ?").run(hashPassword(password), row.id);
   return userById(row.id)!;
 }
 
@@ -197,7 +218,11 @@ export function checkPassword(userId: number, password: unknown): void {
   if (!row || typeof password !== "string" || !verifyPassword(password, row.password_hash)) throw new ValidationError({ password: "That password isn't right." });
 }
 
-export function updateProfile(u: User, body: any): User {
+/**
+ * Saves the name straight away. A new email is only checked here: it takes effect when the link sent to
+ * it is used (see emailflows.ts), so the caller gets it back as `newEmail`.
+ */
+export function updateProfile(u: User, body: any): { user: User; newEmail: string | null } {
   body = body && typeof body === "object" ? body : {};
   const errors: Record<string, string> = {};
   const name = body.name === undefined ? u.name : cleanName(body.name);
@@ -209,8 +234,8 @@ export function updateProfile(u: User, body: any): User {
     checkPassword(u.id, body.password); // changing the sign-in email needs the password
     if (db.prepare("SELECT 1 FROM users WHERE email = ? AND id != ?").get(email, u.id)) throw new UserError("email_taken", 409);
   }
-  db.prepare("UPDATE users SET name = ?, email = ? WHERE id = ?").run(name, email, u.id);
-  return userById(u.id)!;
+  db.prepare("UPDATE users SET name = ? WHERE id = ?").run(name, u.id);
+  return { user: userById(u.id)!, newEmail: email !== u.email ? email : null };
 }
 
 export function changePassword(u: User, current: unknown, next: unknown, keepToken: string | undefined): void {
@@ -242,6 +267,10 @@ export function endSession(token: string | undefined): void {
 }
 
 /** Signs out every other browser or device. Returns how many sessions ended. */
+export function endAllSessions(userId: number): number {
+  return Number(db.prepare("DELETE FROM sessions WHERE user_id = ?").run(userId).changes);
+}
+
 export function endOtherSessions(userId: number, keepToken: string | undefined): number {
   const keep = keepToken ? sha(keepToken) : "";
   return Number(db.prepare("DELETE FROM sessions WHERE user_id = ? AND token_hash != ?").run(userId, keep).changes);

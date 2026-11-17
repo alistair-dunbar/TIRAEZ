@@ -42,6 +42,7 @@ Each one is written as a full sentence, which goes into the policy as it is.
 | `backupRetention` | Railway backups and their lifetime | Not checked. See `docs/SECURITY.md`. |
 | `providerAgreement` | Railway's log retention and its data processing agreement | Railway keeps logs in US West. Its agreement uses EU standard contractual clauses (SCCs). |
 | `transferSafeguards` | The legal basis for sending data to the US | **Launch blocker** (see below). |
+| `emailProvider` | The name and description of the email delivery provider, once chosen | The code is ready for Resend. From its documents, checked 17 Nov 2026: Resend is a processor under its DPA; data is processed mainly in the United States; customer data is deleted within 90 days of account termination; EU standard contractual clauses and the EU-US Data Privacy Framework apply. Not verified: its retention of email content and logs while the account is active, and whether content is used for model training. Get both in writing before naming it. |
 | `outputLicence` | The rights users get in generated videos, and the model provider's content rules | fal's model page shows a "Commercial use" badge for Kling v4. No Kling-specific licence was found. |
 | `liabilityCap` | Any limit on liability | No blanket exclusions were drafted. A cap needs legal advice. |
 | `supervisoryAuthority` | Which regulator to name, and how to complain to it | SDAIA under the PDPL. |
@@ -78,11 +79,27 @@ Also set `config/retention.json` → `"confirmed": true` once the founders accep
 4. **Data protection officer.** Probably not required, as there is no systematic monitoring and no sensitive data. **Confirm with counsel.**
 5. **Documented assessments.** The policy relies on contract and legal duties, not legitimate interest. Relying on legitimate interest would first need a documented assessment (IR Art 16).
 6. **The refund, cancellation, VAT and invoice decisions** above.
-7. **No email provider.** Users can't reset passwords by themselves, and email addresses are unverified (see `docs/SECURITY.md`).
+7. **No email provider configured.** Confirmation, reset and email change are built and tested against a sandbox. Sign-ups stay closed until a provider is set up (`docs/DEPLOY.md`, "Account emails").
+
+## Registration as built (17 Nov 2026)
+
+- **Fields:** name (one field, any language), email, password, and age in whole years.
+- **Agreements:** two separate unticked boxes, one for the terms and one for 18+. The privacy notice is shown as information, not as a consent.
+- **Marketing consent:** none, because no marketing is sent.
+- **Recorded at sign-up:**
+  - the terms version and server timestamp;
+  - the privacy version shown;
+  - the adult-eligibility result, the method (`self_declared`) and the time. **The age itself isn't stored.**
+- **Not collected:** IP addresses.
+- **Age is self-declared.** The product doesn't claim this verifies identity or stops a minor from giving a false age.
+- **Email:** must be confirmed before uploads, generation and purchases. An unconfirmed account can sign in, look at, export and delete its data. It is deleted after 30 days if nothing was bought (`config/retention.json`, still to be confirmed).
+- **Password reset:** gives the same answer whether or not an account exists. Links are single-use, last 1 hour and are stored only as hashes. A successful reset signs out every session.
+- **No social sign-in** exists, so there is no OAuth onboarding path.
 
 ## Points for the lawyer
 
 - Do unused prepaid credits fall under the 7-day cancellation right?
+- Signing up reveals whether an email already has an account ("There's already an account with this email"). Password reset doesn't. Decide whether sign-up should also give a neutral answer.
 - Do business buyers count as "consumers" under the E-Commerce Law? The definition doesn't exclude legal persons.
 - The deletion rule at onboarding: an existing account whose holder says they are under 18 is closed and its data deleted at once. That matches the policy text, but it's a product decision worth confirming.
 - fal's terms say its APIs must not be exposed directly to end users and the service must not be resold. Tiraez is a product built on fal, which those terms contemplate. Confirm.

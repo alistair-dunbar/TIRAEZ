@@ -38,7 +38,7 @@ export function accountSummary(u: User) {
 
 export function exportData(u: User) {
   const user = db.prepare(`SELECT id, email, name, credits, created_at, age_confirmed_at, age_method,
-      terms_version, terms_accepted_at, privacy_version_seen FROM users WHERE id = ?`).get(u.id) as Row;
+      terms_version, terms_accepted_at, privacy_version_seen, email_verified_at, pending_email FROM users WHERE id = ?`).get(u.id) as Row;
   const jobs = db.prepare("SELECT * FROM jobs WHERE user_id = ? ORDER BY id").all(u.id) as Row[];
   return {
     exportedAt: new Date().toISOString(),
@@ -49,6 +49,7 @@ export function exportData(u: User) {
     ],
     account: {
       email: user.email, name: user.name, createdAt: user.created_at, credits: user.credits,
+      emailConfirmedAt: user.email_verified_at, pendingEmail: user.pending_email,
       eligibility: { confirmedAdultAt: user.age_confirmed_at, method: user.age_method },
       terms: { version: user.terms_version, acceptedAt: user.terms_accepted_at, privacyPolicyVersionShown: user.privacy_version_seen },
     },
@@ -91,7 +92,10 @@ export function deleteVideo(u: User, jobId: number): void {
 
 export interface DeletionResult { purchaseRecordsKept: number }
 
-/** Removes everything personal now. Purchase rows stay, attached to an anonymous id. */
+/**
+ * Removes everything personal now. With no purchases the account row is deleted outright; with
+ * purchases, those rows stay attached to an anonymous account id with no name, email or password.
+ */
 export function eraseAccount(userId: number): DeletionResult {
   const jobs = db.prepare("SELECT * FROM jobs WHERE user_id = ?").all(userId) as Row[];
   const photos = db.prepare("SELECT file FROM photos WHERE user_id = ?").all(userId) as Row[];
@@ -100,13 +104,20 @@ export function eraseAccount(userId: number): DeletionResult {
     db.prepare("DELETE FROM jobs WHERE user_id = ?").run(userId);
     db.prepare("DELETE FROM photos WHERE user_id = ?").run(userId);
     db.prepare("DELETE FROM consent_events WHERE user_id = ?").run(userId);
+    db.prepare("DELETE FROM email_tokens WHERE user_id = ?").run(userId);
     db.prepare("DELETE FROM credit_events WHERE user_id = ? AND reason != 'purchase'").run(userId);
     db.prepare("UPDATE reports SET user_id = NULL, contact_email = NULL WHERE user_id = ?").run(userId);
     db.prepare(`UPDATE users SET email = ?, password_hash = '', name = NULL, credits = 0, age_confirmed_at = NULL,
         age_method = NULL, terms_version = NULL, terms_accepted_at = NULL, privacy_version_seen = NULL,
-        suspended_at = NULL, suspended_reason = NULL, deleted_at = datetime('now') WHERE id = ?`)
+        suspended_at = NULL, suspended_reason = NULL, email_verified_at = NULL, pending_email = NULL,
+        deleted_at = datetime('now') WHERE id = ?`)
       .run(`deleted-${userId}@deleted.invalid`, userId);
-    return (db.prepare("SELECT COUNT(*) AS n FROM purchases WHERE user_id = ?").get(userId) as Row).n as number;
+    const purchases = (db.prepare("SELECT COUNT(*) AS n FROM purchases WHERE user_id = ?").get(userId) as Row).n as number;
+    if (purchases === 0) {
+      db.prepare("DELETE FROM credit_events WHERE user_id = ?").run(userId);
+      db.prepare("DELETE FROM users WHERE id = ?").run(userId);
+    }
+    return purchases;
   });
   removeFiles([...jobs.flatMap(jobFiles), ...photos.map((p) => p.file)]);
   return { purchaseRecordsKept: kept };
@@ -124,12 +135,19 @@ export function deleteAccount(u: User, password: unknown, confirm: unknown): Del
 // ---------------------------------------------------------------------------------------------
 // Retention: runs at start-up and every hour
 
-export function runRetention(now = Date.now()): { photos: number; sessions: number; strays: number } {
+export function runRetention(now = Date.now()): { photos: number; sessions: number; strays: number; tokens: number; unverified: number } {
   // Photos uploaded but never used in a video.
   const old = db.prepare(`SELECT id, file FROM photos p WHERE created_at < datetime('now', ?)
       AND NOT EXISTS (SELECT 1 FROM jobs j WHERE j.photo_id = p.id)`).all(`-${retention.unusedPhotosDays} days`) as Row[];
   for (const p of old) { db.prepare("DELETE FROM photos WHERE id = ?").run(p.id); removeFiles([p.file]); }
   const sessions = Number(db.prepare("DELETE FROM sessions WHERE expires_at <= datetime('now')").run().changes);
+  // Email links a week after they expired or were used.
+  const tokens = Number(db.prepare("DELETE FROM email_tokens WHERE expires_at <= datetime('now', '-7 days')").run().changes);
+  // Sign-ups whose email was never confirmed, with nothing bought: closed and deleted.
+  const abandoned = db.prepare(`SELECT id FROM users u WHERE email_verified_at IS NULL AND deleted_at IS NULL
+      AND created_at < datetime('now', ?) AND NOT EXISTS (SELECT 1 FROM purchases p WHERE p.user_id = u.id)`)
+    .all(`-${retention.unverifiedAccountsDays} days`) as Row[];
+  for (const a of abandoned) eraseAccount(a.id);
   // Half-written uploads left by a crash.
   let strays = 0;
   const dir = `${DATA_DIR}/photos`;
@@ -140,7 +158,7 @@ export function runRetention(now = Date.now()): { photos: number; sessions: numb
       if (now - statSync(path).mtimeMs > 3600_000) { rmSync(path, { force: true }); strays++; }
     }
   }
-  return { photos: old.length, sessions, strays };
+  return { photos: old.length, sessions, strays, tokens, unverified: abandoned.length };
 }
 
 let timer: ReturnType<typeof setInterval> | null = null;
@@ -148,7 +166,7 @@ export function startRetention(): void {
   const run = () => {
     try {
       const r = runRetention();
-      if (r.photos || r.sessions || r.strays) console.log(`retention: removed ${r.photos} unused photo(s), ${r.sessions} expired session(s), ${r.strays} partial upload(s)`);
+      if (r.photos || r.sessions || r.strays || r.tokens || r.unverified) console.log(`retention: removed ${r.photos} unused photo(s), ${r.sessions} expired session(s), ${r.strays} partial upload(s), ${r.tokens} old email link(s), ${r.unverified} unconfirmed account(s)`);
     } catch (e) { console.error("retention run failed", e); }
   };
   run();

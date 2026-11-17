@@ -63,6 +63,7 @@ async function eligibleUser(credits = 0) {
   const b = body();
   const r = await c("POST", "/api/signup", b);
   assert.equal(r.status, 200, JSON.stringify(r.data));
+  db.prepare("UPDATE users SET email_verified_at = datetime('now') WHERE email = ?").run(b.email); // email flows: email.test.ts
   if (credits) grantCredits(b.email as string, credits, "test");
   return { c, email: b.email as string };
 }
@@ -73,7 +74,7 @@ async function legacyUser() {
   const e = email();
   const r = await c("POST", "/api/signup", body({ email: e }));
   assert.equal(r.status, 200);
-  db.prepare("UPDATE users SET name = NULL, age_confirmed_at = NULL, age_method = NULL, terms_version = NULL, terms_accepted_at = NULL WHERE email = ?").run(e);
+  db.prepare("UPDATE users SET name = NULL, age_confirmed_at = NULL, age_method = NULL, terms_version = NULL, terms_accepted_at = NULL, email_verified_at = datetime('now') WHERE email = ?").run(e);
   return { c, email: e };
 }
 
@@ -94,7 +95,7 @@ test("signup: age 18 is accepted; only the eligibility record is kept, never the
   const b = body({ age: "18" });
   const r = await c("POST", "/api/signup", b);
   assert.equal(r.status, 200);
-  assert.deepEqual(r.data.needs, { name: false, age: false, terms: false });
+  assert.deepEqual(r.data.needs, { name: false, age: false, terms: false, email: true });
   const row = db.prepare("SELECT * FROM users WHERE email = ?").get(b.email) as any;
   assert.ok(row.age_confirmed_at);
   assert.equal(row.age_method, "self_declared");
@@ -157,7 +158,7 @@ test("names from any language are accepted; control characters are removed", asy
 test("an account without onboarding can't upload, generate or buy, but can see and export its data", async () => {
   const { c } = await legacyUser();
   const site = (await c("GET", "/api/site")).data;
-  assert.deepEqual(site.user.needs, { name: true, age: true, terms: true });
+  assert.deepEqual(site.user.needs, { name: true, age: true, terms: true, email: false });
   assert.equal((await c("POST", "/api/photos", undefined, { raw: PHOTO })).data.error, "onboarding_required");
   assert.equal((await c("POST", "/api/jobs", order("0".repeat(24)))).data.error, "onboarding_required");
   assert.equal((await c("POST", "/api/purchases", { packId: "launch" })).data.error, "onboarding_required");
@@ -174,7 +175,7 @@ test("onboarding: completing it unlocks uploads; partial answers are refused", a
   assert.equal(r.status, 422); assert.ok(r.data.fields.age);
   r = await c("POST", "/api/onboarding", { name: "Faisal", age: "40", confirmAdult: true, agreeTerms: true, termsVersion: termsVersion() });
   assert.equal(r.status, 200);
-  assert.deepEqual(r.data.needs, { name: false, age: false, terms: false });
+  assert.deepEqual(r.data.needs, { name: false, age: false, terms: false, email: false });
   assert.equal((await c("POST", "/api/photos", undefined, { raw: PHOTO })).status, 200);
 });
 
@@ -184,10 +185,7 @@ test("onboarding: someone who says they are under 18 has the account closed and 
   const r = await c("POST", "/api/onboarding", { name: "Kid", age: "16", confirmAdult: true, agreeTerms: true, termsVersion: termsVersion() });
   assert.equal(r.status, 403);
   assert.equal(r.data.error, "age_ineligible");
-  const row = db.prepare("SELECT * FROM users WHERE id = ?").get(id) as any;
-  assert.ok(row.deleted_at);
-  assert.notEqual(row.email, e);
-  assert.equal(row.name, null);
+  assert.equal(db.prepare("SELECT 1 FROM users WHERE id = ?").get(id), undefined, "no purchases, so the account row itself is gone");
   assert.equal((db.prepare("SELECT COUNT(*) AS n FROM sessions WHERE user_id = ?").get(id) as any).n, 0);
   assert.equal((await c("GET", "/api/site")).data.user, null);
   assert.equal((await client()("POST", "/api/login", { email: e, password: "password123" })).status, 401);
@@ -199,7 +197,7 @@ test("new terms version: eligible accounts must accept it again before generatin
   legal.documents.terms.version = "2099-01-01-test";
   try {
     const site = (await c("GET", "/api/site")).data;
-    assert.deepEqual(site.user.needs, { name: false, age: false, terms: true });
+    assert.deepEqual(site.user.needs, { name: false, age: false, terms: true, email: false });
     assert.equal((await c("POST", "/api/photos", undefined, { raw: PHOTO })).data.error, "onboarding_required");
     const r = await c("POST", "/api/onboarding", { agreeTerms: true, termsVersion: "2099-01-01-test" });
     assert.equal(r.status, 200);
@@ -283,7 +281,8 @@ test("profile: name changes freely; email changes need the password", async () =
   r = await c("POST", "/api/account/profile", { email: e });
   assert.equal(r.status, 422); assert.ok(r.data.fields.password);
   r = await c("POST", "/api/account/profile", { email: e, password: "password123" });
-  assert.equal(r.status, 200); assert.equal(r.data.user.email, e);
+  assert.equal(r.status, 200); assert.equal(r.data.pendingEmail, e);
+  assert.notEqual(r.data.user.email, e, "the email only changes once the new address confirms (email.test.ts)");
 });
 
 test("password change and sign out everywhere end the other sessions only", async () => {

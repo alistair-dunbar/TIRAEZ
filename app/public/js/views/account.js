@@ -75,9 +75,12 @@ function detailsSection(u) {
       const body = { name: name.input.value, email: email.input.value, ...(password.el.hidden ? {} : { password: password.input.value }) };
       const r = await api("POST", "/api/account/profile", body);
       setUser({ ...store.site.user, ...r.user });
-      u.email = r.user.email;
       password.input.value = ""; password.el.hidden = true;
-      status.textContent = "Your details are saved.";
+      if (r.pendingEmail) {
+        email.input.value = u.email;
+        status.textContent = `Your name is saved. We've sent a confirmation link to ${r.pendingEmail}; your email changes when you open it.`;
+        drawPending(r.user.pendingEmail);
+      } else status.textContent = "Your details are saved.";
     } catch (err) {
       const code = err instanceof ApiError ? err.code : "offline";
       if (code === "invalid_request" && showFieldErrors(err.fields, all)) status.textContent = "Some fields need attention.";
@@ -85,7 +88,20 @@ function detailsSection(u) {
       else status.textContent = errorText[code] ?? errorText.server_error;
     } finally { setBusy(save, false); }
   } }, name.el, email.el, password.el, h("div", { class: "btn-row" }, save), status);
-  return section("details-title", "Your details", form,
+  const pending = h("div");
+  function drawPending(addr) {
+    if (!addr) { pending.replaceChildren(); return; }
+    const cancel = h("button", { type: "button", class: "btn btn--quiet", onclick: async () => {
+      setBusy(cancel, true);
+      try { const r = await api("POST", "/api/account/email/cancel"); setUser({ ...store.site.user, ...r.user }); drawPending(null); status.textContent = "The email change was cancelled."; }
+      catch (e) { setBusy(cancel, false); status.textContent = errorText[e instanceof ApiError ? e.code : "offline"] ?? errorText.server_error; }
+    } }, "Cancel the change");
+    pending.replaceChildren(notice(`Waiting for ${addr} to be confirmed`, `You still sign in with ${u.email} until the link we sent to ${addr} is opened.`, { actions: [cancel] }));
+  }
+  drawPending(u.pendingEmail);
+  const verify = u.emailVerified ? null : notice("Your email isn't confirmed yet", "Confirm it to upload photos, create videos and buy credits.",
+    { actions: [h("a", { class: "btn btn--secondary", href: "/verify-email" }, "Confirm your email")] });
+  return section("details-title", "Your details", verify, form, pending,
     h("p", { class: "notice-text" }, "We don't send marketing emails, so there's nothing to switch off."));
 }
 
@@ -134,8 +150,8 @@ function dataSection(data) {
     h("div", { class: "btn-row" }, h("a", { class: "btn btn--secondary", href: "/api/account/export", download: "" }, "Download your data")),
     data.termsAcceptedAt ? h("p", { class: "notice-text" }, `You agreed to the Terms of Service (version ${data.termsVersion}) on ${dateText(data.termsAcceptedAt)}.`,
       data.ageConfirmedAt ? ` You confirmed you are 18 or over on ${dateText(data.ageConfirmedAt)}.` : "") : null,
-    h("p", { class: "notice-text" }, "To correct your name or email, change them above. For anything else, see the ",
-      policyLink("privacy", "Privacy Policy"), " or ", h("a", { class: "link", href: "/legal/contact" }, "contact us"), "."),
+    h("p", { class: "notice-text" }, "To correct your name or email, change them above. For any other request about your data, ",
+      h("a", { class: "link", href: "/report?kind=privacy" }, "send us a privacy request"), ". The ", policyLink("privacy", "Privacy Policy"), " explains your rights."),
   );
 }
 

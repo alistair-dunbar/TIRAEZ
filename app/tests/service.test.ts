@@ -59,6 +59,7 @@ async function newUser(credits = 0) {
   const c = client();
   const email = `user${++n}@example.com`;
   assert.equal((await c("POST", "/api/signup", signupBody(email))).status, 200);
+  db.prepare("UPDATE users SET email_verified_at = datetime('now') WHERE email = ?").run(email); // email flows: email.test.ts
   if (credits) grantCredits(email, credits, "test");
   return { c, email };
 }

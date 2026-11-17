@@ -13,7 +13,7 @@ below is paused.
 ```bash
 npm install
 npm start                    # http://localhost:3000, generation and payments off
-npm test                     # 43 end-to-end tests with a test-only provider; no cost
+npm test                     # 55 end-to-end tests with a test-only provider and mail outbox; no cost
 npm run credits -- you@example.com 5 "note"   # give an account credits (operator tool)
 npm run reports              # open misuse reports (see docs/SECURITY.md)
 npm run suspend -- --email you@example.com --reason "why"   # suspend an account
@@ -39,6 +39,8 @@ credits automatically.
 - Policies: `legal/*.md`, filled from `config/business.json`, `config/legal.json` and
   `config/retention.json`. In production they stay withheld, and sign-ups stay closed, until the
   facts are confirmed and `config/legal.json` says "published". See `docs/LEGAL-REVIEW.md`.
+- Account emails (confirmation, password reset, email change): `MAIL=resend` in production, see
+  `docs/DEPLOY.md`. In development, messages land in `data/outbox/` instead of being sent.
 - Security and incident response: `docs/SECURITY.md`.
 - Brand files: `app/public/brand/` (wordmark, mark, lockup), the favicons and the manifest in `app/public/`.
   They are rebuilt with `scripts/build-logo.py`.

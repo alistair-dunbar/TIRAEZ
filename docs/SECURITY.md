@@ -7,8 +7,11 @@ It is not a certification, and Tiraez does not claim one.
 
 | Area | What happens | Where |
 |---|---|---|
-| Passwords | scrypt with a random salt per password. The password itself is never stored or logged. | `app/auth.ts` |
+| Passwords | scrypt from `node:crypto` (N=65536, r=8, p=1, 16-byte random salt), with the parameters stored in each hash. Older lighter hashes are upgraded at the next sign-in. The password itself is never stored or logged. | `app/auth.ts` |
 | Sessions | 32 random bytes in an `HttpOnly`, `SameSite=Lax` cookie, `Secure` in production, 30 days. Only a SHA-256 hash is stored. Sign out ends the session. Users can sign out other devices; changing the password signs out every other session. | `app/auth.ts`, `app/server.ts` |
+| Email links | Confirmation, reset and email-change links each carry 32 random bytes. Only a SHA-256 hash is stored. They expire (24 hours, or 1 hour for resets), work once, and a newer link voids older ones. Links are built from `APP_URL`, never the Host header. Tokens are removed from the address bar on arrival and never logged. | `app/emailflows.ts` |
+| Password reset | Always the same reply. At most 3 links an hour per address and 10 requests an hour per visitor. A reset signs out every session and emails the account. A changed password also emails the account. | `app/emailflows.ts`, `app/server.ts` |
+| Email change | Needs the current password. The new address must confirm through its own link, and the old address is told. | `app/emailflows.ts` |
 | Request forgery | Every state-changing API call must carry `X-Requested-With: app`, which a cross-site form can't send. Cookies are `SameSite=Lax`. | `app/server.ts` |
 | Authorisation | Every photo, video and job lookup filters by the signed-in user's id, so other people's ids return "not found". Uploads, generation and purchases also need an eligible account (18+ confirmed, current terms accepted, not suspended). | `app/server.ts`, `app/jobs.ts`, `app/photos.ts` |
 | Uploads | Size limit before reading. The file type is checked by content, not by name. Each photo is decoded and re-encoded by ffmpeg, which removes metadata such as location. Files get random names outside the web root. | `app/photos.ts`, `app/media.ts` |
@@ -28,7 +31,8 @@ It is not a certification, and Tiraez does not claim one.
 
 - Rate limits and the login lock live in memory. They reset on restart and assume a single server.
 - Behind Railway, the last `X-Forwarded-For` entry is treated as the visitor's address. Recheck this if the proxy setup changes.
-- There is **no email verification and no password reset**, because no email provider is set up. Until there is, a person who forgets their password has to contact support, and an account's email address isn't proven to belong to its holder.
+- Email delivery needs a provider to be configured on the live site (`docs/DEPLOY.md`). Until then, reset and confirmation emails can't be sent there, and sign-ups stay closed.
+- Sign-up says when an email is already registered (password reset doesn't). Rate limits slow down enumeration.
 - The SQLite database and files sit on one Railway volume. Whether Railway takes backups, and for how long, hasn't been checked (see `docs/LEGAL-REVIEW.md`).
 - There is no admin interface. Reports and suspensions are handled from the command line.
 
@@ -37,7 +41,7 @@ It is not a certification, and Tiraez does not claim one.
 1. Turn on two-factor sign-in for GitHub, Railway, fal, GoDaddy and Moyasar. Keep the list of who has access.
 2. In the fal dashboard, set the account's default media expiry and access, as a backstop to the per-request headers. fal's default for CDN files is to keep them, readable by anyone with the link.
 3. Check Railway's volume backups and log retention, then record them in `config/legal.json`.
-4. Decide on an email provider, so email verification and password reset can be added.
+4. Set up the email provider and its DNS records (`docs/DEPLOY.md`, "Account emails").
 5. Rotate the fal key if it has ever been pasted anywhere other than Railway's variables.
 6. Review the open reports regularly with `npm run reports`.
 

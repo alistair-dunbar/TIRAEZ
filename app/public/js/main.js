@@ -13,6 +13,7 @@ import { videosView } from "./views/videos.js";
 import { welcomeView } from "./views/welcome.js";
 import { accountView } from "./views/account.js";
 import { reportView } from "./views/report.js";
+import { forgotView, resetView, verifyEmailView } from "./views/emailflow.js";
 // Motion is decoration: loaded separately, so if it fails the site works exactly the same without it.
 let motion = { scan: () => () => {}, parallax: () => () => {}, endEntrance: () => {} };
 
@@ -28,6 +29,9 @@ const routes = [
   [/^\/welcome$/, welcomeView, { auth: true }],
   [/^\/account$/, accountView, { auth: true }],
   [/^\/report$/, reportView],
+  [/^\/verify-email$/, verifyEmailView],
+  [/^\/forgot-password$/, forgotView],
+  [/^\/reset-password$/, resetView],
 ];
 
 let cleanup = null;
@@ -73,6 +77,9 @@ async function render() {
   const needs = store.site?.user?.needs;
   if (opts.eligible && needs && (needs.name || needs.age || needs.terms)) {
     return navigate(`/welcome?next=${encodeURIComponent(url.pathname + url.search)}`, { replace: true });
+  }
+  if (opts.eligible && needs?.email) {
+    return navigate(`/verify-email?next=${encodeURIComponent(url.pathname + url.search)}`, { replace: true });
   }
   const ctx = { params: match ? match.slice(1) : [], query: url.searchParams, url, onCleanup: (fn) => { cleanup = fn; } };
   let result;

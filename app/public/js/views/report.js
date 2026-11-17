@@ -13,7 +13,7 @@ export function reportView(ctx) {
   const kindErr = id("kind-error");
   const kindError = h("p", { class: "field__error", id: kindErr });
   const radios = Object.entries(kinds).map(([value, label]) =>
-    h("label", { class: "option" }, h("input", { type: "radio", name: "kind", value }), h("span", {}, label)));
+    h("label", { class: "option" }, h("input", { type: "radio", name: "kind", value, checked: ctx.query.get("kind") === value }), h("span", {}, label)));
   const group = h("fieldset", { class: "field report__kinds", "aria-describedby": kindErr },
     h("legend", { class: "field__label" }, "What is the problem?"), radios, kindError);
   const kind = { input: radios[0]?.querySelector("input"), setError: (t) => { setError(group, kindError, t); } };

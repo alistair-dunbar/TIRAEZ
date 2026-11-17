@@ -33,6 +33,11 @@ export const errorText = {
   jobs_active: "A video is still being made. Wait for it to finish, then try again.",
   job_active: "This video is still being made. You can delete it once it has finished.",
   invalid_request: "Some details need attention.",
+  email_unverified: "Confirm your email address to continue. We've sent you a link.",
+  mail_not_configured: "We can't send emails yet, so this isn't available. Contact us for help.",
+  link_invalid: "This link isn't valid.",
+  link_expired: "This link has expired.",
+  link_used: "This link has already been used.",
 };
 
 export const policyLinks = {

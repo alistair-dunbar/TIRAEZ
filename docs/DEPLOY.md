@@ -85,3 +85,27 @@ or with `PAYMENTS=moyasar` but no `APP_URL`.
   5. Push. The live check (`scripts/verify-live.mjs`) then expects sign-ups to be open.
 - An hourly job removes unused photos older than `unusedPhotosDays`, along with expired sessions. It runs inside the
   web process; nothing else to schedule.
+
+## Account emails (needed before sign-ups can open)
+
+Sign-up, email confirmation, password reset and email changes all work in code and are tested
+against a sandbox outbox. On the live site they stay off until a real email provider is configured,
+and sign-ups stay closed until then. The adapter is written for **Resend** (plain HTTPS, no new dependency).
+
+1. Create a Resend account. Add a sending domain, preferably a subdomain such as `mail.tiraez.com`.
+2. Resend shows the DNS records for that domain (DKIM and SPF: TXT plus MX or CNAME records). Add them
+   exactly in **GoDaddy → DNS** for tiraez.com and wait for Resend to show the domain as verified
+   (usually minutes, up to 72 hours). Adding a DMARC record afterwards is recommended.
+3. In Resend, create an API key with **sending access** only.
+4. In **Railway → the service → Variables**, add the following. Don't paste the key anywhere else: not into chat, code or a committed file.
+   - `MAIL=resend`
+   - `RESEND_API_KEY=` the key
+   - `MAIL_FROM=Tiraez <account@mail.tiraez.com>` (an address on the verified domain)
+   - `APP_URL=https://www.tiraez.com` (links in emails are built from this, never from the request)
+   - optionally `MAIL_REPLY_TO=` your support address
+5. Redeploy. The start-up log line should end with `email: resend`.
+6. Before opening sign-ups, send yourself a real confirmation and reset email on a non-public preview
+   deployment (`LEGAL_PREVIEW=1`), and check that the links open www.tiraez.com and work once.
+
+Without these, `/api/site` reports `mailOn: false`. The forgot-password page then says reset by email
+isn't switched on, and existing accounts can't confirm their email (so they can't upload or generate).

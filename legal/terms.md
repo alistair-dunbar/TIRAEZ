@@ -18,6 +18,7 @@ Please read them before you create an account. Our [Privacy Policy](/legal/priva
 
 ## 3. Your account
 
+- You must confirm your email address before you upload photos, create videos or buy credits. If you forget your password, you can reset it by email from the sign-in page.
 - Keep your password private and do not share your account. You are responsible for activity on your account unless it happens because of a failure on our side.
 - Tell us at {{business.supportEmail}} straight away if you think someone else has used your account.
 - You can update your details, download a copy of your data or delete your account from your account settings.

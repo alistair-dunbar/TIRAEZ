@@ -116,6 +116,8 @@ const ADDED_USER_COLUMNS: Record<string, string> = {
   suspended_at: "TEXT",
   suspended_reason: "TEXT",
   deleted_at: "TEXT",              // set when an account is deleted; personal fields are cleared at the same time
+  email_verified_at: "TEXT",       // when the person proved they control the email address
+  pending_email: "TEXT",           // a requested new email, until its confirmation link is used
 };
 const have = new Set((db.prepare("PRAGMA table_info(users)").all() as any[]).map((c) => c.name));
 for (const [col, type] of Object.entries(ADDED_USER_COLUMNS)) {
@@ -147,6 +149,19 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     closed_at TEXT
   );
+
+  -- Single-use links sent by email. Only a hash of each token is stored.
+  CREATE TABLE IF NOT EXISTS email_tokens (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    kind TEXT NOT NULL,            -- verify | reset | email_change
+    token_hash TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL,           -- the address the link was sent to
+    expires_at TEXT NOT NULL,
+    used_at TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS email_tokens_user ON email_tokens(user_id);
 
   CREATE INDEX IF NOT EXISTS sessions_user ON sessions(user_id);
   CREATE INDEX IF NOT EXISTS jobs_user ON jobs(user_id);

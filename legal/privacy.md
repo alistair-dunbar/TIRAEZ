@@ -16,6 +16,8 @@ This policy explains what personal data {{brand}} collects, why, who receives it
 - Your password, stored only as a one-way hash. We cannot see your password.
 - That you confirmed you are 18 or over, the date you confirmed it and how (you told us). We check the age you enter at the time and **do not keep the number itself**.
 - The version of the Terms of Service you accepted and when, and the version of this policy we showed you.
+- Whether and when you confirmed your email address. If you ask to change your email, the new address until you confirm it.
+- Single-use links we email you to confirm your address or reset your password. We store only a scrambled (hashed) copy of each link's code, with when it expires and whether it has been used.
 
 **When you create videos**
 
@@ -35,9 +37,13 @@ This policy explains what personal data {{brand}} collects, why, who receives it
 - Counts of recent sign-in attempts and requests, held briefly in memory to slow down misuse. They are not written to our database.
 - Technical logs kept by our hosting provider. {{legal.unresolved.providerAgreement}}
 
-**If you report a problem**
+**If you report a problem or make a privacy request**
 
-- What you tell us in the report, and the contact email you give, if you give one.
+- What you tell us in the form, and the contact email you give, if you give one.
+
+**Emails we send you**
+
+We only send emails your account needs: confirming your address, resetting your password, and telling you when your email or password changes. They contain no tracking images or tracked links.
 
 We do not use analytics, advertising trackers or third-party scripts.
 
@@ -72,6 +78,7 @@ We do not sell personal data, use it for advertising, or use your photos and vid
 
 - **fal.ai** (Features & Labels, Inc.), which runs the AI video model. It receives the framed copy of your photo and the instructions for the video. We ask fal to delete these files after about {{retention.providerFilesHours}} hours and not to keep the request in its request history. fal handles this data under its own terms and privacy policy, and its terms allow it to use anonymised or aggregated data about how its service is used, which may come from requests, to develop its services.
 - **Railway** (Railway Corporation), which hosts our servers, database, stored files and logs.
+- **Our email delivery provider**, {{legal.unresolved.emailProvider}}, which receives your email address and the content of the account emails above so it can deliver them.
 - **Moyasar**, if online payments are switched on, which processes card payments.
 - Authorities, when the law requires us to share data.
 
@@ -85,6 +92,8 @@ Your data is processed outside Saudi Arabia. Our servers, database, files and lo
 - **Photos you uploaded but never used in a video**: deleted automatically after {{retention.unusedPhotosDays}} days.
 - **Copies sent to the video model**: set to expire after about {{retention.providerFilesHours}} hours.
 - **Expired sign-in sessions**: deleted automatically.
+- **Email links**: deleted a week after they expire. Confirmation links expire after 24 hours and password reset links after 1 hour.
+- **Accounts whose email was never confirmed**: deleted with everything in them after {{retention.unverifiedAccountsDays}} days, unless something was bought.
 - **After you delete your account**: your name, email, photos, videos and agreement records are deleted straight away. {{legal.unresolved.deletedAccountRetention}} {{legal.unresolved.paymentRecordRetention}}
 - **Backups**: {{legal.unresolved.backupRetention}}
 
@@ -95,7 +104,7 @@ When we delete data, we remove it from our database and delete its files from ou
 - **See and get a copy of your data**: use "Download your data" in your account settings. You get a file in a common, readable format.
 - **Correct it**: change your name and email in your account settings.
 - **Delete it**: delete individual videos, or your whole account, in your account settings.
-- **Other requests**, such as objecting to a use or asking us to restrict it: contact {{business.privacyEmail}}. {{legal.unresolved.rightsResponseTime}}
+- **Other requests**, such as objecting to a use or asking us to restrict it: send a [privacy request](/report?kind=privacy) or contact {{business.privacyEmail}}. {{legal.unresolved.rightsResponseTime}}
 
 ## Under 18s
 

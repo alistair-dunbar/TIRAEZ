@@ -25,7 +25,7 @@ Zero dependencies (node:http, node:sqlite, node:crypto, system ffmpeg). Plain JS
 
 - Journey: landing -> catalogue (`/templates`) -> template (`/templates/<slug>`) -> workspace
   (`/create/<slug>`: upload, framing, schema-built form, settings, review) -> job (`/videos/<id>`) -> My videos.
-- `npm start`, `npm test` (43 end-to-end tests, test-only mock provider, free), `npm run credits`,
+- `npm start`, `npm test` (55 end-to-end tests, test-only mock provider and mail outbox, free), `npm run credits`,
   `npm run reports`, `npm run suspend`.
 - Brand: **Tiraez** (17 Nov 2026). The name comes from `config/site.json`. Logo files are in `app/public/brand/`
   (`scripts/build-logo.py`). Don't rename database tables, environment variables, domains or storage keys for the brand.
@@ -35,7 +35,11 @@ Zero dependencies (node:http, node:sqlite, node:crypto, system ffmpeg). Plain JS
   Production withholds the policies, and keeps sign-ups closed, until `status` is "published" and nothing is
   unresolved. Open items and launch blockers: `docs/LEGAL-REVIEW.md`. Security notes: `docs/SECURITY.md`.
 - Eligibility: 18+, age asked in whole years and never stored. The terms version and acceptance time are
-  recorded. Uploads, generation and purchases need an eligible account (`requireEligible`).
+  recorded. Uploads, generation and purchases need an eligible account with a confirmed email (`requireEligible`).
+- Email (`app/mail.ts`, `app/emailflows.ts`): `MAIL=resend` (+ `RESEND_API_KEY`, `MAIL_FROM`, `APP_URL`) for real
+  delivery. `MAIL=outbox` is a sandbox, the default outside production and refused in production. It covers
+  confirmation, password reset and email change, with single-use, hashed, expiring links. Sign-ups only open
+  in production when the policies are published AND email works. Never send test emails to real people.
 - Motion: tokens `--motion-*` and `--ease-out`/`--ease-ui` in `styles.css`. Behaviour is in `js/boot.js` and
   `js/motion.js`. No magnetism or animation on consent, payment, cancellation or deletion controls, and no
   animation on policy text.
@@ -57,7 +61,7 @@ Zero dependencies (node:http, node:sqlite, node:crypto, system ffmpeg). Plain JS
 - Payments: `PAYMENTS=moyasar` written, tested against a stand-in; off by the founder's choice for now.
 - Hosting: `Dockerfile` + `railway.json`, steps in `docs/DEPLOY.md`. Production runs plain `node`, so keep
   the code to erasable TypeScript (`erasableSyntaxOnly`).
-- Not built yet: email verification and password reset (no email provider yet), an admin view (reports and
+- Not built yet: an admin view (reports and
   suspensions are run from the command line), an Arabic interface (the UI copy is English only, in
   `app/public/js/copy.js` and the views).
 
