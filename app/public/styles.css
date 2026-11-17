@@ -705,3 +705,6 @@ mark.todo { background: #F4E4DC; color: var(--clay); padding: 0 3px; border-bott
 .field--with-link > .link { align-self: center; justify-self: end; min-height: 44px; display: inline-flex; align-items: center; }
 .flow { gap: var(--s-4); }
 .purchase-list { display: grid; gap: var(--s-4); } .purchase-list li { padding-top: var(--s-3); border-top: 1px solid var(--border); }
+.prose ol { list-style: decimal; padding-left: 1.4em; display: grid; gap: var(--s-2); }
+.prose ol li::marker { color: var(--accent); }
+.prose li > ul { margin-top: var(--s-2); }

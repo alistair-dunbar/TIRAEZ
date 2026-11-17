@@ -1,8 +1,8 @@
 {
-  "_note": "Facts about the operator, shown on the legal pages. null = not yet confirmed. Fill in exactly as they appear on the freelance document and the National Address. Policies are not published in production while any value used by a page is null.",
+  "_note": "Facts about the operator, shown on the legal pages. null = not yet confirmed (drafts show a placeholder; production won't publish). licenceDetails is optional: set it to \"\" to show nothing, or to a line such as \"Freelance licence: FL-...\". freelanceActivity is not shown; it records the activity on the licence so it can be checked against this service.",
   "operatorName": null,
-  "freelanceDocumentNumber": null,
-  "freelanceActivity": null,
   "address": null,
-  "contactEmail": null
+  "contactEmail": null,
+  "licenceDetails": null,
+  "freelanceActivity": null
 }

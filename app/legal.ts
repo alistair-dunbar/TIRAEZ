@@ -45,7 +45,25 @@ export const privacyVersion = () => legal.documents.privacy.version;
 // ---------------------------------------------------------------------------------------------
 // Tokens
 
-type Token = { value: string | null; pending?: boolean; email?: boolean };
+type Token = { value: string | null; pending?: boolean; email?: boolean; draftOnly?: string };
+
+/** What a reader of a draft sees in place of a fact or decision that hasn't been confirmed. */
+const PLACEHOLDERS: Record<string, string> = {
+  "business.operatorName": "[LEGAL OPERATOR NAME]",
+  "business.address": "[BUSINESS ADDRESS REQUIRED FOR PUBLICATION]",
+  "business.contactEmail": "[PUBLIC CONTACT EMAIL]",
+  "business.licenceDetails": "[FREELANCE LICENCE DETAILS, IF APPLICABLE]",
+  "doc.effective": "[EFFECTIVE DATE]",
+  "legal.unresolved.transferSafeguards": "[TRANSFER SAFEGUARDS: DESCRIBE ONLY ONCE IN PLACE]",
+  "legal.unresolved.controllerRegistration": "[SDAIA CONTROLLER REGISTRATION DETAILS, ONCE REGISTERED]",
+  "legal.unresolved.vatTreatment": "[VAT STATUS, AND WHETHER PRICES INCLUDE VAT]",
+  "legal.unresolved.creditExpiry": "[CREDIT EXPIRY RULE]",
+  "legal.unresolved.unusedCreditRefunds": "[REFUND RULE FOR PARTLY USED PACKS AND OTHER CASES]",
+  "legal.unresolved.invoices": "[RECEIPT OR INVOICE PROVIDED, AND ITS CONTENTS]",
+  "legal.unresolved.paymentRecordRetention": "[CONFIRMED RETENTION PERIOD FOR PURCHASE RECORDS]",
+  "legal.unresolved.refundTiming": "[HOW LONG A REFUND TAKES TO REACH THE CARD]",
+};
+const placeholder = (name: string) => PLACEHOLDERS[name] ?? (name.startsWith("retention.") ? "[CONFIRMED RETENTION PERIOD]" : `[${name.split(".").pop()!.replace(/([A-Z])/g, " $1").toUpperCase()}]`);
 
 function tokenValue(name: string, slug: string): Token {
   const [scope, ...rest] = name.split(".");
@@ -58,13 +76,16 @@ function tokenValue(name: string, slug: string): Token {
     const v = legal.unresolved[rest[1]] ?? null;
     // Decisions that only matter once people can pay don't hold up the rest of the service: while
     // buying is switched off, the policy says so instead of guessing.
-    if (v === null && legal.paymentsOnly.includes(rest[1]) && !paymentsSwitchedOn()) return { value: "This will be set out here before buying credits opens." };
+    // On a published page it says so; in a draft the reader sees the placeholder to fill in.
+    if (v === null && legal.paymentsOnly.includes(rest[1]) && !paymentsSwitchedOn()) return { value: "This will be set out here before buying credits opens.", draftOnly: placeholder(name) };
     return { value: v };
   }
   if (scope === "retention") {
     const v = (retention as any)[key];
-    // The numbers describe what the code does; they still need the founders' sign-off as policy.
-    return { value: v === undefined ? null : String(v), pending: !retention.confirmed };
+    // The code applies these numbers, but they are proposals until the founders confirm them: a
+    // draft shows a placeholder, never the proposal as if it were decided.
+    const unit = key.endsWith("Days") ? " days" : key.endsWith("Hours") ? " hours" : "";
+    return { value: v === undefined || !retention.confirmed ? null : `${v}${unit}` };
   }
   if (name === "pricing.currency") return { value: pricing.currency };
   if (name === "pricing.perVideo") {
@@ -100,8 +121,9 @@ function inline(text: string, slug: string, unresolved: Set<string>): string {
     const t = tokenValue(name, slug);
     if (t.value === null || t.value === undefined) {
       unresolved.add(name);
-      return `<mark class="todo" title="Not confirmed yet: ${esc(name)}">to confirm: ${esc(name.split(".").pop()!)}</mark>`;
+      return `<mark class="todo" title="Not confirmed yet: ${esc(name)}">${esc(placeholder(name))}</mark>`;
     }
+    if (t.draftOnly && !(legalEnforced() && legal.status === "published")) return `<mark class="todo" title="Decision needed before payments open">${esc(t.draftOnly)}</mark>`;
     if (t.pending) unresolved.add(`${name} (needs sign-off)`);
     const v = esc(t.value);
     const shown = t.email && t.value ? `<a class="link" href="mailto:${v}">${v}</a>` : v;
@@ -124,10 +146,22 @@ function render(md: string, slug: string, unresolved: Set<string>): string {
       out.push(level === 1 ? `<h1 class="h1">${body}</h1>` : `<h${level} id="${slugify(body)}">${body}</h${level}>`);
       i++; continue;
     }
-    if (line.startsWith("- ")) {
+    const listItem = /^(- |\d+\. )/;
+    if (listItem.test(line)) {
+      // "- " and "1. " lists, with "  - " sub-items under the item before them. Empty items are dropped.
+      const ordered = /^\d+\. /.test(line);
       const items: string[] = [];
-      while (i < lines.length && lines[i].startsWith("- ")) items.push(`<li>${inline(lines[i++].slice(2), slug, unresolved)}</li>`);
-      out.push(`<ul>${items.join("")}</ul>`);
+      while (i < lines.length && (listItem.test(lines[i]) || /^ {2,}- /.test(lines[i]))) {
+        if (/^ {2,}- /.test(lines[i])) {
+          const subs: string[] = [];
+          while (i < lines.length && /^ {2,}- /.test(lines[i])) subs.push(`<li>${inline(lines[i++].replace(/^ +- /, ""), slug, unresolved)}</li>`);
+          if (items.length) items[items.length - 1] = items[items.length - 1].replace(/<\/li>$/, `<ul>${subs.join("")}</ul></li>`);
+          continue;
+        }
+        const body = inline(lines[i++].replace(listItem, ""), slug, unresolved);
+        if (body.replace(/<[^>]+>/g, "").trim()) items.push(`<li>${body}</li>`);
+      }
+      if (items.length) out.push(ordered ? `<ol>${items.join("")}</ol>` : `<ul>${items.join("")}</ul>`);
       continue;
     }
     if (line.startsWith("|")) {
@@ -142,7 +176,7 @@ function render(md: string, slug: string, unresolved: Set<string>): string {
       continue;
     }
     const para: string[] = [];
-    while (i < lines.length && lines[i].trim() && !/^(#{1,3} |- |\|)/.test(lines[i])) para.push(lines[i++]);
+    while (i < lines.length && lines[i].trim() && !/^(#{1,3} |- |\d+\. | {2,}- |\|)/.test(lines[i])) para.push(lines[i++]);
     const html = inline(para.join(" "), slug, unresolved);
     if (html.trim()) out.push(`<p>${html}</p>`);
   }

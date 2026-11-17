@@ -69,8 +69,8 @@ export function eligibilityFields(brand, need) {
   const f = {};
   if (need.name) f.name = field("Name", { name: "name", autocomplete: "name", maxlength: 100, dir: "auto", help: "The name you'd like us to use, in any language." });
   if (need.age) f.age = field("Age", { name: "age", inputmode: "numeric", autocomplete: "off", maxlength: 3, class: "input input--short", help: `In whole years. ${brand} is for people aged 18 and over.` });
-  if (need.terms) f.agreeTerms = checkbox("agreeTerms", "I agree to the ", policyLink("terms", "Terms of Service"), ", including the ", policyLink("acceptableUse", "Acceptable Use Policy"), ".");
-  if (need.age) f.confirmAdult = checkbox("confirmAdult", "I confirm that I am 18 or over.");
+  if (need.terms) f.agreeTerms = checkbox("agreeTerms", "I agree to the ", policyLink("terms", "Terms of Service"), ", including the ", policyLink("acceptableUse", "Acceptable Use and AI Content Policy"), ".");
+  if (need.age) f.confirmAdult = checkbox("confirmAdult", "I confirm that I am at least 18 years old.");
   return f;
 }
 
@@ -80,7 +80,7 @@ export function checkEligibilityFields(f) {
   if (f.name && !f.name.input.value.trim()) { f.name.setError("Write your name, as you'd like us to use it."); problems.push(f.name.input); }
   if (f.age && ageValue(f.age.input.value) === null) { f.age.setError("Write your age in years, as a whole number."); problems.push(f.age.input); }
   if (f.agreeTerms && !f.agreeTerms.input.checked) { f.agreeTerms.setError("To create an account, you need to agree to the Terms of Service."); problems.push(f.agreeTerms.input); }
-  if (f.confirmAdult && !f.confirmAdult.input.checked) { f.confirmAdult.setError("Confirm that you are 18 or over."); problems.push(f.confirmAdult.input); }
+  if (f.confirmAdult && !f.confirmAdult.input.checked) { f.confirmAdult.setError("Confirm that you are at least 18 years old."); problems.push(f.confirmAdult.input); }
   return problems;
 }
 
@@ -94,6 +94,6 @@ export function eligibilityBody(f) {
 
 /** The privacy notice: information, not a box to tick. */
 export function privacyNotice() {
-  return h("p", { class: "notice-text" }, "We use your details to run your account and make your videos, as our ",
-    policyLink("privacy", "Privacy Policy"), " explains.");
+  return h("p", { class: "notice-text" }, "We use your name, email and age confirmation to run your account, confirm your email and keep the service secure. Our ",
+    policyLink("privacy", "Privacy Policy"), " explains how, who we share data with and your rights.");
 }

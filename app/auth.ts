@@ -108,7 +108,7 @@ const fieldText = {
   password: "Use a password of at least 8 characters.",
   age: "Write your age in years, as a whole number.",
   agreeTerms: "To create an account, you need to agree to the Terms of Service.",
-  confirmAdult: "Confirm that you are 18 or over.",
+  confirmAdult: "Confirm that you are at least 18 years old.",
 };
 
 interface EligibilityInput { name?: unknown; age?: unknown; agreeTerms?: unknown; confirmAdult?: unknown; termsVersion?: unknown }

@@ -177,8 +177,8 @@ export async function createView(ctx) {
     h("ul", { class: "plain-list small" }, t.photoGuidance.map((g) => h("li", {}, g))),
     h("p", { class: "small muted" }, `At least ${store.site.upload.minShortSide} pixels on the shortest side.`),
     fileInput, uploadArea, uploadError,
-    h("p", { class: "notice-text" }, "Only upload photos you have the right to use, and don't include people without their permission. See the ",
-      policyLink("acceptableUse", "Acceptable Use Policy"), " and how we handle your photo in the ", policyLink("privacy", "Privacy Policy"), "."),
+    h("p", { class: "notice-text" }, "Your photo and details are stored in your account and sent to our video model provider, fal.ai, and the model's developer, Kling, to make your video. We don't use them to train AI models. Only upload photos you have the right to use, and don't include people without their permission. See the ",
+      policyLink("acceptableUse", "Acceptable Use and AI Content Policy"), " and the ", policyLink("privacy", "Privacy Policy"), "."),
   );
 
   // ---- Template fields, built from its schema ----
