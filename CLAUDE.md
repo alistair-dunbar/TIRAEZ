@@ -98,4 +98,5 @@ The command-line render experiments (`render/`, results in `docs/RENDER-TEST.md`
   key; none is configured, and adding one is the user's call.
 - `design-taste-frontend` (Leonxlnx/taste-skill) was installed globally (~/.agents), not in the repo, so it is
   lost when a cloud session's container is recycled.
-- `.claude/skills/verify/`: empty, purpose not decided yet.
+- `.claude/skills/verify/`: project skill. Typecheck + tests, the local browser journey (`scripts/verify-journey.mjs`),
+  and read-only live checks of www.tiraez.com (`scripts/verify-live.mjs`). Run it before saying something works.
