@@ -6,6 +6,7 @@ import { credits, errorText, formatName, tooLarge, tooSmall } from "../copy.js";
 import { navigate, setUser } from "../main.js";
 import { getDraft, loadCatalogue, newKey, nicheLabel, setDraft, store } from "../state.js";
 import { notice, progress, setBusy, spinner } from "./parts.js";
+import { policyLink } from "./forms.js";
 
 const ACCEPT = "image/jpeg,image/png,image/webp";
 
@@ -176,6 +177,8 @@ export async function createView(ctx) {
     h("ul", { class: "plain-list small" }, t.photoGuidance.map((g) => h("li", {}, g))),
     h("p", { class: "small muted" }, `At least ${store.site.upload.minShortSide} pixels on the shortest side.`),
     fileInput, uploadArea, uploadError,
+    h("p", { class: "notice-text" }, "Only upload photos you have the right to use, and don't include people without their permission. See the ",
+      policyLink("acceptableUse", "Acceptable Use Policy"), " and how we handle your photo in the ", policyLink("privacy", "Privacy Policy"), "."),
   );
 
   // ---- Template fields, built from its schema ----

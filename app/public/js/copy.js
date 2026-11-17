@@ -23,6 +23,26 @@ export const errorText = {
   payment_failed: "We couldn't open the payment page. Try again.",
   not_found: "We couldn't find that.",
   file_unavailable: "This file is no longer available.",
+  rate_limited: "Too many requests in a short time. Wait a few minutes, then try again.",
+  age_ineligible: "Tiraez is available to people aged 18 and over.",
+  signups_closed: "We aren't opening new accounts yet.",
+  onboarding_required: "Finish setting up your account to continue.",
+  account_suspended: "This account is suspended. Contact us if you think this is a mistake.",
+  terms_changed: "Our Terms of Service changed while this page was open. Read the current version, then try again.",
+  terms_unavailable: "Our Terms of Service are being updated. Try again later.",
+  jobs_active: "A video is still being made. Wait for it to finish, then try again.",
+  job_active: "This video is still being made. You can delete it once it has finished.",
+  invalid_request: "Some details need attention.",
+};
+
+export const policyLinks = {
+  terms: "/legal/terms",
+  privacy: "/legal/privacy",
+  acceptableUse: "/legal/acceptable-use",
+  billing: "/legal/billing",
+  cookies: "/legal/cookies",
+  contact: "/legal/contact",
+  report: "/report",
 };
 
 export const tooLarge = (mb) => `This photo is larger than ${mb} MB. Choose a smaller file or export it at a lower size.`;

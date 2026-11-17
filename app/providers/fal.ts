@@ -7,7 +7,10 @@
 //   499 cancelled, 500/504 model or start failure, 404 once the result has expired).
 // - Results are kept for a limited time (6 minutes to 1 hour, longer while payload storage is
 //   on), so finished videos are downloaded straight away.
-// - X-Fal-Object-Lifecycle-Preference sets how long uploaded and generated files stay on the CDN.
+// - X-Fal-Object-Lifecycle-Preference sets how long uploaded and generated files stay on the CDN
+//   (fal's default for CDN files is to keep them, publicly readable by link, until deleted).
+// - X-Fal-Store-IO: 0 asks fal not to keep the request's inputs and outputs in its request history
+//   (kept 90 days by default). It doesn't affect CDN files. Checked against fal's docs, 17 Nov 2026.
 //
 // Auth: FAL_KEY, sent as "Authorization: Key <key>". FAL_AUTH=proxy means an outbound proxy
 // adds the header (cloud development sessions); then no key is read here.
@@ -79,7 +82,7 @@ export const fal: VideoProvider = {
     try {
       res = await fetch(`${QUEUE}/${model.endpoint}`, {
         method: "POST",
-        headers: { ...headers(), "X-Fal-Object-Lifecycle-Preference": LIFECYCLE },
+        headers: { ...headers(), "X-Fal-Object-Lifecycle-Preference": LIFECYCLE, "X-Fal-Store-IO": "0" },
         // Field names from the endpoint's OpenAPI schema (kling/v4/image-to-video).
         body: JSON.stringify({ start_image_url: input.imageUrl, prompt: input.prompt, duration: input.duration, resolution: input.resolution }),
       });

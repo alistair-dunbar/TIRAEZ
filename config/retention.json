@@ -1,0 +1,7 @@
+{
+  "_note": "Applied by the hourly retention job in app/retention.ts. 'confirmed: false' means the founders have not yet approved these values.",
+  "confirmed": false,
+  "unusedPhotosDays": 7,
+  "expiredSessions": true,
+  "providerFilesHours": 24
+}

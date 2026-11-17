@@ -3,7 +3,7 @@
 import { api, ApiError } from "../api.js";
 import { h } from "../dom.js";
 import { bytesText, credits, dateText, errorText, failureText, formatName } from "../copy.js";
-import { announce, setUser } from "../main.js";
+import { announce, navigate, setUser } from "../main.js";
 import { store } from "../state.js";
 import { loading, notice, progress, setBusy, spinner } from "./parts.js";
 
@@ -71,8 +71,10 @@ export async function jobView(ctx) {
             rail("completed"),
             h("div", { class: "btn-row" }, download.button, again),
             download.status,
+            h("p", { class: "notice-text" }, "Made by an AI model, so check the details before you post. Some platforms, including TikTok, require AI-generated ads to be labelled."),
             choose,
             h("section", { class: "panel" }, h("h2", { class: "h3" }, "Details"), details(job)),
+            removeControl(job),
           ),
         ),
       );
@@ -83,7 +85,7 @@ export async function jobView(ctx) {
       swap(heading("This video file is no longer available", job.template.name),
         h("div", { class: "stack" },
           notice("The file can't be found", "You can make a new version with the same photo and details.", { error: true }),
-          h("div", { class: "btn-row" }, again, choose)));
+          h("div", { class: "btn-row" }, again, choose), removeControl(job)));
       return;
     }
     if (job.stage === "failed") {
@@ -94,7 +96,8 @@ export async function jobView(ctx) {
             rail("failed"),
             notice(failureText[job.failure?.code] ?? failureText.failed, refund, { error: true }),
             h("p", { class: "lead" }, "Your photo and details are saved, so you can try again or adjust them first."),
-            h("div", { class: "btn-row" }, again, choose)),
+            h("div", { class: "btn-row" }, again, choose),
+            removeControl(job)),
           h("section", { class: "panel" }, h("h2", { class: "h3" }, "Details"), details(job))));
       return;
     }
@@ -116,6 +119,30 @@ export async function jobView(ctx) {
         h("section", { class: "panel" }, h("h2", { class: "h3" }, "Details"), details(job)),
       ),
     );
+  }
+
+  /** Deleting a finished video: one quiet link, then a plain confirmation of what goes. */
+  function removeControl(job) {
+    const box = h("div", { class: "remove" });
+    const draw = () => box.replaceChildren(h("button", { type: "button", class: "btn btn--quiet btn--danger", onclick: ask }, "Delete this video"));
+    function ask() {
+      const status = h("p", { class: "form-status", role: "status" });
+      const yes = h("button", { type: "button", class: "btn btn--destroy btn--sm", onclick: async () => {
+        setBusy(yes, true);
+        try {
+          await api("DELETE", `/api/jobs/${job.id}`);
+          stopped = true;
+          await navigate("/videos", { replace: true });
+          announce("The video has been deleted.");
+        } catch (e) { setBusy(yes, false); status.textContent = errorText[e instanceof ApiError ? e.code : "offline"] ?? errorText.server_error; }
+      } }, "Delete video");
+      box.replaceChildren(h("div", { class: "danger-zone stack", role: "group", "aria-label": "Delete this video" },
+        h("p", {}, "This deletes the video from our servers, and the photo it was made from unless another of your videos uses it. It can't be undone."),
+        h("div", { class: "btn-row" }, yes, h("button", { type: "button", class: "btn btn--quiet", onclick: draw }, "Keep it")), status));
+      yes.focus();
+    }
+    draw();
+    return box;
   }
 
   function heading(text, sub) {

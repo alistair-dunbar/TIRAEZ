@@ -14,7 +14,9 @@
     "typecheck": "tsc --noEmit",
     "ai-video": "tsx render/ai-video.ts",
     "finish": "tsx render/finish.ts",
-    "credits": "tsx app/grant-credits.ts"
+    "credits": "tsx app/grant-credits.ts",
+    "reports": "tsx app/reports.ts",
+    "suspend": "tsx app/reports.ts suspend"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

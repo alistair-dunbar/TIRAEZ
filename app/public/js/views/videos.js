@@ -57,7 +57,9 @@ export async function videosView(ctx) {
         load();
       } catch (e) { status.textContent = errorText[e instanceof ApiError ? e.code : "offline"] ?? errorText.server_error; setBusy(btn, false); }
     } }, `Buy ${p.pack.credits} credits for ${p.currency} ${p.pack.priceSar}`);
-    buy.replaceChildren(h("div", { class: "btn-row" }, btn), status);
+    buy.replaceChildren(h("div", { class: "btn-row" }, btn), status,
+      h("p", { class: "notice-text" }, "A one-off payment, with no subscription. Card payments are taken on Moyasar's payment page. See ",
+        h("a", { class: "link", href: "/legal/billing" }, "Billing, credits and refunds"), "."));
   }
 
   load();

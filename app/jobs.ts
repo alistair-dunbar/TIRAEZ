@@ -6,11 +6,12 @@
 //
 // A request that might have reached the provider is never sent again automatically.
 import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
-import { UserError } from "./auth.ts";
+import { UserError, ValidationError } from "./auth.ts";
 import { ASPECT_RATIOS, availability, templateById, type Template } from "./catalog.ts";
 import { creditsFor, generation, models } from "./config.ts";
 import { balance, isRefunded, refundJob, spendForJob } from "./credits.ts";
 import { db, tx } from "./db.ts";
+import { redact } from "./guard.ts";
 import { cropPhoto, posterFrame, probe } from "./media.ts";
 import { DATA_DIR, photoFor } from "./photos.ts";
 import { assemblePrompt, validateInputs, validateSettings, type FieldErrors } from "./prompt.ts";
@@ -22,10 +23,7 @@ mkdirSync(`${DATA_DIR}/jobs`, { recursive: true });
 const POLL_MS = Number(process.env.JOB_POLL_MS ?? 4000);
 const ACTIVE = ["queued", "uploading", "submitting", "in_queue", "in_progress", "saving"];
 
-export class ValidationError extends UserError {
-  fields: FieldErrors;
-  constructor(fields: FieldErrors) { super("invalid_request", 422); this.fields = fields; }
-}
+export { ValidationError };
 
 type Row = Record<string, any>;
 const get = (id: number): Row | undefined => db.prepare("SELECT * FROM jobs WHERE id = ?").get(id) as Row | undefined;
@@ -139,7 +137,7 @@ function fail(job: Row, code: string, detail: string): void {
   // Only an active job can fail, and only then are its credits returned.
   if (!set(job.id, { status: "failed", failure_code: code, failure_detail: detail.slice(0, 1000), finished_at: now() })) return;
   refundJob(job.user_id, job.id, job.credits);
-  console.error(`job ${job.id} failed (${code}): ${detail.slice(0, 300)}`);
+  console.error(`job ${job.id} failed (${code}): ${redact(detail).slice(0, 300)}`);
 }
 
 const now = () => new Date().toISOString().replace("T", " ").slice(0, 19);
@@ -154,7 +152,7 @@ async function step(id: number): Promise<void> {
   if (running.has(id)) return;
   running.add(id);
   try { await advance(id); }
-  catch (e) { console.error(`job ${id}: unexpected error`, e); const j = get(id); if (j && ACTIVE.includes(j.status)) schedule(id, backoff(j.check_failures + 1)); }
+  catch (e) { console.error(`job ${id}: unexpected error: ${redact(e instanceof Error ? e.stack ?? e.message : e)}`); const j = get(id); if (j && ACTIVE.includes(j.status)) schedule(id, backoff(j.check_failures + 1)); }
   finally { running.delete(id); settle(); }
 }
 

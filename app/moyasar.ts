@@ -3,6 +3,7 @@
 //
 // Needs: MOYASAR_SECRET_KEY (sk_test_... or sk_live_...) and APP_URL (this site's public https address).
 import { UserError } from "./auth.ts";
+import { redact } from "./guard.ts";
 import type { Pack, PaymentProvider } from "./credits.ts";
 
 const API = "https://api.moyasar.com/v1";
@@ -29,7 +30,7 @@ async function call(method: string, path: string, body?: unknown): Promise<any> 
   });
   const text = await res.text();
   if (!res.ok) {
-    console.error(`Moyasar ${method} ${path} failed (${res.status}): ${text.slice(0, 300)}`);
+    console.error(`Moyasar ${method} ${path} failed (${res.status}): ${redact(text).slice(0, 300)}`);
     throw new UserError("payment_failed", 502);
   }
   return JSON.parse(text);

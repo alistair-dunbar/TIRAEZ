@@ -18,3 +18,5 @@ data/app.db*
 data/uploads/
 data/videos/
 .taste-skill/
+data/photos/
+data/jobs/

@@ -108,5 +108,19 @@ log("my videos:", await p.locator(".video-card").count(), "|", (await p.textCont
 await shot("my-videos");
 await overflow("my videos");
 
+// Account, a policy page and the report form
+await p.goto(base + "/account");
+await p.waitForSelector("h2:has-text('Delete your account')");
+log("account sections:", await p.locator(".account__section").count());
+await shot("account");
+await overflow("account");
+await p.goto(base + "/legal/privacy");
+log("privacy:", await p.locator("main h1").textContent(), "| footer policy links:", await p.locator(".site-footer__policies a").count());
+await overflow("privacy");
+await p.goto(base + "/report");
+await p.click("button:has-text('Send report')");
+log("empty report errors:", await p.locator(".field__error:not(:empty)").count());
+await overflow("report");
+
 console.log(errors.length ? `ERRORS:\n${errors.join("\n")}` : `[${W}] no page errors, no overflow`);
 await b.close();

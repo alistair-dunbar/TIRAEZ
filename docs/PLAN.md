@@ -1,6 +1,6 @@
 # Photo-to-Video Ads: Business Plan v2
 
-*Draft of 15 November 2026. Working name: "Reel-in-60". All numbers are starting assumptions to test, not research.*
+*Draft of 15 November 2026. Working name at the time: "Reel-in-60" (renamed Tiraez on 17 Nov 2026). All numbers are starting assumptions to test, not research.*
 
 ---
 

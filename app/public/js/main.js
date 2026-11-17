@@ -10,21 +10,29 @@ import { jobView } from "./views/job.js";
 import { landingView } from "./views/landing.js";
 import { templateView } from "./views/template.js";
 import { videosView } from "./views/videos.js";
+import { welcomeView } from "./views/welcome.js";
+import { accountView } from "./views/account.js";
+import { reportView } from "./views/report.js";
 
 const routes = [
   [/^\/$/, landingView],
   [/^\/templates$/, catalogueView],
   [/^\/templates\/([a-z0-9-]+)$/, templateView],
-  [/^\/create\/([a-z0-9-]+)$/, createView, { auth: true }],
+  [/^\/create\/([a-z0-9-]+)$/, createView, { auth: true, eligible: true }],
   [/^\/videos$/, videosView, { auth: true }],
   [/^\/videos\/(\d+)$/, jobView, { auth: true }],
   [/^\/signin$/, (ctx) => authView(ctx, "signin")],
   [/^\/signup$/, (ctx) => authView(ctx, "signup")],
+  [/^\/welcome$/, welcomeView, { auth: true }],
+  [/^\/account$/, accountView, { auth: true }],
+  [/^\/report$/, reportView],
 ];
 
 let cleanup = null;
 let first = true;
 const main = $("#main");
+// Pages the server renders in full (policies), so they read the same with or without JavaScript.
+const SERVER_PAGES = /^\/legal(\/|$)/;
 
 export function navigate(url, { replace = false } = {}) {
   if (replace) history.replaceState(null, "", url); else history.pushState(null, "", url);
@@ -42,6 +50,12 @@ async function render() {
   cleanup = null;
   closeMenu();
   const url = new URL(location.href);
+  if (SERVER_PAGES.test(url.pathname)) {
+    if (main.dataset.static === url.pathname) { renderChrome(url.pathname); first = false; return; }
+    if (!first) { location.reload(); return; } // back or forward onto a server page: fetch it
+    // First load of a /legal/ address the server didn't recognise: falls through to "not found".
+  }
+  delete main.dataset.static;
   let match = null, view = notFoundView, opts = {};
   for (const [re, v, o] of routes) {
     const m = re.exec(url.pathname);
@@ -49,6 +63,11 @@ async function render() {
   }
   if (opts.auth && !store.site?.user) {
     return navigate(`/signin?next=${encodeURIComponent(url.pathname + url.search)}`, { replace: true });
+  }
+  // Uploading and generating need a finished account (18+ confirmed, current terms agreed).
+  const needs = store.site?.user?.needs;
+  if (opts.eligible && needs && (needs.name || needs.age || needs.terms)) {
+    return navigate(`/welcome?next=${encodeURIComponent(url.pathname + url.search)}`, { replace: true });
   }
   const ctx = { params: match ? match.slice(1) : [], query: url.searchParams, url, onCleanup: (fn) => { cleanup = fn; } };
   let result;
@@ -81,7 +100,7 @@ function navItems(path) {
     ["/templates", "Templates"],
     ["/#how-it-works", "How it works"],
   ];
-  if (u) items.push(["/videos", "My videos"]);
+  if (u) items.push(["/videos", "My videos"], ["/account", "Account"]);
   return items.map(([href, label]) => ({ href, label, current: href === path || (href === "/videos" && path.startsWith("/videos")) || (href === "/templates" && path.startsWith("/templates")) }));
 }
 
@@ -111,7 +130,6 @@ function renderChrome(path) {
   foot.replaceChildren(...[...navItems(path), u ? null : { href: "/signin", label: "Sign in" }, { href: "/templates", label: "Create a video" }]
     .filter(Boolean).map((i) => h("li", {}, h("a", { href: i.href }, i.label))));
   $("[data-legal]").textContent = `© ${new Date().getFullYear()} ${store.site.brandName}`;
-  for (const el of document.querySelectorAll("[data-brand]")) el.textContent = store.site.brandName;
 }
 
 /** Called after anything that changes the balance or sign-in state. */
@@ -148,7 +166,7 @@ document.addEventListener("click", (e) => {
   if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
   if (a.target || a.hasAttribute("download") || a.dataset.external !== undefined) return;
   const url = new URL(a.href, location.href);
-  if (url.origin !== location.origin || url.pathname.startsWith("/api/")) return;
+  if (url.origin !== location.origin || url.pathname.startsWith("/api/") || SERVER_PAGES.test(url.pathname)) return;
   e.preventDefault();
   if (url.pathname === location.pathname && url.search === location.search && url.hash) {
     history.pushState(null, "", url.href);
@@ -192,8 +210,8 @@ function errorView() {
   try {
     await loadSite();
   } catch {
-    store.site = { brandName: document.querySelector("[data-brand]").textContent, user: null, pricing: null };
-    main.replaceChildren(errorView().node);
+    store.site = { brandName: document.querySelector(".wordmark")?.getAttribute("aria-label")?.replace(/, home$/, "") ?? "", user: null, pricing: null };
+    if (!main.dataset.static) main.replaceChildren(errorView().node); // a policy page stays readable
     return;
   }
   render();

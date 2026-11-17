@@ -13,6 +13,7 @@ process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "svc-"));
 process.env.PAYMENTS = "test";
 process.env.ENGINE = "mock";
 process.env.JOB_POLL_MS = "5";
+process.env.RATE_LIMITS = "off"; // limits have their own tests in accounts.test.ts
 
 const { server } = await import("../server.ts");
 const { idle, recoverJobs } = await import("../jobs.ts");
@@ -52,10 +53,12 @@ function image(w: number, h: number, ext = "jpg"): Buffer {
 const PHOTO = image(1200, 1600);
 
 let n = 0;
+const { termsVersion } = await import("../legal.ts");
+const signupBody = (email: string) => ({ name: "Test Person", email, password: "password123", age: "30", agreeTerms: true, confirmAdult: true, termsVersion: termsVersion() });
 async function newUser(credits = 0) {
   const c = client();
   const email = `user${++n}@example.com`;
-  assert.equal((await c("POST", "/api/signup", { email, password: "password123" })).status, 200);
+  assert.equal((await c("POST", "/api/signup", signupBody(email))).status, 200);
   if (credits) grantCredits(email, credits, "test");
   return { c, email };
 }
@@ -79,15 +82,17 @@ async function jobNow(c: ReturnType<typeof client>, id: number) { return (await 
 test("accounts: signup, session, duplicate email, wrong password, logout", async () => {
   const { c, email } = await newUser();
   assert.equal((await c("GET", "/api/site")).data.user.email, email);
-  assert.equal((await client()("POST", "/api/signup", { email, password: "password123" })).status, 409);
+  assert.equal((await client()("POST", "/api/signup", signupBody(email))).status, 409);
   assert.equal((await client()("POST", "/api/login", { email, password: "wrong-password" })).status, 401);
-  assert.equal((await client()("POST", "/api/signup", { email: "nope", password: "password123" })).data.error, "invalid_email");
+  const bad = await client()("POST", "/api/signup", signupBody("nope"));
+  assert.equal(bad.status, 422);
+  assert.ok(bad.data.fields.email);
   await c("POST", "/api/logout");
   assert.equal((await c("GET", "/api/site")).data.user, null);
 });
 
 test("state-changing requests without the app header are refused", async () => {
-  assert.equal((await client()("POST", "/api/signup", { email: "x@example.com", password: "password123" }, { noHeader: true })).status, 403);
+  assert.equal((await client()("POST", "/api/signup", signupBody("x@example.com"), { noHeader: true })).status, 403);
 });
 
 test("catalogue: public templates never include prompt text", async () => {

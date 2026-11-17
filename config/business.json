@@ -1,0 +1,14 @@
+{
+  "_note": "Facts about the operator. null = not yet confirmed by the founders. Legal pages that need a null value are not published in production.",
+  "legalName": null,
+  "entityType": null,
+  "country": null,
+  "registrationNumber": null,
+  "vatNumber": null,
+  "address": null,
+  "supportEmail": null,
+  "privacyEmail": null,
+  "abuseEmail": null,
+  "governingLaw": null,
+  "disputes": null
+}

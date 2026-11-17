@@ -105,6 +105,54 @@ db.exec(`
   );
 `);
 
+// Columns added after launch. Existing databases get them on start-up; nothing is renamed or dropped.
+const ADDED_USER_COLUMNS: Record<string, string> = {
+  name: "TEXT",
+  age_confirmed_at: "TEXT",        // when the person told us they are 18 or over (the age itself is never stored)
+  age_method: "TEXT",              // how: 'self_declared'
+  terms_version: "TEXT",           // the Terms of Service version they agreed to
+  terms_accepted_at: "TEXT",
+  privacy_version_seen: "TEXT",    // the Privacy Policy version shown when they agreed (a notice, not a consent)
+  suspended_at: "TEXT",
+  suspended_reason: "TEXT",
+  deleted_at: "TEXT",              // set when an account is deleted; personal fields are cleared at the same time
+};
+const have = new Set((db.prepare("PRAGMA table_info(users)").all() as any[]).map((c) => c.name));
+for (const [col, type] of Object.entries(ADDED_USER_COLUMNS)) {
+  if (!have.has(col)) db.exec(`ALTER TABLE users ADD COLUMN ${col} ${type}`);
+}
+
+db.exec(`
+  -- What each person agreed to or confirmed, and when (server time). Deleted with the account.
+  CREATE TABLE IF NOT EXISTS consent_events (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    kind TEXT NOT NULL,            -- terms_accepted | age_confirmed | privacy_notice_shown
+    version TEXT,                  -- document version, for terms and privacy
+    source TEXT NOT NULL,          -- signup | onboarding
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS consent_events_user ON consent_events(user_id);
+
+  -- Reports of misuse or problems, from the report form. Reviewed with npm run reports.
+  CREATE TABLE IF NOT EXISTS reports (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    contact_email TEXT,
+    kind TEXT NOT NULL,
+    target TEXT,
+    details TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open',   -- open | closed
+    outcome TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    closed_at TEXT
+  );
+
+  CREATE INDEX IF NOT EXISTS sessions_user ON sessions(user_id);
+  CREATE INDEX IF NOT EXISTS jobs_user ON jobs(user_id);
+  CREATE INDEX IF NOT EXISTS photos_user ON photos(user_id);
+`);
+
 /** Runs fn inside a transaction; rolls back if it throws. */
 export function tx<T>(fn: () => T): T {
   db.exec("BEGIN IMMEDIATE");
