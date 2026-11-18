@@ -1,0 +1,8 @@
+[
+  { "id": "coffee", "label": "Coffee shops" },
+  { "id": "fashion", "label": "Fashion" },
+  { "id": "real-estate", "label": "Real estate" },
+  { "id": "restaurants", "label": "Restaurants" },
+  { "id": "beauty", "label": "Beauty" },
+  { "id": "products", "label": "Products" }
+]

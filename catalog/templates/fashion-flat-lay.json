@@ -1,0 +1,77 @@
+{
+  "id": "fashion-flat-lay",
+  "slug": "fashion-flat-lay",
+  "version": 1,
+  "name": "Flat lay, slow overhead drift",
+  "niche": "fashion",
+  "summary": "A top-down view of your flat lay with slowly changing daylight.",
+  "outcome": "A top-down view of your flat lay with a slow camera drift and daylight changing gently across it.",
+  "photoGuidance": [
+    "A photo taken from directly above.",
+    "Items laid flat with space between them.",
+    "Even light without harsh shadows."
+  ],
+  "limitations": [
+    "Text and logos in your photo may change in the video. Check the result before you post it."
+  ],
+  "inputs": [
+    {
+      "id": "subject",
+      "type": "text",
+      "label": "What's in the flat lay",
+      "help": "For example, 'white shirt, belt and loafers'.",
+      "required": true,
+      "maxLength": 80,
+      "example": "White shirt, belt and loafers"
+    },
+    {
+      "id": "keep",
+      "type": "text",
+      "label": "Details to keep as they are",
+      "help": "Optional. For example, the colour of your cups or the shape of a sign.",
+      "required": false,
+      "maxLength": 120
+    },
+    {
+      "id": "avoid",
+      "type": "text",
+      "label": "Anything to leave out",
+      "help": "Optional. For example, no smoke or no people.",
+      "required": false,
+      "maxLength": 120
+    }
+  ],
+  "output": {
+    "aspectRatios": [
+      "1:1",
+      "9:16"
+    ],
+    "defaultAspectRatio": "1:1",
+    "durations": [
+      5
+    ],
+    "defaultDuration": 5,
+    "resolutions": [
+      "1080p",
+      "720p"
+    ],
+    "defaultResolution": "1080p"
+  },
+  "model": "kling-v4",
+  "availability": "available",
+  "preview": {
+    "asset": null,
+    "approved": false
+  },
+  "prompt": {
+    "preserve": "Keep everything in the photo recognisable: the same objects, shapes, colours and proportions. Keep any printed text, labels and logos as they are.",
+    "avoid": "Do not add people, hands, text, captions, logos or new objects. No sudden cuts, no camera shake, no warping or melting of surfaces.",
+    "subject": "The photo is a top-down flat lay of {subject}.",
+    "composition": "Keep the top-down view and the arrangement exactly as in the photo.",
+    "environment": "The surface under the items stays as in the photo.",
+    "camera": "The camera drifts very slowly across the arrangement, staying directly above it.",
+    "subjectMotion": "The items stay still.",
+    "lighting": "Daylight from a window, with soft shadows that shift slowly across the items.",
+    "mood": "Calm and orderly."
+  }
+}

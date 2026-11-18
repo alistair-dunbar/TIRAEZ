@@ -1,0 +1,100 @@
+{
+  "id": "restaurant-plated-dish",
+  "slug": "restaurant-plated-dish",
+  "version": 1,
+  "name": "Plated dish with steam",
+  "niche": "restaurants",
+  "summary": "A slow push-in over your dish as steam rises.",
+  "outcome": "A slow push-in over your dish as steam rises and the light catches the sauces and textures.",
+  "photoGuidance": [
+    "A close photo of one plated dish.",
+    "Shot at a slight angle, not straight down.",
+    "Sharp focus on the food."
+  ],
+  "limitations": [
+    "Text and logos in your photo may change in the video. Check the result before you post it."
+  ],
+  "inputs": [
+    {
+      "id": "subject",
+      "type": "text",
+      "label": "The dish",
+      "help": "For example, 'lamb kabsa on a white plate'.",
+      "required": true,
+      "maxLength": 80,
+      "example": "Lamb kabsa on a white plate"
+    },
+    {
+      "id": "steam",
+      "type": "select",
+      "label": "Steam",
+      "help": null,
+      "required": true,
+      "default": "light",
+      "options": [
+        {
+          "value": "light",
+          "label": "A little",
+          "prompt": "A little steam rises from the dish."
+        },
+        {
+          "value": "none",
+          "label": "None",
+          "prompt": "No steam."
+        }
+      ]
+    },
+    {
+      "id": "keep",
+      "type": "text",
+      "label": "Details to keep as they are",
+      "help": "Optional. For example, the colour of your cups or the shape of a sign.",
+      "required": false,
+      "maxLength": 120
+    },
+    {
+      "id": "avoid",
+      "type": "text",
+      "label": "Anything to leave out",
+      "help": "Optional. For example, no smoke or no people.",
+      "required": false,
+      "maxLength": 120
+    }
+  ],
+  "output": {
+    "aspectRatios": [
+      "9:16",
+      "1:1"
+    ],
+    "defaultAspectRatio": "9:16",
+    "durations": [
+      5
+    ],
+    "defaultDuration": 5,
+    "resolutions": [
+      "1080p",
+      "720p"
+    ],
+    "defaultResolution": "1080p"
+  },
+  "model": "kling-v4",
+  "availability": "available",
+  "preview": {
+    "asset": null,
+    "approved": false
+  },
+  "prompt": {
+    "preserve": "Keep everything in the photo recognisable: the same objects, shapes, colours and proportions. Keep any printed text, labels and logos as they are.",
+    "avoid": "Do not add people, hands, text, captions, logos or new objects. No sudden cuts, no camera shake, no warping or melting of surfaces.",
+    "subject": "The photo shows {subject}.",
+    "composition": "The plate stays centred and whole in the frame.",
+    "environment": "The table and background stay as in the photo.",
+    "camera": "The camera pushes in slowly towards the dish.",
+    "subjectMotion": {
+      "input": "steam"
+    },
+    "lighting": "Warm light that catches the sauces and textures.",
+    "mood": "Appetising and generous.",
+    "preserveExtra": "The food stays exactly as plated."
+  }
+}

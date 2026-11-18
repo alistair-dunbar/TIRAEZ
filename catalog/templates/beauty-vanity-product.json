@@ -1,0 +1,79 @@
+{
+  "id": "beauty-vanity-product",
+  "slug": "beauty-vanity-product",
+  "version": 1,
+  "name": "Product on a vanity",
+  "niche": "beauty",
+  "summary": "Soft light sweeps across your product during a small, slow arc.",
+  "outcome": "Soft light sweeps across your product while the camera makes a small, slow arc around it.",
+  "photoGuidance": [
+    "A photo of one product, label facing the camera.",
+    "Clean surface and plain background.",
+    "Sharp focus on the product."
+  ],
+  "limitations": [
+    "The camera only moves a little, because any side of the product that isn't in your photo has to be imagined by the model.",
+    "Text and logos in your photo may change in the video. Check the result before you post it."
+  ],
+  "inputs": [
+    {
+      "id": "subject",
+      "type": "text",
+      "label": "The product",
+      "help": "For example, 'amber glass serum bottle'.",
+      "required": true,
+      "maxLength": 80,
+      "example": "Amber glass serum bottle"
+    },
+    {
+      "id": "keep",
+      "type": "text",
+      "label": "Details to keep as they are",
+      "help": "Optional. For example, the colour of your cups or the shape of a sign.",
+      "required": false,
+      "maxLength": 120
+    },
+    {
+      "id": "avoid",
+      "type": "text",
+      "label": "Anything to leave out",
+      "help": "Optional. For example, no smoke or no people.",
+      "required": false,
+      "maxLength": 120
+    }
+  ],
+  "output": {
+    "aspectRatios": [
+      "9:16",
+      "1:1"
+    ],
+    "defaultAspectRatio": "9:16",
+    "durations": [
+      5
+    ],
+    "defaultDuration": 5,
+    "resolutions": [
+      "1080p",
+      "720p"
+    ],
+    "defaultResolution": "1080p"
+  },
+  "model": "kling-v4",
+  "availability": "available",
+  "preview": {
+    "asset": null,
+    "approved": false
+  },
+  "prompt": {
+    "preserve": "Keep everything in the photo recognisable: the same objects, shapes, colours and proportions. Keep any printed text, labels and logos as they are.",
+    "avoid": "Do not add people, hands, text, captions, logos or new objects. No sudden cuts, no camera shake, no warping or melting of surfaces.",
+    "subject": "The photo shows {subject}.",
+    "composition": "The product stays centred, upright and whole.",
+    "environment": "The surface and background stay as in the photo.",
+    "camera": "The camera makes a very small, slow arc around the product, keeping the label facing the viewer.",
+    "subjectMotion": "The product stays still.",
+    "lighting": "A soft band of light sweeps slowly across the product.",
+    "mood": "Clean and premium.",
+    "preserveExtra": "The bottle shape and label stay exactly as in the photo."
+  }
+}

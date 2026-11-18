@@ -1,0 +1,27 @@
+{
+  "id": "coffee",
+  "mode": "composite",
+  "subject": "coffee cup",
+  "placement": {
+    "x": 0.5,
+    "baseY": 0.74,
+    "maxW": 0.55,
+    "maxH": 0.36,
+    "float": 0,
+    "grade": {
+      "brightness": 0,
+      "contrast": 1.0,
+      "warmth": 0.03
+    }
+  },
+  "scenes": [
+    {
+      "still": "Specialty coffee shop advertising backdrop, vertical composition. An empty light oak counter top filling the lower third of the frame, the centre of the counter completely empty. Softly blurred cozy cafe background with warm bokeh lights and a beam of morning sunlight. Photorealistic photography. No text, no logos, no cups, no people, nothing on the counter.",
+      "motion": "Static locked-off camera with no camera movement. Dust particles float in the sunbeam and the background bokeh lights twinkle softly. The counter stays perfectly still and empty."
+    },
+    {
+      "still": "Moody coffee advertising backdrop, vertical composition. An empty dark slate surface filling the lower third of the frame, a few roasted coffee beans scattered only at the far left and right edges, the centre completely empty. Dark brown background with a soft warm spotlight. Photorealistic studio photography. No text, no logos, no cups, nothing in the centre.",
+      "motion": "Static locked-off camera with no camera movement. A faint wisp of steam drifts across the background and the warm light flickers gently. The surface stays perfectly still and empty."
+    }
+  ]
+}

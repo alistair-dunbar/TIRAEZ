@@ -1,0 +1,10 @@
+{
+  "upload": {
+    "maxBytes": 10485760,
+    "minShortSide": 512,
+    "maxLongSide": 2048
+  },
+  "maxActiveJobsPerUser": 3,
+  "statusStaleAfterSeconds": 45,
+  "giveUpAfterMinutes": 180
+}

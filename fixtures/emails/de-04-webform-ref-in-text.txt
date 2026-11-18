@@ -1,8 +1,0 @@
-From: Costa Test Homes website <web@costa-test-homes.example>
-Subject: Website enquiry
-
-Name: Jonas Weber
-Email: jonas.weber@example.de
-Property: -
-Message: Guten Tag, bezüglich Referenz cth 1214 in Cancelada: Wie weit ist es zum Strand? Wir planen den Kauf im Juni 2027.
---

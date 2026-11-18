@@ -1,0 +1,52 @@
+{
+  "_note": "'published' means: publish each policy in production as soon as every value it uses is filled in (operator facts in config/business.json, effective dates here). Until then production says the policies are being prepared, and previews show the placeholders. 'paymentsOnly' values only block payments. Bump a document's version when its text changes; a new terms version asks logged-in users to accept again.",
+  "status": "published",
+  "documents": {
+    "terms": {
+      "title": "Terms of Service",
+      "version": "2026-11-18-v1",
+      "effective": "18 November 2026"
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "version": "2026-11-18-v1",
+      "effective": "18 November 2026"
+    },
+    "acceptable-use": {
+      "title": "Acceptable Use and AI Content Policy",
+      "version": "2026-11-18-v1",
+      "effective": "17 November 2026"
+    },
+    "billing": {
+      "title": "Billing, Cancellation and Refunds",
+      "version": "2026-11-18-v1",
+      "effective": "17 November 2026"
+    },
+    "cookies": {
+      "title": "Cookie Policy",
+      "version": "2026-11-18-v1",
+      "effective": "17 November 2026"
+    },
+    "contact": {
+      "title": "Contact and Support",
+      "version": "2026-11-18-v1",
+      "effective": "18 November 2026"
+    }
+  },
+  "unresolved": {
+    "vatTreatment": null,
+    "creditExpiry": null,
+    "unusedCreditRefunds": null,
+    "invoices": null,
+    "paymentRecordRetention": null,
+    "refundTiming": null
+  },
+  "paymentsOnly": [
+    "vatTreatment",
+    "creditExpiry",
+    "unusedCreditRefunds",
+    "invoices",
+    "paymentRecordRetention",
+    "refundTiming"
+  ]
+}

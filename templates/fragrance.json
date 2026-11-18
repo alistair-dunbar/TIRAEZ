@@ -1,0 +1,27 @@
+{
+  "id": "fragrance",
+  "mode": "composite",
+  "subject": "perfume bottle",
+  "placement": {
+    "x": 0.5,
+    "baseY": 0.72,
+    "maxW": 0.34,
+    "maxH": 0.33,
+    "float": 6,
+    "grade": {
+      "brightness": -0.06,
+      "contrast": 1.05,
+      "warmth": 0.06
+    }
+  },
+  "scenes": [
+    {
+      "still": "Luxury perfume advertising backdrop, vertical composition. An empty round black marble pedestal centered in the lower third of the frame, its flat top completely empty. Dark warm background, soft golden rim light, thin wisps of smoke drifting behind the pedestal. Photorealistic studio photography. No text, no logos, no products, no bottles, nothing on the pedestal.",
+      "motion": "Static locked-off camera with no camera movement. Smoke drifts slowly and the golden light shimmers softly. The pedestal stays perfectly still and empty."
+    },
+    {
+      "still": "Elegant beauty product advertising backdrop, vertical composition. An empty cream travertine plinth centered in the lower third of the frame, its flat top completely empty. Beige silk fabric draped softly behind, warm sunlight with gentle palm-leaf shadows on the wall. Photorealistic studio photography. No text, no logos, no products, nothing on the plinth.",
+      "motion": "Static locked-off camera with no camera movement. The palm-leaf shadows sway gently and the silk ripples slightly. The plinth stays perfectly still and empty."
+    }
+  ]
+}

@@ -1,9 +1,0 @@
-From: Costa Test Homes website <web@costa-test-homes.example>
-Subject: Website enquiry
-
-Name: Bram Visser
-Email: bram.visser@example.nl
-Phone: +31 6 11223344
-Property: CTH1211
-Message: Goedendag, heeft het perceel in Los Arqueros al een bouwvergunning? Wij willen binnen zes maanden beslissen.
---

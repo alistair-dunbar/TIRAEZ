@@ -1,0 +1,77 @@
+{
+  "id": "restaurant-dining-room",
+  "slug": "restaurant-dining-room",
+  "version": 1,
+  "name": "Dining room at night",
+  "niche": "restaurants",
+  "summary": "Candlelight and a slow pan across your tables.",
+  "outcome": "Your dining room after dark, with candlelight flickering softly and a slow pan across the tables.",
+  "photoGuidance": [
+    "A photo of the dining room with the lights on.",
+    "Tables laid as for service.",
+    "Taken from the entrance or a corner."
+  ],
+  "limitations": [
+    "Text and logos in your photo may change in the video. Check the result before you post it."
+  ],
+  "inputs": [
+    {
+      "id": "subject",
+      "type": "text",
+      "label": "The room",
+      "help": "For example, 'dining room with twelve tables'.",
+      "required": true,
+      "maxLength": 80,
+      "example": "Dining room with twelve tables"
+    },
+    {
+      "id": "keep",
+      "type": "text",
+      "label": "Details to keep as they are",
+      "help": "Optional. For example, the colour of your cups or the shape of a sign.",
+      "required": false,
+      "maxLength": 120
+    },
+    {
+      "id": "avoid",
+      "type": "text",
+      "label": "Anything to leave out",
+      "help": "Optional. For example, no smoke or no people.",
+      "required": false,
+      "maxLength": 120
+    }
+  ],
+  "output": {
+    "aspectRatios": [
+      "16:9",
+      "9:16"
+    ],
+    "defaultAspectRatio": "16:9",
+    "durations": [
+      5
+    ],
+    "defaultDuration": 5,
+    "resolutions": [
+      "1080p",
+      "720p"
+    ],
+    "defaultResolution": "1080p"
+  },
+  "model": "kling-v4",
+  "availability": "available",
+  "preview": {
+    "asset": null,
+    "approved": false
+  },
+  "prompt": {
+    "preserve": "Keep everything in the photo recognisable: the same objects, shapes, colours and proportions. Keep any printed text, labels and logos as they are.",
+    "avoid": "Do not add people, hands, text, captions, logos or new objects. No sudden cuts, no camera shake, no warping or melting of surfaces.",
+    "subject": "The photo shows {subject} in a restaurant.",
+    "composition": "Keep the room's layout as in the photo.",
+    "environment": "The room stays as in the photo, with no people.",
+    "camera": "The camera pans slowly across the tables.",
+    "subjectMotion": "Candle flames and small lights flicker softly. Nothing else moves.",
+    "lighting": "Warm evening light with soft candlelight.",
+    "mood": "Intimate and inviting."
+  }
+}

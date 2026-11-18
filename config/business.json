@@ -1,0 +1,8 @@
+{
+  "_note": "Facts about the operator, shown on the legal pages. null = not yet supplied: drafts show a placeholder and production won't publish. Required for publication (E-Commerce Law Art 6): operatorName, address, licenceDetails (the freelance licence number, as a publicly checkable register entry, e.g. \"Freelance licence (freelance.sa): FL-...\"). freelanceActivity is not shown.",
+  "operatorName": null,
+  "address": null,
+  "contactEmail": "support@tiraez.com",
+  "licenceDetails": null,
+  "freelanceActivity": "Web development (as stated by the operator, 17 Nov 2026; coverage of this service not verified)"
+}

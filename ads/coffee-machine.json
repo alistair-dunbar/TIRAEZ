@@ -1,0 +1,33 @@
+{
+  "id": "coffee-machine",
+  "seconds": 10,
+  "still": "Vertical cinematic commercial photograph for a specialty coffee shop advert. A gleaming polished stainless-steel espresso machine, close three-quarter view of the group head with a double-spout portafilter locked in. A small clear double-walled glass cup sits on the drip tray directly beneath the two spouts, empty, waiting. Warm, upscale cafe interior behind, softly out of focus with golden bokeh lights and warm morning window light. Shallow depth of field, 50mm lens at f/2, rich contrast, deep shadows, photorealistic, extremely detailed, premium advertising quality. No people, no hands, no text, no logos, no brand names.",
+  "motion": "Slow, smooth cinematic push-in toward the glass cup, the camera gliding steadily closer. Two thin, glossy streams of rich dark espresso begin to pour from the portafilter spouts into the glass cup. The cup gradually fills with layered dark espresso topped by a thick golden-brown crema that swirls and settles. Delicate wisps of steam rise from the cup and curl in the warm light. Light glints across the polished steel. Realistic liquid physics, steady camera, premium coffee commercial. No people, no hands, no text.",
+  "edit": {
+    "shots": [
+      {
+        "from": 0.0,
+        "to": 1.6
+      },
+      {
+        "from": 2.2,
+        "to": 4.0,
+        "zoom": 1.35,
+        "focusX": 0.5,
+        "focusY": 0.6
+      },
+      {
+        "from": 5.0,
+        "to": 7.0,
+        "speed": 1.25
+      },
+      {
+        "from": 8.0,
+        "to": 10.0,
+        "zoom": 1.15,
+        "focusX": 0.5,
+        "focusY": 0.7
+      }
+    ]
+  }
+}

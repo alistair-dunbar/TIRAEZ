@@ -1,0 +1,16 @@
+{
+  "_note": "Approved retention defaults (operator brief, 17 Nov 2026). Applied by app/retention.ts, which runs hourly on the server. Video and source-photo expiry run in dry-run (report only) until RETENTION_MEDIA=enforce is set, so existing data can be reviewed first (docs/RETENTION.md).",
+  "confirmed": true,
+  "videoDays": 90,
+  "expiryNoticeDays": 7,
+  "sourcePhotoDays": 7,
+  "abandonedUploadDays": 7,
+  "unverifiedAccountDays": 30,
+  "ageRestrictedDays": 30,
+  "resetLinkHours": 1,
+  "verifyLinkHours": 24,
+  "emailLinkRecordDays": 7,
+  "staleJobHours": 24,
+  "migrationGraceDays": 30,
+  "providerFilesHours": 24
+}

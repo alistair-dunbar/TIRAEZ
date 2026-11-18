@@ -1,0 +1,29 @@
+{
+  "name": "photo-to-video-ads",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.21"
+  },
+  "scripts": {
+    "start": "tsx app/server.ts",
+    "test": "tsx --test app/tests/*.test.ts",
+    "samples": "tsx render/fetch-samples.ts",
+    "scenes": "tsx render/build-scenes.ts",
+    "render": "tsx render/render.ts",
+    "typecheck": "tsc --noEmit",
+    "ai-video": "tsx render/ai-video.ts",
+    "finish": "tsx render/finish.ts",
+    "credits": "tsx app/grant-credits.ts",
+    "reports": "tsx app/reports.ts",
+    "suspend": "tsx app/reports.ts suspend",
+    "refunds": "tsx app/refunds.ts",
+    "launch-check": "tsx app/launch-check.ts",
+    "retention": "tsx app/retention.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
