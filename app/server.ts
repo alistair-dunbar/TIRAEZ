@@ -390,8 +390,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     if (process.env.PAYMENTS === "test") throw new Error("PAYMENTS=test is not allowed in production");
     if (process.env.ENGINE === "mock") throw new Error("ENGINE=mock is not allowed in production");
     if (process.env.PAYMENTS === "moyasar" && !process.env.APP_URL) throw new Error("APP_URL must be set for Moyasar payments");
-    if (process.env.MAIL === "resend" && !process.env.APP_URL) throw new Error("APP_URL must be set for email links");
-    mailName(); // refuses MAIL=outbox in production
+    // Email misconfiguration must not take the site down: report it, and email (and so sign-up) stays off.
+    try { mailName(); } catch (e) { console.error(`EMAIL OFF: ${(e as Error).message}`); delete process.env.MAIL; }
+    const missing = ["RESEND_API_KEY", "MAIL_FROM", "APP_URL"].filter((k) => !process.env[k]);
+    if (process.env.MAIL === "resend" && missing.length) console.error(`EMAIL OFF: MAIL=resend but missing ${missing.join(", ")} (Railway > Variables)`);
+    else if (process.env.MAIL && process.env.MAIL !== "resend") console.error(`EMAIL OFF: MAIL must be "resend" (got "${process.env.MAIL}")`);
   }
   startRetention();
   const resumed = recoverJobs();
