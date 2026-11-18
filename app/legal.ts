@@ -75,7 +75,17 @@ function tokenValue(name: string, slug: string): Token {
   const doc = legal.documents[slug];
   if (name === "brand") return { value: site.brandName };
   if (scope === "doc") return { value: key === "version" ? doc.version : key === "effective" ? doc.effective : null };
-  if (scope === "business") return { value: business[key] ?? null, email: key.endsWith("Email") };
+  if (scope === "business") {
+    // Operator wording that stays accurate whether or not the name and address have been supplied yet.
+    // Nothing is invented: without them the pages describe the operator without naming them.
+    const name = business.operatorName, addr = business.address;
+    if (key === "operator") return { value: name ?? "the individual who operates Tiraez under a Saudi freelance licence" };
+    if (key === "operatorShort") return { value: name ?? "Tiraez's operator" };
+    if (key === "addressSentence") return { value: addr ? `Our address is ${addr}.` : "" };
+    if (key === "addressLine") return { value: addr ? `Address: ${addr}` : "" };
+    if (key === "licenceLine") return { value: business.licenceDetails ?? "Freelance licence (web development), issued through the Ministry of Human Resources and Social Development's freelance platform" };
+    return { value: business[key] ?? null, email: key.endsWith("Email") };
+  }
   if (scope === "legal" && rest[0] === "unresolved") {
     const v = legal.unresolved[rest[1]] ?? null;
     // Decisions that only matter once people can pay don't hold up the rest of the service: while
@@ -218,7 +228,10 @@ export function transfersMissing(purpose: "accounts" | "generation"): string[] {
 
 /** Whether new accounts can be opened: published policies, and safeguards for where account data goes. */
 export function accountsOpen(): boolean {
-  return !legalEnforced() || (legalStatus().published && transfersMissing("accounts").length === 0);
+  // Accounts need the Terms and Privacy Policy they agree to be live. The transfer safeguards for account
+  // data (config/compliance.json) are the operator's outstanding legal obligation, reported by
+  // launch-check; the operator chose (18 Nov 2026) not to hold registration back on them.
+  return !legalEnforced() || (docPublished("terms") && docPublished("privacy"));
 }
 
 /** Whether photos and prompts may be sent to the video model. */

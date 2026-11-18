@@ -4,9 +4,9 @@ Version {{doc.version}}.
 
 ## Who operates {{brand}}
 
-- **Operator:** {{business.operatorName}}
-- {{business.licenceDetails}}
-- **Address:** {{business.address}}
+- **Operator:** {{business.operator}}
+- {{business.licenceLine}}
+- {{business.addressLine}}
 - **Email:** {{business.contactEmail}}
 
 ## How to reach us

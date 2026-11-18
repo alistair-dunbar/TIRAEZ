@@ -273,8 +273,10 @@ test("legal pages: server-rendered, every footer link works, drafts are marked",
   assert.equal((await fetch(base + "/legal/nothing")).status, 404);
 });
 
-test("production: unpublished policies are withheld and accounts can't open", async () => {
+test("production: draft policies are withheld and accounts can't open", async () => {
   process.env.LEGAL_ENFORCE = "1";
+  const savedStatus = legal.status;
+  legal.status = "draft";
   try {
     const html = await (await fetch(`${base}/legal/terms`)).text();
     assert.match(html, /being prepared/);
@@ -284,7 +286,7 @@ test("production: unpublished policies are withheld and accounts can't open", as
     const r = await client()("POST", "/api/signup", body());
     assert.equal(r.status, 503); assert.equal(r.data.error, "signups_closed");
     assert.equal((await client()("GET", "/api/site")).data.signupsOpen, false);
-  } finally { delete process.env.LEGAL_ENFORCE; }
+  } finally { delete process.env.LEGAL_ENFORCE; legal.status = savedStatus; }
 });
 
 test("production: once every fact is confirmed and the status is published, policies appear and signups open", async () => {
@@ -296,11 +298,12 @@ test("production: once every fact is confirmed and the status is published, poli
     for (const k of Object.keys(legal.unresolved)) legal.unresolved[k] = `Confirmed text for ${k}.`;
     for (const d of Object.values(legal.documents)) d.effective = "1 January 2027";
     retention.confirmed = true;
+    legal.status = "draft";
     assert.equal((await client()("POST", "/api/signup", body())).status, 503, "still draft until status is published");
     legal.status = "published";
     const html0 = await (await fetch(`${base}/legal/billing`)).text();
     assert.doesNotMatch(html0, /mark class="todo"|being prepared/, "policies publish once facts are confirmed");
-    assert.equal((await client()("POST", "/api/signup", body())).status, 503, "but accounts stay closed until transfers have safeguards");
+    assert.equal((await client()("POST", "/api/signup", body())).status, 200, "accounts open once Terms and Privacy are live");
     for (const t of Object.values(compliance.transfers)) { t.mechanism = "SDAIA SCCs signed 2027-01-01"; t.riskAssessment = "transfers-ra.pdf, 2027-01-01"; }
     const html = await (await fetch(`${base}/legal/billing`)).text();
     assert.doesNotMatch(html, /mark class="todo"|being prepared|Draft for review/);
@@ -563,4 +566,19 @@ test("production gates are scoped: generation waits for the video-model transfer
     for (const t of Object.values(compliance.transfers)) { t.mechanism = null; t.riskAssessment = null; }
     await idle();
   }
+});
+
+test("production as configured: Terms and Privacy are live without placeholders and accounts open, independent of payments, generation and transfer records", async () => {
+  process.env.LEGAL_ENFORCE = "1";
+  try {
+    for (const slug of ["terms", "privacy", "contact"]) {
+      const html = await (await fetch(`${base}/legal/${slug}`)).text();
+      assert.doesNotMatch(html, /being prepared|mark class="todo"|\[[A-Z ,]{6,}\]|Draft for review/, slug);
+    }
+    const r = await client()("POST", "/api/signup", body());
+    assert.equal(r.status, 200);
+    const site = (await client()("GET", "/api/site")).data;
+    assert.equal(site.signupsOpen, true, "mail outbox counts as working email in tests");
+    assert.equal(site.generationOn, false, "generation keeps its own gate");
+  } finally { delete process.env.LEGAL_ENFORCE; }
 });

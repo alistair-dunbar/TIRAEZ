@@ -29,9 +29,9 @@ const terms = await fetch(base + "/legal/terms");
 const termsText = await terms.text();
 check(terms.status === 200, "terms page answers 200");
 check(!/mark class="todo"|Draft for review/.test(termsText), "no draft or unconfirmed policy text in production");
-if (!site.legal || site.legal.draft) check(site.signupsOpen === false && /being prepared/.test(termsText), "policies unpublished: pages withheld and sign-ups closed");
-else check(site.signupsOpen === true, "policies published: sign-ups open");
-check(site.mailOn || site.signupsOpen === false, "sign-ups closed while email can't be sent", `email ${site.mailOn ? "on" : "off"}`);
+const termsLive = !/being prepared/.test(termsText) && (site.legal?.live ?? []).includes("terms");
+check(termsLive, "Terms of Service published");
+check(site.signupsOpen === (termsLive && (site.legal?.live ?? []).includes("privacy") && site.mailOn), "sign-ups open exactly when Terms, Privacy and email are ready", `signupsOpen ${site.signupsOpen}, email ${site.mailOn ? "on" : "off"}`);
 for (const f of ["/favicon.svg", "/favicon.ico", "/apple-touch-icon.png", "/manifest.webmanifest", "/brand/tiraez-wordmark.svg"]) check((await fetch(base + f)).status === 200, `${f} served`);
 
 // Browser checks at three widths

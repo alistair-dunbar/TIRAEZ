@@ -39,9 +39,10 @@ Zero dependencies (node:http, node:sqlite, node:crypto, system ffmpeg). Plain JS
   The job runs hourly. The media rules are dry-run until `RETENTION_MEDIA=enforce`. Never touch credit or payment records.
 - Contact: support@tiraez.com (domain mail is on Zoho). Policies publish one by one as soon as every value they use is filled in.
 - Operator (17 Nov 2026): an individual with a Saudi freelance document (not a commercial registration; an
-  e-commerce "practitioner"). Facts go in `config/business.json`, never invented. Gates are scoped: policies,
-  accounts (also needs the Railway and Resend transfer safeguards in `config/compliance.json`), generation
-  (Railway and fal safeguards) and payments (billing decisions). See `docs/LEGAL-REVIEW.md` and `docs/compliance/transfers.md`.
+  e-commerce "practitioner"). Facts go in `config/business.json`, never invented. Gates are scoped: accounts need the Terms and
+  Privacy pages live plus working email (the operator chose on 18 Nov 2026 not to gate registration on the
+  Railway/Resend transfer safeguards, which stay an outstanding obligation in `config/compliance.json`);
+  generation (Railway and fal safeguards) and payments (billing decisions) stay gated. See `docs/LEGAL-REVIEW.md` and `docs/compliance/transfers.md`.
 - Wording: "Log in" and "Log out" in everything users see; routes such as `/signin` keep their names.
 - Credits ledger (`app/credits.ts`): video (reserve), consume, refund (returned), purchase, grant, purchase_refund.
   A unique (reason, ref) index means nothing is recorded twice. Job ids are never reused.

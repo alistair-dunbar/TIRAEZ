@@ -12,7 +12,7 @@ It describes how the service actually works today. The short notices on our sign
 
 ## Who is responsible for your data
 
-{{business.operatorName}} operates {{brand}} and is responsible for (the "controller" of) the personal data described here. Address: {{business.address}}. For privacy questions or requests, contact {{business.contactEmail}}.
+{{business.operator}} operates {{brand}} and is responsible for (the "controller" of) the personal data described here. {{business.addressSentence}} For privacy questions or requests, contact {{business.contactEmail}}.
 
 ## What we collect
 

@@ -2,7 +2,7 @@
 
 Version {{doc.version}}. Effective {{doc.effective}}.
 
-These terms are an agreement between you and **{{business.operatorName}}**, who operates {{brand}} ("we", "us", "our"). Our address is {{business.address}}, and you can contact us at {{business.contactEmail}}.
+These terms are an agreement between you and **{{business.operator}}** ("we", "us", "our"), who operates {{brand}}. {{business.addressSentence}} You can contact us at {{business.contactEmail}}.
 
 Please read these terms before you create an account. They include our [Acceptable Use and AI Content Policy](/legal/acceptable-use) and our [Billing, Cancellation and Refunds](/legal/billing) policy. Our [Privacy Policy](/legal/privacy) explains how we handle personal data.
 
@@ -94,4 +94,4 @@ If you're a consumer, you keep every right that consumer protection law gives yo
 
 ## 13. Contact
 
-{{business.operatorName}}, {{business.address}}. Email: {{business.contactEmail}}. More ways to reach us are on our [Contact](/legal/contact) page.
+Email: {{business.contactEmail}}. More ways to reach us are on our [Contact](/legal/contact) page.

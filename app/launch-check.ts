@@ -16,8 +16,9 @@ const policyGaps = status.unresolved.filter((u) => !u.startsWith("business."));
 item(policyGaps.length === 0, "every other value the pages use", `still unresolved: ${policyGaps.join(", ")} (config/legal.json; doc.effective = each page's effective date)`);
 item(legal.status === "published", "policies marked published", "set \"status\": \"published\" in config/legal.json once reviewed");
 lines.push("", "Accounts (sign-up, login, email confirmation, password reset)");
-item(status.published, "all policy pages live", "see above");
+item(["terms", "privacy"].every((s) => status.live.includes(s)), "Terms and Privacy Policy live", "see above");
 const t = transfersMissing("accounts");
+lines.push("  (not a gate: the operator's outstanding legal obligation, PDPL Art 29 / Transfer Regulation Arts 4 and 7)");
 item(t.length === 0, "safeguards for transfers outside Saudi Arabia (account data)", `record mechanism and riskAssessment for: ${t.join(", ")} in config/compliance.json (docs/compliance/transfers.md)`);
 item(mailReady(), "account email can be sent", "set MAIL=resend, RESEND_API_KEY, MAIL_FROM and APP_URL in Railway Variables (docs/DEPLOY.md)");
 
